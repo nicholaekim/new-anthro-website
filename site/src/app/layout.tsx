@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { Fraunces, IBM_Plex_Mono, Inter, Source_Serif_4 } from "next/font/google";
 import { Suspense } from "react";
 import { FocusOnNavigate } from "@/components/FocusOnNavigate";
+import { MotionSwitch } from "@/components/MotionSwitch";
 import { NavMenu } from "@/components/NavMenu";
 import { RestartButton } from "@/components/RestartButton";
+import { MotionProvider } from "@/motion/MotionProvider";
 import "./globals.css";
 
 // The four voices. The source voice is provisional until the real sources are seen.
@@ -23,19 +25,22 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${source.variable} ${yours.variable} ${title.variable} ${iface.variable} antialiased`}
     >
       <body>
-        <a href="#content" className="target sr-only px-2 font-interface focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-40 focus:bg-surround">
-          Skip to content
-        </a>
-        <header className="sticky top-0 z-20 flex items-center gap-2 bg-surround px-2 py-2 text-sm text-paper">
-          <NavMenu />
-          <RestartButton />
-        </header>
-        <div id="content" tabIndex={-1}>
-          {children}
-        </div>
-        <Suspense fallback={null}>
-          <FocusOnNavigate />
-        </Suspense>
+        <MotionProvider>
+          <a href="#content" className="target sr-only px-2 font-interface focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-40 focus:bg-surround">
+            Skip to content
+          </a>
+          <header className="sticky top-0 z-20 flex items-center gap-2 bg-surround px-2 py-2 text-sm text-paper">
+            <NavMenu />
+            <RestartButton />
+            <MotionSwitch />
+          </header>
+          <div id="content" tabIndex={-1}>
+            {children}
+          </div>
+          <Suspense fallback={null}>
+            <FocusOnNavigate />
+          </Suspense>
+        </MotionProvider>
       </body>
     </html>
   );

@@ -1,0 +1,27 @@
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { CustomEase } from "gsap/CustomEase";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+// The one place GSAP is set up. Full motion only at this width; the same width as Tailwind's lg.
+export const MOTION_QUERY = "(min-width: 1024px)";
+
+gsap.registerPlugin(ScrollTrigger, CustomEase, useGSAP);
+
+// The ease of the timed cross-fade (the era switch when beat 6 is not scrubbed).
+export const FADE_EASE = CustomEase.create("opmb-fade", "0.4,0,0.2,1");
+
+// Pins start just below the sticky header, which is measured again on every refresh.
+export function pinStart(): string {
+  return `top ${document.querySelector("body > header")?.getBoundingClientRect().height ?? 0}px`;
+}
+
+if (typeof window !== "undefined") {
+  // Positions are measured at creation and on refresh: measure again once late fonts and
+  // opened or closed disclosures have changed the page's height.
+  document.fonts?.ready.then(() => ScrollTrigger.refresh());
+  document.addEventListener("toggle", () => ScrollTrigger.refresh(), true);
+}
+
+export { gsap, ScrollTrigger, useGSAP };
+

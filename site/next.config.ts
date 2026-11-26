@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // cacheComponents is off: it keeps earlier routes mounted but hidden (Activity), which
+  // duplicates ids and leaves ScrollTrigger pins measured against hidden pages.
+  // partialPrefetching requires cacheComponents, so it goes too.
   turbopack: {
     rules: {
       "*.css": {

@@ -75,3 +75,46 @@
     min-width: 44px;
   }
 }
+
+/* Below the breakpoint the person card's fixed button sits under the header: keep focused
+   elements and #beat-N targets clear of both. */
+@media (max-width: 1023.98px) {
+  html {
+    scroll-padding-top: 4.5rem;
+  }
+}
+@media (max-width: 1023.98px) and (pointer: coarse) {
+  html {
+    scroll-padding-top: 7rem;
+  }
+}
+
+/* At the breakpoint the person card is part of the backdrop: shown, fixed in its reserved
+   column. This overrides the browser's popover styles; below it the card is a popover. */
+@media (min-width: 1024px) {
+  [data-person-card] {
+    display: block;
+    position: fixed;
+    inset: 4rem auto 3rem 0;
+    width: 18rem;
+    max-height: none;
+    margin: 0;
+    padding: 1rem;
+    border: 0;
+    background: transparent;
+  }
+}
+
+/* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the
+   two mounts at one position for the cross-fade; the years stay apart at either end. */
+[data-stage][data-overlap] {
+  display: grid;
+  background: var(--color-paper);
+}
+[data-stage][data-overlap] > figure {
+  grid-area: 1 / 1;
+  background: transparent;
+}
+[data-stage][data-overlap] > figure[data-era="present"] > figcaption {
+  text-align: right;
+}

@@ -1,6 +1,6 @@
 import type { Chapter, PersonCard } from "@/content/types";
+import { Backdrop } from "./Backdrop";
 import { BeatTicks } from "./BeatTicks";
-import { PersonCardView } from "./PersonCardView";
 import { PlaceDateTag } from "./PlaceDateTag";
 import { BasisBeat } from "./beats/BasisBeat";
 import { ChangeOfDate } from "./beats/ChangeOfDate";
@@ -47,11 +47,7 @@ export function ChapterPage({
         <PresentDay chapter={chapter} person={person} />
         <CloseBeat next={next} />
       </main>
-      <div className="p-4 lg:col-start-1 lg:row-start-1">
-        <div className="lg:sticky lg:top-16">
-          <PersonCardView person={person} used={used} />
-        </div>
-      </div>
+      <Backdrop person={person} used={used} />
       <PlaceDateTag place={chapter.place} historicalYear={chapter.historicalYear} presentYear={chapter.presentYear} />
       <BeatTicks beats={beats} />
     </div>
