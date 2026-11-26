@@ -106,15 +106,16 @@
 }
 
 /* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the
-   two mounts at one position for the cross-fade; the years stay apart at either end. */
+   two media layers at one position for the cross-fade and stacks both captions below them. */
 [data-stage][data-overlap] {
   display: grid;
-  background: var(--color-paper);
 }
-[data-stage][data-overlap] > figure {
+[data-stage][data-overlap] > [data-media] {
   grid-area: 1 / 1;
-  background: transparent;
 }
-[data-stage][data-overlap] > figure[data-era="present"] > figcaption {
-  text-align: right;
+[data-stage][data-overlap] > [data-caption="historical"] {
+  grid-row: 2;
+}
+[data-stage][data-overlap] > [data-caption="present"] {
+  grid-row: 3;
 }

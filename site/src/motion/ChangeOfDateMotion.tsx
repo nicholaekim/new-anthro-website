@@ -7,14 +7,16 @@ import { eraFromProgress, scrollTargetForEra } from "./era";
 import { FADE_EASE, gsap, MOTION_QUERY, pinStart, ScrollTrigger, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 
-// Opacity the mount that is not shown fades to when the era switch is pressed in place.
-const DIMMED = 0.4;
+// Opacity the media layer of the era not shown fades to when the era switch is pressed in place.
+// Only media layers ever get an opacity below 1; they hold no real text.
+const DIMMED_MEDIA = 0.4;
 
-// Beat 6. Children hold [data-date-line] and [data-stage] with one figure[data-era] each.
-// Full motion at the breakpoint: the set-up stacks the two mounts at one position (data-overlap),
-// pins for one viewport height and scrubs one timeline (cross-fade, date line); the era switch
-// then scrolls to the pin's start or end. Otherwise the mounts stay one after the other and the
-// era switch plays a timed cross-fade in place.
+// Beat 6. Children hold [data-date-line] and [data-stage] with a media layer ([data-media]) and
+// a caption ([data-caption]) per era. Full motion at the breakpoint: the set-up stacks the two
+// media layers at one position (data-overlap) with the captions stacked below, pins for one
+// viewport height and scrubs one timeline (media cross-fade, date line); the era switch then
+// scrolls to the pin's start or end. Otherwise everything stays one after the other and the
+// era switch plays a timed fade of the media layers in place. Captions are never animated.
 export function ChangeOfDateMotion({ presentYear, children }: { presentYear: number; children: ReactNode }) {
   const { mode } = useMotionMode();
   const wrapper = useRef<HTMLDivElement>(null);
@@ -29,8 +31,8 @@ export function ChangeOfDateMotion({ presentYear, children }: { presentYear: num
       const el = wrapper.current;
       const stage = el?.querySelector("[data-stage]");
       if (!el || !stage) return;
-      const historical = '[data-era="historical"] [data-mount]';
-      const present = '[data-era="present"] [data-mount]';
+      const historical = '[data-media="historical"]';
+      const present = '[data-media="present"]';
       // useGSAP records the matchMedia and reverts it on a mode change, once. Its set-up runs
       // outside useGSAP's context (ignore): run inside, its context became a child whose tweens
       // were reverted twice, and the second revert wrote the fromTo start values back inline
@@ -63,7 +65,7 @@ export function ChangeOfDateMotion({ presentYear, children }: { presentYear: num
             fade.current = media.add("fade", (era: Era) => {
               const tween = { duration: 0.6, ease: FADE_EASE, overwrite: "auto" } as const;
               gsap.to(era === "present" ? present : historical, { ...tween, opacity: 1 });
-              gsap.to(era === "present" ? historical : present, { ...tween, opacity: DIMMED });
+              gsap.to(era === "present" ? historical : present, { ...tween, opacity: DIMMED_MEDIA });
             }) as (era: Era) => void;
           }
           return () => {

@@ -17,6 +17,9 @@ export function pinStart(): string {
 }
 
 if (typeof window !== "undefined") {
+  // The site keeps history.scrollRestoration at "manual" (set in FocusOnNavigate). ScrollTrigger
+  // records the value it finds when registered and writes it back on every refresh, so tell it too.
+  ScrollTrigger.clearScrollMemory("manual");
   // Positions are measured at creation and on refresh: measure again once late fonts and
   // opened or closed disclosures have changed the page's height.
   document.fonts?.ready.then(() => ScrollTrigger.refresh());

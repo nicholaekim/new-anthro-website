@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { gsap, MOTION_QUERY, pinStart, ScrollTrigger, useGSAP } from "./gsap";
+import { useRef, type ReactNode } from "react";
+import { gsap, MOTION_QUERY, pinStart, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 
 // Beat 2's pin wrapper. In full motion at the breakpoint it pins for one viewport height and
@@ -15,13 +15,6 @@ const LAYER_TRAVEL: [layer: string, yPercent: number][] = [
 export function PlacePhotographMotion({ children }: { children: ReactNode }) {
   const { mode } = useMotionMode();
   const wrapper = useRef<HTMLDivElement>(null);
-
-  // Beat 2 is on every chapter page: chapter pages start at the top on reload and Back,
-  // so no pin is measured against a remembered scroll position.
-  useEffect(() => {
-    ScrollTrigger.clearScrollMemory("manual");
-    return () => ScrollTrigger.clearScrollMemory("auto");
-  }, []);
 
   useGSAP(
     (context) => {

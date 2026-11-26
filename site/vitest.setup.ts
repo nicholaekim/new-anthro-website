@@ -19,6 +19,9 @@ if (!window.matchMedia) {
   });
 }
 
+// jsdom does not scroll; its scrollTo only reports "not implemented".
+window.scrollTo = (() => {}) as typeof window.scrollTo;
+
 // jsdom has no modal dialog methods: model only the open attribute and the close event.
 if (!HTMLDialogElement.prototype.showModal) {
   HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {

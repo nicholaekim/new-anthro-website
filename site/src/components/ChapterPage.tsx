@@ -2,6 +2,7 @@ import type { Chapter, PersonCard } from "@/content/types";
 import { Backdrop } from "./Backdrop";
 import { BeatTicks } from "./BeatTicks";
 import { PlaceDateTag } from "./PlaceDateTag";
+import { StartAtTop } from "./StartAtTop";
 import { BasisBeat } from "./beats/BasisBeat";
 import { ChangeOfDate } from "./beats/ChangeOfDate";
 import { ChapterCard } from "./beats/ChapterCard";
@@ -30,6 +31,7 @@ export function ChapterPage({
 
   return (
     <div data-chapter={chapter.slug} className="grid pb-28 lg:grid-cols-[18rem_1fr]">
+      <StartAtTop />
       <main className="lg:col-start-2">
         <ChapterCard chapter={chapter} />
         <PlacePhotograph chapter={chapter} />
