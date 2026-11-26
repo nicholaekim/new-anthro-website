@@ -69,6 +69,21 @@ describe("Reveal", () => {
     expect(vars.aria).toBeUndefined(); // SplitText's default labelling stays on
     expect(typeof vars.onSplit).toBe("function");
   });
+
+  it("builds a tween in onSplit that reverts the split once the lines are in place", () => {
+    render(
+      <MotionProvider>
+        <Reveal>Fixture title</Reveal>
+      </MotionProvider>,
+    );
+    const onSplit = split.created[0].vars.onSplit as (self: { lines: Element[]; revert: () => void }) => gsap.core.Tween;
+    const line = document.createElement("div");
+    const revert = vi.fn();
+    const tween = onSplit({ lines: [line], revert });
+    expect(revert).not.toHaveBeenCalled();
+    tween.progress(1);
+    expect(revert).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("MotionReady", () => {
