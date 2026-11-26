@@ -1,0 +1,97 @@
+import { slot } from "../slot";
+import type { Chapter, Provenance } from "../types";
+
+const provenance = (): Provenance => ({
+  creator: slot("creator"),
+  title: slot("title"),
+  holder: slot("holding institution"),
+  reference: slot("reference number"),
+  rights: slot("rights statement"),
+  alterations: slot("any alteration you made"),
+});
+
+export const tobique: Chapter = {
+  slug: "tobique",
+  place: "Tobique, New Brunswick",
+  country: "Canada",
+  historicalYear: 1960,
+  presentYear: 2020,
+  contentNote: slot("your chapter-level content note"),
+  photograph: {
+    id: "tobique-photograph",
+    kind: "photograph",
+    status: "sourced",
+    image: null,
+    alt: slot("short alternative text"),
+    longDescription: slot("longer description"),
+    transcription: null,
+    provenance: provenance(),
+    contentNote: slot("your content note, if this item is sensitive"),
+    annotations: [],
+    gapNote: null,
+  },
+  photographContext: slot("your context"),
+  items: [
+    {
+      id: "tobique-item-1",
+      kind: "document",
+      status: "sourced",
+      image: null,
+      alt: slot("short alternative text"),
+      longDescription: slot("longer description"),
+      transcription: slot("your exact transcription"),
+      provenance: provenance(),
+      contentNote: slot("your content note, if this item is sensitive"),
+      annotations: [{ id: "tobique-item-1-annotation-1", text: slot("your annotations") }],
+      gapNote: null,
+    },
+    {
+      id: "tobique-item-2",
+      kind: "document",
+      status: "sourced",
+      image: null,
+      alt: slot("short alternative text"),
+      longDescription: slot("longer description"),
+      transcription: slot("your exact transcription"),
+      provenance: provenance(),
+      contentNote: slot("your content note, if this item is sensitive"),
+      annotations: [{ id: "tobique-item-2-annotation-1", text: slot("your annotations") }],
+      gapNote: null,
+    },
+  ],
+  basis: {
+    quote: slot("how your sources show classification operated here, quoted"),
+    citation: slot("the citation for that quotation"),
+    explanation: slot("your explanation"),
+    cardFactsUsed: [],
+  },
+  // No recorded outcome for a person in this chapter, whatever else is decided.
+  outcome: null,
+  changeOfDate: {
+    historicalItemId: "tobique-item-1",
+    presentItemId: "tobique-present-instrument",
+  },
+  present: {
+    instrument: {
+      id: "tobique-present-instrument",
+      kind: "document",
+      status: "sourced",
+      image: null,
+      alt: slot("short alternative text"),
+      longDescription: slot("longer description"),
+      transcription: slot("your exact transcription of the present-day instrument"),
+      provenance: provenance(),
+      contentNote: slot("your content note, if this item is sensitive"),
+      annotations: [],
+      gapNote: null,
+    },
+    basis: {
+      quote: slot("its basis, if any, quoted"),
+      citation: slot("the citation for its basis"),
+      explanation: slot("your explanation of its basis"),
+      cardFactsUsed: [],
+    },
+    outcome: null,
+    reflection: slot("your reflection"),
+  },
+};
