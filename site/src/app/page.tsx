@@ -1,8 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { PersonCardView } from "@/components/PersonCardView";
 import { SlotText } from "@/components/SlotText";
 import { chapters, person } from "@/content";
 import { opening } from "@/content/pages";
+import { pageTitle } from "./title";
+
+export const metadata: Metadata = { title: pageTitle("Opening") };
 
 export default function OpeningPage() {
   const first = chapters[0];

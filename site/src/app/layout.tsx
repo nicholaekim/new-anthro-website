@@ -7,6 +7,7 @@ import { NavMenu } from "@/components/NavMenu";
 import { RestartButton } from "@/components/RestartButton";
 import { MotionProvider } from "@/motion/MotionProvider";
 import "./globals.css";
+import { SITE_NAME } from "./title";
 
 // The four voices. The source voice is provisional until the real sources are seen.
 const source = IBM_Plex_Mono({ variable: "--font-source", subsets: ["latin"], weight: ["400", "600"] });
@@ -15,7 +16,7 @@ const title = Fraunces({ variable: "--font-title", subsets: ["latin"] });
 const iface = Inter({ variable: "--font-interface", subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "One Person, Many Boxes",
+  title: SITE_NAME,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -34,7 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <RestartButton />
             <MotionSwitch />
           </header>
-          <div id="content" tabIndex={-1}>
+          {/* Focused only as the skip link's target, so it shows no outline around the whole page. */}
+          <div id="content" tabIndex={-1} className="outline-none">
             {children}
           </div>
           <Suspense fallback={null}>

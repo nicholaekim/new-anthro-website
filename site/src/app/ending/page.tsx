@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { pageTitle } from "@/app/title";
 import { SlotText } from "@/components/SlotText";
 import { chapters } from "@/content";
 import { ending } from "@/content/pages";
 import type { Text } from "@/content/slot";
 import type { Outcome } from "@/content/types";
+
+export const metadata: Metadata = { title: pageTitle("Ending") };
 
 function Part({ id, heading, children }: { id: string; heading: string; children: ReactNode }) {
   return (
