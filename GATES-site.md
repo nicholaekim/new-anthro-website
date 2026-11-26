@@ -33,5 +33,11 @@ Scope: the default design in design-plan.md built as a working Next.js site in s
 - [x] G6: the content files hold placeholders only, with no invented historical facts, sources or site wording
   EVIDENCE: manual, 2026-11-26. content.test.ts walks every Text field reachable from the chapters, the person card and the page slots and asserts each is a slot (it runs inside gate G1). The final whole-branch reviewer read site/src/content, the tests and README.md and reported the only real strings are places, countries, years, slugs and interface labels; the fix-wave re-reviewer confirmed the new test fixture holds only slots and neutral strings. Limit: interface labels (beat headings and similar) are AI-written working labels, which README.md now states.
 
+- [ ] G8: in full motion in a real browser, page titles reveal without first flashing finished, the opening sequence plays once and can be skipped, and a cover closes and opens on in-app links
+  EVIDENCE: pending
+
+- [ ] G9: with motion off, at phone width in still mode, and with scripts disabled, every heading is visible and no reveal, opening sequence or cover runs
+  EVIDENCE: pending
+
 - [x] G7: every finding from the final whole-branch review is fixed or recorded with a ruling
   EVIDENCE: manual, 2026-11-26. Final review at 3d87d00: 0 critical, 4 important, 6 minor worth fixing, 2 deferred minors promoted. All twelve (A to L) were fixed in ed7808f and a scoped re-review returned "all findings addressed" with no new critical or important breakage. Left by the reviewer's triage and recorded in the build ledger and README known limitations: 29 deferred minors (5 already resolved at head), plus 2 new minors from the re-review (README wording on line breaks on the opening page; a removed greater-than-zero guard in one test) and 2 noted assumptions (beat 6 height cap hard-codes header and beat-bar heights; validateChapter reads the live person card).
