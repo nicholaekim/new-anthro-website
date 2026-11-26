@@ -16,6 +16,7 @@ export const saoPaulo: Chapter = {
   country: "Brazil",
   historicalYear: 1950,
   presentYear: 2020,
+  showPersonCard: true,
   contentNote: slot("your chapter-level content note"),
   photograph: {
     id: "sao-paulo-photograph",

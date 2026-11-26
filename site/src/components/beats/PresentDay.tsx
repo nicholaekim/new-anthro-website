@@ -5,7 +5,7 @@ import { SlotText } from "../SlotText";
 import { BasisView } from "./BasisBeat";
 import { OutcomeView } from "./OutcomeBeat";
 
-export function PresentDay({ chapter, person }: { chapter: Chapter; person: PersonCard }) {
+export function PresentDay({ chapter, person }: { chapter: Chapter; person: PersonCard | null }) {
   const { instrument, basis, outcome, reflection } = chapter.present;
   return (
     <section data-beat="7" id="beat-7" aria-labelledby="beat-7-heading" className="flex flex-col gap-6 p-8">

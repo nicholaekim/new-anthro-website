@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import { chapters, getChapter, person } from "@/content";
 import { ending, opening } from "@/content/pages";
 import { isSlot, type Text } from "@/content/slot";
-import type { Chapter } from "@/content/types";
 import { validateChapter } from "@/content/validate";
+import { countSlots, fixtureChapter } from "@/test/fixtures";
 
 // String fields that are real values rather than research slots.
 const EXEMPT_KEYS = new Set([
@@ -36,21 +36,6 @@ function nonSlotStrings(value: unknown, path: string, out: string[]): void {
       nonSlotStrings(v, `${path}.${key}`, out);
     }
   }
-}
-
-function countSlots(value: unknown): number {
-  if (Array.isArray(value)) return value.reduce((n: number, v) => n + countSlots(v), 0);
-  if (value !== null && typeof value === "object") {
-    if (isSlot(value as Text)) return 1;
-    return Object.values(value).reduce((n: number, v) => n + countSlots(v), 0);
-  }
-  return 0;
-}
-
-function louisianaCopy(): Chapter {
-  const c = getChapter("louisiana");
-  if (!c) throw new Error("louisiana chapter missing");
-  return structuredClone(c);
 }
 
 describe("chapters", () => {
@@ -98,14 +83,37 @@ describe("chapters", () => {
     expect(countSlots(ending)).toBeGreaterThan(0);
   });
 
+  it("shows the person card in every chapter but Tobique", () => {
+    expect(chapters.map((c) => [c.slug, c.showPersonCard])).toEqual([
+      ["louisiana", true],
+      ["sao-paulo", true],
+      ["johannesburg", true],
+      ["tobique", false],
+    ]);
+  });
+
   it("returns undefined for an unknown slug", () => {
     expect(getChapter("nope")).toBeUndefined();
   });
 });
 
 describe("validateChapter", () => {
+  it("accepts the fixture chapter", () => {
+    expect(validateChapter(fixtureChapter())).toEqual([]);
+  });
+
+  it("reports a basis listing card facts in a chapter that shows no person card", () => {
+    for (const which of ["basis", "present"] as const) {
+      const c = fixtureChapter(1, { showPersonCard: false });
+      const b = which === "basis" ? c.basis : c.present.basis;
+      if (!b) throw new Error("fixture needs both bases");
+      b.cardFactsUsed = ["fact-1"];
+      expect(validateChapter(c).some((p) => p.includes("showPersonCard"))).toBe(true);
+    }
+  });
+
   it("reports a document with an image but no transcription", () => {
-    const c = louisianaCopy();
+    const c = fixtureChapter();
     const doc = c.items.find((i) => i.kind === "document");
     if (!doc) throw new Error("fixture needs a document item");
     doc.image = { src: "/placeholder.png", width: 10, height: 10 };
@@ -114,28 +122,28 @@ describe("validateChapter", () => {
   });
 
   it("reports a change of date naming an unknown historical item", () => {
-    const c = louisianaCopy();
+    const c = fixtureChapter();
     if (!c.changeOfDate) throw new Error("fixture needs a change of date");
     c.changeOfDate.historicalItemId = "missing-item";
     expect(validateChapter(c)).not.toEqual([]);
   });
 
   it("reports a change of date naming an unknown present-day item", () => {
-    const c = louisianaCopy();
+    const c = fixtureChapter();
     if (!c.changeOfDate) throw new Error("fixture needs a change of date");
     c.changeOfDate.presentItemId = "missing-item";
     expect(validateChapter(c)).not.toEqual([]);
   });
 
   it("reports a basis using a fact not on the person card", () => {
-    const c = louisianaCopy();
+    const c = fixtureChapter();
     if (!c.basis) throw new Error("fixture needs a basis");
     c.basis.cardFactsUsed = ["no-such-fact"];
     expect(validateChapter(c)).not.toEqual([]);
   });
 
   it("reports a present-day basis using a fact not on the person card", () => {
-    const c = louisianaCopy();
+    const c = fixtureChapter();
     if (!c.present.basis) throw new Error("fixture needs a present-day basis");
     c.present.basis.cardFactsUsed = ["no-such-fact"];
     expect(validateChapter(c)).not.toEqual([]);

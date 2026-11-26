@@ -72,9 +72,7 @@ export function CloseView({ item }: { item: Item }) {
                 </div>
               )}
               <div className="flex flex-col gap-2 md:order-1 md:flex-1">
-                <Mount image={item.image && { ...item.image, src: large ?? item.image.src }} alt={item.alt}>
-                  {item.gapNote !== null && <SlotText value={item.gapNote} />}
-                </Mount>
+                <Mount image={item.image && { ...item.image, src: large ?? item.image.src }} alt={item.alt} gapNote={item.gapNote} />
                 {large && (
                   <a href={large} className="target self-start font-interface text-sm underline">
                     Large image

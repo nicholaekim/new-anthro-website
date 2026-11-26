@@ -57,6 +57,8 @@ export interface Chapter {
   country: string;
   historicalYear: number;
   presentYear: 2020;
+  // Whether the chapter page shows the person card. When false, no basis may list card facts.
+  showPersonCard: boolean;
   contentNote: Text;
   photograph: Item;
   photographContext: Text;

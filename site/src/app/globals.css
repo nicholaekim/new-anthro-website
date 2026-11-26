@@ -10,6 +10,9 @@
   --color-ink: #1f1d1a; /* text inside a document view */
   --color-reserved: #c2410c; /* only the outcome mark in beat 5 */
   --color-interface: #737373; /* navigation, ticks, focus ring; never the reserved colour */
+  /* The one breakpoint, in pixels like MOTION_QUERY in src/motion/gsap.ts and the media queries
+     below, so lg and the pins switch at the same width whatever the browser's font size. */
+  --breakpoint-lg: 1024px;
 }
 
 /* The four voices; the variables are set by next/font in the root layout. */
@@ -106,12 +109,39 @@
 }
 
 /* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the
-   two media layers at one position for the cross-fade and stacks both captions below them. */
+   two media layers at one position for the cross-fade and stacks both captions below them.
+   The pinned wrapper is then exactly the height of the view between the header (2.5rem, 3.75rem
+   on touch) and the beat bar (2rem, 3.25rem on touch), and the media row takes what the heading,
+   date line, era switch and captions leave, so a tall image is scaled down to fit and nothing in
+   beat 6 is out of view during the pin. Layout only: no starting state. */
+[data-change-of-date]:has(> [data-stage][data-overlap]) {
+  height: calc(100svh - 4.5rem);
+}
+@media (pointer: coarse) {
+  [data-change-of-date]:has(> [data-stage][data-overlap]) {
+    height: calc(100svh - 7rem);
+  }
+}
 [data-stage][data-overlap] {
   display: grid;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  flex: 1 1 0;
+  min-height: 0;
 }
 [data-stage][data-overlap] > [data-media] {
   grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+[data-stage][data-overlap] > [data-media] > [data-mount] {
+  height: 100%;
+}
+[data-stage][data-overlap] > [data-media] img {
+  width: auto;
+  height: auto;
+  max-height: 100%;
+  margin-inline: auto;
 }
 [data-stage][data-overlap] > [data-caption="historical"] {
   grid-row: 2;

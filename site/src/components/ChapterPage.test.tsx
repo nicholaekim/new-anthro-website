@@ -1,27 +1,13 @@
 import { render } from "@testing-library/react";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { getChapter, person } from "@/content";
-import { isSlot, slot, type Text } from "@/content/slot";
+import { slot } from "@/content/slot";
 import type { Chapter } from "@/content/types";
+import { countSlots, fixtureChapter, fixturePerson } from "@/test/fixtures";
 import { ChapterPage } from "./ChapterPage";
 
-const next = { href: "/chapters/sao-paulo", label: "Next chapter" };
-
-function chapterCopy(slug: string): Chapter {
-  const c = getChapter(slug);
-  if (!c) throw new Error(`${slug} chapter missing`);
-  return structuredClone(c);
-}
-
-function countSlots(value: unknown): number {
-  if (Array.isArray(value)) return value.reduce((n: number, v) => n + countSlots(v), 0);
-  if (value !== null && typeof value === "object") {
-    if (isSlot(value as Text)) return 1;
-    return Object.values(value).reduce((n: number, v) => n + countSlots(v), 0);
-  }
-  return 0;
-}
+const next = { href: "/chapters/fixture-2", label: "Next chapter" };
+const person = fixturePerson();
 
 function renderChapter(chapter: Chapter) {
   return render(<ChapterPage chapter={chapter} person={person} next={next} />);
@@ -29,24 +15,25 @@ function renderChapter(chapter: Chapter) {
 
 describe("ChapterPage", () => {
   it("renders the eight beats in order, starting with place and date", () => {
-    const { container } = renderChapter(chapterCopy("louisiana"));
+    const c = fixtureChapter();
+    const { container } = renderChapter(c);
     const beats = [...container.querySelectorAll("section[data-beat]")];
     expect(beats.map((b) => b.getAttribute("data-beat"))).toEqual(["1", "2", "3", "4", "5", "6", "7", "8"]);
     expect(beats.map((b) => b.id)).toEqual(["beat-1", "beat-2", "beat-3", "beat-4", "beat-5", "beat-6", "beat-7", "beat-8"]);
     for (const beat of beats) expect(beat.querySelector("h1, h2")).not.toBeNull();
     const firstHeading = container.querySelector("h1, h2, h3, h4, h5, h6");
-    expect(firstHeading).toHaveTextContent("Louisiana");
-    expect(firstHeading).toHaveTextContent("1930");
+    expect(firstHeading).toHaveTextContent(c.place);
+    expect(firstHeading).toHaveTextContent(String(c.historicalYear));
   });
 
-  it("gives Tobique no outcome beat and no mark", () => {
-    const { container } = renderChapter(chapterCopy("tobique"));
+  it("gives a chapter without an outcome no outcome beat and no mark", () => {
+    const { container } = renderChapter(fixtureChapter(1, { withOutcome: false }));
     expect(container.querySelector('[data-beat="5"]')).toBeNull();
     expect(container.querySelector("[data-mark]")).toBeNull();
   });
 
   it("renders a chapter with no basis, items, change of date or instrument", () => {
-    const c = chapterCopy("louisiana");
+    const c = fixtureChapter();
     c.basis = null;
     c.items = [];
     c.changeOfDate = null;
@@ -60,16 +47,22 @@ describe("ChapterPage", () => {
   });
 
   it("shows the gap note in the empty mount of an item without an image", () => {
-    const c = chapterCopy("louisiana");
-    c.items[0].image = null;
+    const c = fixtureChapter();
     c.items[0].gapNote = slot("fixture gap note");
     const { container } = renderChapter(c);
-    const mounts = [...container.querySelectorAll("[data-empty-mount]")];
-    expect(mounts.some((m) => m.textContent?.includes("fixture gap note"))).toBe(true);
+    const mount = container.querySelector(`#${c.items[0].id} [data-empty-mount]`);
+    expect(mount).toHaveTextContent("fixture gap note");
+    expect(mount).not.toHaveTextContent("No image");
+  });
+
+  it('shows "No image" in the empty mount of an item without an image or a gap note', () => {
+    const c = fixtureChapter();
+    const { container } = renderChapter(c);
+    expect(container.querySelector(`#${c.items[0].id} [data-empty-mount]`)).toHaveTextContent("No image");
   });
 
   it("shows a sensitive item closed, with its content note as the summary", () => {
-    const c = chapterCopy("louisiana");
+    const c = fixtureChapter();
     c.items[0].contentNote = slot("fixture content note");
     const { container } = renderChapter(c);
     const item = container.querySelector(`#${c.items[0].id}`);
@@ -77,25 +70,58 @@ describe("ChapterPage", () => {
     expect(details).not.toBeNull();
     expect(details).not.toHaveAttribute("open");
     expect(details?.querySelector(":scope > summary")).toHaveTextContent("fixture content note");
-    expect(details).toHaveTextContent("your exact transcription");
+    expect(details).toHaveTextContent("fixture transcription");
   });
 
   it("server-renders both eras and one marked slot per slot in the content", () => {
-    const c = chapterCopy("louisiana");
+    const c = fixtureChapter();
     const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
     expect(html).toContain('data-era="historical"');
     expect(html).toContain('data-era="present"');
-    const expected = countSlots(c) + countSlots(person);
-    expect(expected).toBeGreaterThan(0);
-    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(expected);
+    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + countSlots(person));
   });
 
   it("gives every details summary an accessible name", () => {
-    const c = chapterCopy("louisiana");
+    const c = fixtureChapter();
     c.items[0].contentNote = slot("fixture content note");
     const { container } = renderChapter(c);
     const summaries = [...container.querySelectorAll("details > summary")];
     expect(summaries.length).toBeGreaterThan(0);
     for (const s of summaries) expect(s.textContent?.trim()).not.toBe("");
+  });
+
+  it("lists the person-card facts a basis uses as plain text, not as links", () => {
+    const c = fixtureChapter();
+    if (!c.basis) throw new Error("fixture needs a basis");
+    c.basis.cardFactsUsed = ["fact-1"];
+    const { container } = renderChapter(c);
+    const beat4 = container.querySelector('[data-beat="4"]');
+    expect(beat4).toHaveTextContent("Person-card facts used:");
+    expect(beat4).toHaveTextContent("fixture fact 1 label");
+    expect(beat4?.querySelector('a[href^="#person-"]')).toBeNull();
+  });
+
+  it("shows the person card, with its button and its column, when the chapter shows it", () => {
+    const { container } = renderChapter(fixtureChapter());
+    expect(container.querySelector("[data-person-card]")).not.toBeNull();
+    expect(container.querySelector('button[popovertarget="person-card-panel"]')).not.toBeNull();
+    expect(container.querySelector("[data-chapter]")?.className).toMatch(/lg:grid-cols-/);
+  });
+
+  it("shows no person card at any width, and no facts in beat 4, when the chapter does not show it", () => {
+    const c = fixtureChapter(1, { showPersonCard: false });
+    // Even if a basis names a fact (the content check reports that), none is listed.
+    if (!c.basis) throw new Error("fixture needs a basis");
+    c.basis.cardFactsUsed = ["fact-1"];
+    const { container } = renderChapter(c);
+    expect(container.querySelector("[data-person-card]")).toBeNull();
+    expect(container.querySelector("[popovertarget]")).toBeNull();
+    expect(container.querySelector("#person-card-heading")).toBeNull();
+    expect(container.querySelector("[data-chapter]")?.className).not.toMatch(/lg:grid-cols-/);
+    expect(container.querySelector("main")?.className ?? "").not.toMatch(/lg:col-start-2/);
+    expect(container.querySelector('[data-beat="4"]')).not.toHaveTextContent("Person-card facts used:");
+    // Every slot shown is the chapter's own.
+    const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
+    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c));
   });
 });

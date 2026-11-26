@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { fixtureChapter, fixturePerson } from "@/test/fixtures";
 
 beforeEach(() => sessionStorage.clear());
 afterEach(() => vi.restoreAllMocks());
@@ -8,22 +9,20 @@ afterEach(() => vi.restoreAllMocks());
 // The motion override lives in module memory, so every test loads the modules fresh, as a page load would.
 async function load() {
   vi.resetModules();
-  const [{ getChapter, person }, { MotionProvider }, { ChapterPage }, { MotionSwitch }] = await Promise.all([
-    import("@/content"),
+  const [{ MotionProvider }, { ChapterPage }, { MotionSwitch }] = await Promise.all([
     import("@/motion/MotionProvider"),
     import("./ChapterPage"),
     import("./MotionSwitch"),
   ]);
-  return { getChapter, person, MotionProvider, ChapterPage, MotionSwitch };
+  return { MotionProvider, ChapterPage, MotionSwitch };
 }
 
-async function renderLouisiana() {
-  const { getChapter, person, MotionProvider, ChapterPage } = await load();
-  const chapter = getChapter("louisiana");
-  if (!chapter) throw new Error("louisiana chapter missing");
+async function renderChapter() {
+  const { MotionProvider, ChapterPage } = await load();
+  const chapter = fixtureChapter();
   const utils = render(
     <MotionProvider>
-      <ChapterPage chapter={chapter} person={person} next={{ href: "/chapters/sao-paulo", label: "Next" }} />
+      <ChapterPage chapter={chapter} person={fixturePerson()} next={{ href: "/chapters/fixture-2", label: "Next" }} />
     </MotionProvider>,
   );
   const beat6 = utils.container.querySelector<HTMLElement>('section[data-beat="6"]');
@@ -53,7 +52,7 @@ describe("EraSwitch", () => {
   it("in still mode switches the shown era in place, without scrolling", async () => {
     sessionStorage.setItem("opmb:motion", "still");
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
-    const { beat6 } = await renderLouisiana();
+    const { beat6 } = await renderChapter();
     scrollTo.mockClear(); // the page itself starts at the top on mount; only the press matters here
     const button = screen.getByRole("button", { name: "Show 2020" });
     expect(beat6).toContainElement(button);
@@ -72,7 +71,7 @@ describe("EraSwitch", () => {
 
   it("keeps both captions as real, unfaded text when two image-less items are switched in still mode", async () => {
     sessionStorage.setItem("opmb:motion", "still");
-    const { beat6, chapter } = await renderLouisiana();
+    const { beat6, chapter } = await renderChapter();
     const historical = chapter.items.find((i) => i.id === chapter.changeOfDate?.historicalItemId);
     expect(historical?.image).toBeNull();
     expect(chapter.present.instrument?.image).toBeNull();
@@ -94,7 +93,7 @@ describe("EraSwitch", () => {
 
   it("never puts an inline opacity on an element that contains text", async () => {
     sessionStorage.setItem("opmb:motion", "still");
-    const { container, beat6 } = await renderLouisiana();
+    const { container, beat6 } = await renderChapter();
     await pressAndWaitForFade(beat6);
     const faded = [...container.querySelectorAll<HTMLElement>("[style]")].filter((el) => el.style.opacity !== "");
     expect(faded.length).toBeGreaterThan(0);

@@ -3,17 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
-import { chapters } from "@/content";
-
-const LINKS = [
-  { href: "/", label: "Opening" },
-  ...chapters.map((c) => ({ href: `/chapters/${c.slug}`, label: `${c.place}, ${c.historicalYear} and ${c.presentYear}` })),
-  { href: "/ending", label: "Ending" },
-];
+import type { NavLink } from "./navLinks";
 
 // A native disclosure: the links are in the HTML and work without scripts. With scripts the
 // panel closes on Escape, when focus leaves it, and when any of its links is chosen.
-export function NavMenu() {
+// The links come from the server (navLinks), so the chapter content stays out of the client bundle.
+export function NavMenu({ links }: { links: readonly NavLink[] }) {
   const pathname = usePathname();
 
   function onKeyDown(e: KeyboardEvent<HTMLDetailsElement>) {
@@ -35,7 +30,7 @@ export function NavMenu() {
       <summary className="target px-2 font-interface">Menu</summary>
       <nav aria-label="Site" className="absolute left-0 top-full z-30 mt-1 min-w-64 bg-surround p-2 shadow-lg outline outline-interface">
         <ol className="flex flex-col">
-          {LINKS.map((l) => (
+          {links.map((l) => (
             <li key={l.href}>
               <Link
                 href={l.href}

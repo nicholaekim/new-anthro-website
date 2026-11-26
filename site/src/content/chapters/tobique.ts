@@ -16,6 +16,9 @@ export const tobique: Chapter = {
   country: "Canada",
   historicalYear: 1960,
   presentYear: 2020,
+  // false: no person card on this page. Whether a fictional person is placed here at all is
+  // your and your instructor's decision (design-plan.md, "The Tobique chapter").
+  showPersonCard: false,
   contentNote: slot("your chapter-level content note"),
   photograph: {
     id: "tobique-photograph",

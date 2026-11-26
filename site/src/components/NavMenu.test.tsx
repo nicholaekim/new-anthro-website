@@ -1,15 +1,19 @@
 import { fireEvent, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { chapters } from "@/content";
+import { fixtureChapters } from "@/test/fixtures";
 import { NavMenu } from "./NavMenu";
+import { navLinks } from "./navLinks";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/chapters/sao-paulo" }));
+vi.mock("next/navigation", () => ({ usePathname: () => "/chapters/fixture-2" }));
+
+const chapters = fixtureChapters();
+const menuLinks = navLinks(chapters);
 
 function openMenu() {
   const utils = render(
     <>
-      <NavMenu />
+      <NavMenu links={menuLinks} />
       <button type="button">After the menu</button>
     </>,
   );
@@ -22,19 +26,19 @@ function openMenu() {
 
 describe("NavMenu", () => {
   it("opens from one control", () => {
-    const { container } = render(<NavMenu />);
+    const { container } = render(<NavMenu links={menuLinks} />);
     expect(container.querySelectorAll("summary, button")).toHaveLength(1);
   });
 
   it("lists the opening, the four chapters and the ending, in order", () => {
-    const { container } = render(<NavMenu />);
+    const { container } = render(<NavMenu links={menuLinks} />);
     const links = [...container.querySelectorAll("a")];
     expect(links.map((a) => a.getAttribute("href"))).toEqual([
       "/",
-      "/chapters/louisiana",
-      "/chapters/sao-paulo",
-      "/chapters/johannesburg",
-      "/chapters/tobique",
+      "/chapters/fixture-1",
+      "/chapters/fixture-2",
+      "/chapters/fixture-3",
+      "/chapters/fixture-4",
       "/ending",
     ]);
     chapters.forEach((c, i) => {
@@ -46,10 +50,10 @@ describe("NavMenu", () => {
   });
 
   it("marks exactly the current page's link with aria-current", () => {
-    const { container } = render(<NavMenu />);
+    const { container } = render(<NavMenu links={menuLinks} />);
     const current = container.querySelectorAll('a[aria-current="page"]');
     expect(current).toHaveLength(1);
-    expect(current[0]).toHaveAttribute("href", "/chapters/sao-paulo");
+    expect(current[0]).toHaveAttribute("href", "/chapters/fixture-2");
   });
 
   it("closes on Escape and returns focus to its summary", async () => {

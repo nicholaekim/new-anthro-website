@@ -9,14 +9,19 @@ import { ChapterPage } from "@/components/ChapterPage";
 import { MotionSwitch } from "@/components/MotionSwitch";
 import { NavMenu } from "@/components/NavMenu";
 import { RestartButton } from "@/components/RestartButton";
-import { chapters, getChapter, person } from "@/content";
+import { navLinks } from "@/components/navLinks";
+import { chapters, person } from "@/content";
 import type { Chapter } from "@/content/types";
 import { MotionProvider } from "@/motion/MotionProvider";
+import { fixtureChapter } from "@/test/fixtures";
 
 vi.mock("next/navigation", async (importOriginal) => ({
   ...(await importOriginal<typeof import("next/navigation")>()),
-  usePathname: () => "/chapters/louisiana",
+  usePathname: () => "/chapters/fixture-1",
 }));
+// The routes and pages run against the shared fixture, never the live content.
+vi.mock("@/content", async () => (await import("@/test/fixtures")).fixtureContent());
+vi.mock("@/content/pages", async () => (await import("@/test/fixtures")).fixturePages());
 
 // Still mode for the whole file: the override is read from storage on first use.
 beforeEach(() => sessionStorage.setItem("opmb:motion", "still"));
@@ -29,7 +34,7 @@ function renderWithHeader(page: ReactNode) {
   return render(
     <MotionProvider>
       <header>
-        <NavMenu />
+        <NavMenu links={navLinks(chapters)} />
         <RestartButton />
         <MotionSwitch />
       </header>
@@ -65,10 +70,8 @@ function expectNoInlineStyles(root: Element) {
   }
 }
 
-function withImages(slug: string): Chapter {
-  const source = getChapter(slug);
-  if (!source) throw new Error(`${slug} chapter missing`);
-  const c = structuredClone(source);
+function withImages(): Chapter {
+  const c = fixtureChapter();
   c.photograph.image = { src: "/fixture-photo.jpg", width: 800, height: 600 };
   c.items[0].image = { src: "/fixture-item.jpg", width: 800, height: 1000, largeSrc: "/fixture-item-large.jpg" };
   if (c.present.instrument) c.present.instrument.image = { src: "/fixture-instrument.jpg", width: 800, height: 1000 };
@@ -100,7 +103,7 @@ describe("chapter pages", () => {
   });
 
   it("gives every image an alt attribute, including in the close view, and hides decorative layers", async () => {
-    const c = withImages("louisiana");
+    const c = withImages();
     const { container } = renderWithHeader(<ChapterPage chapter={c} person={person} next={{ href: "/ending", label: "Ending" }} />);
     await userEvent.click(container.querySelector<HTMLElement>(`#${c.items[0].id} [data-close-view-open]`) as HTMLElement);
     const images = [...document.querySelectorAll("img")];
@@ -119,7 +122,7 @@ describe("chapter pages", () => {
   });
 
   it("adds no style attribute with images in still mode, other than next/image's own color:transparent on img", () => {
-    const c = withImages("louisiana");
+    const c = withImages();
     const { container } = renderWithHeader(<ChapterPage chapter={c} person={person} next={{ href: "/ending", label: "Ending" }} />);
     expect(screen.getByRole("button", { name: "Motion" })).toHaveAttribute("aria-pressed", "false");
     expect(container.querySelectorAll("img").length).toBeGreaterThan(0);

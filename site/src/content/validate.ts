@@ -26,6 +26,9 @@ export function validateChapter(c: Chapter): string[] {
   const factIds = new Set(person.facts.map((f) => f.id));
   const bases: Basis[] = [c.basis, c.present.basis].filter((b): b is Basis => b !== null);
   for (const basis of bases) {
+    if (!c.showPersonCard && basis.cardFactsUsed.length > 0) {
+      problems.push(`${c.slug}: showPersonCard is false, so cardFactsUsed must be empty`);
+    }
     for (const id of basis.cardFactsUsed) {
       if (!factIds.has(id)) problems.push(`${c.slug}: cardFactsUsed names "${id}", which is not a person fact`);
     }

@@ -25,9 +25,15 @@ export function ChangeOfDate({
     ["present", present, presentYear],
   ];
   return (
-    <ChangeOfDateMotion presentYear={presentYear}>
-      <h2 id="beat-6-heading" className="font-title text-2xl">Change of date</h2>
-      <div aria-hidden data-date-line className="h-0.5 w-full bg-interface" />
+    <ChangeOfDateMotion
+      presentYear={presentYear}
+      intro={
+        <>
+          <h2 id="beat-6-heading" className="font-title text-2xl">Change of date</h2>
+          <div aria-hidden data-date-line className="h-0.5 w-full bg-interface" />
+        </>
+      }
+    >
       <div data-stage className="flex flex-col gap-4">
         {eras.map(([era, item, year]) => (
           <Fragment key={era}>

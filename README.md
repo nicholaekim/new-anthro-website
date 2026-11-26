@@ -40,15 +40,16 @@ explanation: slot("your explanation"),
 explanation: "…",
 ```
 
-Some tests check the placeholder content itself, and will fail once you start filling it in. That is expected. Change or delete them as you go:
+Only one test file reads your content files: `site/src/content/content.test.ts`. Every other test runs against a made-up set of placeholder chapters in `site/src/test/fixtures.ts`, so filling slots, adding images or removing a beat from a chapter does not change them. The tests in `content.test.ts` that change as you work:
 
-- `site/src/content/content.test.ts`, "holds only slots in every research field": fails as soon as any slot holds a string.
-- `site/src/components/ChapterPage.test.tsx`, "shows a sensitive item closed…": expects the first Louisiana item's transcription to still be its placeholder.
-- `site/src/components/EraSwitch.test.tsx`: expects both of Louisiana's beat 6 items to have no image.
+- "holds only slots in every research field": fails as soon as any slot holds a string. That is expected. Delete it once you start filling slots.
+- "validates every chapter": fails if a chapter refers to something that is not there, or breaks a rule below (a document image without a transcription, person-card facts listed on a page without the card). Fix the content, not the test.
+- "has the four chapters in order", "has the fixed places, countries and dates" and "gives Tobique no outcome": change them only if you change those decisions.
+- "shows the person card in every chapter but Tobique": change it if you change `showPersonCard` in a chapter file.
 
 ## Add an image
 
-1. Put the file in `site/public/`, for example in a folder `site/public/images/`.
+1. Put the file in `site/public/` (create the folder if it is not there), for example in a folder `site/public/images/`.
 2. In the item, replace `image: null` with the file's path from `public`, and its width and height in pixels:
 
    ```ts
@@ -61,6 +62,16 @@ Some tests check the placeholder content itself, and will fail once you start fi
 
 Leave `image: null` until you have the file. The page then shows an empty frame with the item's `gapNote` if it has one, or "No image".
 
+## The person card
+
+Each chapter file has a `showPersonCard` line. When it is `true`, the chapter page shows the person card: in its own column on wide screens, and behind a "Person card" button on narrow ones. When it is `false`, the page shows no person card at any width, and beat 4 lists no person-card facts. A chapter with `showPersonCard: false` must keep `cardFactsUsed: []` in both of its bases; the tests report it otherwise.
+
+By default the Louisiana, São Paulo and Johannesburg pages show the card, and the Tobique page does not. The design plan ("The Tobique chapter") makes placing a fictional person in relation to that community a decision for you and your instructor, so the default is the fallback that places no one there. The opening page always shows the card. To show it on the Tobique page once that is decided, change this one line in `site/src/content/chapters/tobique.ts`:
+
+```ts
+showPersonCard: true,
+```
+
 ## Mark an item as sensitive
 
 Every item has `contentNote: null`, so it is shown open. To mark one item as sensitive, replace its `null` with your content note:
@@ -70,6 +81,21 @@ contentNote: "…", // your content note between the quotes
 ```
 
 The item is then shown closed, as a disclosure labelled "Content note:" followed by your note, and opens only when the visitor chooses to. Each chapter also has its own chapter-level `contentNote`, shown under the chapter heading.
+
+## Interface labels
+
+The site's own words (beat headings, button and link labels, and labels such as "Content note:", "Confidence:", "Citation:", "Person-card facts used:", "No image", "Reason:" and the ending page's headings) are working labels, not research text. They were written by AI, like the code. Review them and reword any you like. They are set in:
+
+- `site/src/components/beats/`: the beat headings ("Place", "Items", "Basis", "Change of date", "Present day", "Next" and the others), "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.";
+- `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance" and its field names, "Large image", "Content note:";
+- `site/src/components/CloseView.tsx`: "Open close view", "Close view:", "Close";
+- `site/src/components/Mount.tsx`: "No image";
+- `site/src/components/PersonCardView.tsx` and `Backdrop.tsx`: "Person card", "Reason:", "Close";
+- `site/src/components/EraSwitch.tsx` ("Show 2020"), `BeatTicks.tsx` ("Previous beat", "Next beat"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
+- `site/src/app/layout.tsx`: "Skip to content";
+- `site/src/app/page.tsx`: "Introduction", "Note on language and content", "Begin:";
+- `site/src/app/ending/page.tsx`: "Ending", "Comparing the four cases", "Records", "Outcome,", "Confidence:", "Citation:", "Reflection", "Method note", "Note on language", "Bibliography", "Image credits", "What is fictional or reconstructed", "AI-use disclosure";
+- `site/src/app/title.ts`: the working site title, used in every page's document title.
 
 ## Status labels
 
@@ -84,17 +110,23 @@ The four type voices are loaded in `site/src/app/layout.tsx` through `next/font/
 
 ## Motion
 
-- Full motion runs only when the window is at least 1024 pixels wide. The same width is the layout breakpoint (Tailwind's `lg`). It is set as `MOTION_QUERY` in `site/src/motion/gsap.ts`.
+- Full motion runs only when the window is at least 1024 pixels wide. The same width is the layout breakpoint (Tailwind's `lg`). It is set in pixels in three places that must agree: `MOTION_QUERY` in `site/src/motion/gsap.ts`, `--breakpoint-lg` and the media queries in `site/src/app/globals.css`.
 - At that width, only beats 2 and 6 pin, each for about one screen of scrolling. Beat 2 moves the decorative layers; beat 6 cross-fades the two images and grows the date line.
 - Below 1024 pixels nothing pins. Beat 6's era switch cross-fades the images in place.
 - The Motion button in the header turns full motion on or off. When it is pressed, motion is on. It overrides the system's reduced-motion setting for the rest of the visit. With motion off, the site is the still version: nothing pins and beat 6's era switch works as it does below 1024 pixels.
 - By default the site follows the system setting: reduced motion means the still version.
 
-## Assets and credits
+## Assets, credits and AI use
 
-The site uses no generative assets: no generated images, text, sound or video. Every frame without an image is an empty placeholder. Keep it that way.
+The site holds no generated images, sound or video, and no generated research content: every research field is still a slot for your own work, and every frame without an image is an empty placeholder. Keep it that way.
+
+It is not free of AI-generated text, though. The code, this README and the interface labels (see "Interface labels" above) were produced by AI at your request. The labels are working labels for you to review, and you may reword them. Disclose this as your course requires; the "Read this first" section of `design-plan.md` gives the disclosure guidance.
 
 Log every asset you make or alter in a credits ledger from the day you add it: creator, title, holder, reference number, rights statement or licence, where it is used, alterations permitted and alterations made. The ledger is your own record. The site shows what you write in each item's `provenance` and in the ending page's `imageCredits`.
+
+## Long notes on the ending page
+
+Line breaks inside a filled ending note (`bibliography`, `imageCredits` and the others in `pages.ts`) are kept on the page, as they are in a transcription. Write `\n` inside the quotes for a new line, or use a template string (between backticks) with real line breaks.
 
 ## Not built, on purpose
 
@@ -112,6 +144,12 @@ These items from the design plan were not built:
 - hotspots on images;
 - a cover between routes.
 
+These gaps in the default design were not built either:
+
+- There is no separate translation field. A source not in English has only its `transcription`; the design plan asks for your transcription and your translation as separate labelled text.
+- The person card and the outcome sheet carry no status label (sourced, reconstructed or fictional). Only items do.
+- Images have no `sizes` hint, and none is set to load eagerly. The browser may fetch a larger file than it shows, and the first image on a page is not given priority.
+
 The Tobique chapter has no outcome and no reserved-colour mark. A test checks this.
 
 ## Known limitations
@@ -122,16 +160,13 @@ Small issues found in review and left for later:
   - Each chapter file has its own copy of the `provenance()` placeholder helper.
   - The chapter check always uses the site's own person card, so a test cannot supply a different one.
   - Duplicate item ids or annotation ids are not reported. Keep every id unique.
-- `site/README.md` and `site/AGENTS.md` are leftovers from the project template.
-- Tests that will need attention as you fill in content:
-  - Listing person-card facts in a basis's `cardFactsUsed` shows those facts' labels again in beat 4 or 7. While those labels are still slots, the "one marked slot per slot" test in `ChapterPage.test.tsx` then fails.
-  - The same happens if an item used in beat 6 has no image and its `gapNote` is a slot: the gap note shows in beat 6's caption as well as with the item.
-  - The tests for names only check that a name exists. Many disclosures share the plain labels "Citation" and "Provenance".
+- `site/README.md` is a leftover from the project template. `site/AGENTS.md` is not: `next dev` writes it (notes for AI coding tools about this Next.js version) and writes it again if it is deleted, so leave it.
+- The tests for names only check that a name exists. Many disclosures share the plain labels "Citation" and "Provenance".
 - Layout:
   - On large screens the person card sits on the left, but in reading order it comes after the main content.
-  - At 320 pixels wide the place-and-date tag overlaps the header.
   - At the end of beat 6 the place-and-date tag still shows the historical year, while beat 6 already shows the present day. The tag changes at beat 7.
-  - Beats 2 and 6 pin their whole content. If your real content there is taller than the window, the bottom part is out of view until the pin ends.
+  - Beats 2 and 6 pin their whole content. In beat 6 the images are scaled down so the heading, era switch, images and both captions fit the window during the pin; very long gap notes in the captions could still push it past the window. Beat 2 is not scaled: if your real content there is taller than the window, the bottom part is out of view until the pin ends.
+  - Below 1024 pixels the place-and-date tag sits on its own row under the header and lets clicks through, so it covers no control, but it does cover a strip of the page beneath it.
   - A person-card panel opened on a narrow window stays open if the window is widened past 1024 pixels.
 - Without scripts:
   - The "Open close view" button does nothing. The "Large image" link still works when the item has a `largeSrc`.

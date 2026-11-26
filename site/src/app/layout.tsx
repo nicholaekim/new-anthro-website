@@ -4,7 +4,9 @@ import { Suspense } from "react";
 import { FocusOnNavigate } from "@/components/FocusOnNavigate";
 import { MotionSwitch } from "@/components/MotionSwitch";
 import { NavMenu } from "@/components/NavMenu";
+import { navLinks } from "@/components/navLinks";
 import { RestartButton } from "@/components/RestartButton";
+import { chapters } from "@/content";
 import { MotionProvider } from "@/motion/MotionProvider";
 import "./globals.css";
 import { SITE_NAME } from "./title";
@@ -31,7 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             Skip to content
           </a>
           <header className="sticky top-0 z-20 flex items-center gap-2 bg-surround px-2 py-2 text-sm text-paper">
-            <NavMenu />
+            <NavMenu links={navLinks(chapters)} />
             <RestartButton />
             <MotionSwitch />
           </header>

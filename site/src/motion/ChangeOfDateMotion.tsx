@@ -11,13 +11,14 @@ import { useMotionMode } from "./MotionProvider";
 // Only media layers ever get an opacity below 1; they hold no real text.
 const DIMMED_MEDIA = 0.4;
 
-// Beat 6. Children hold [data-date-line] and [data-stage] with a media layer ([data-media]) and
-// a caption ([data-caption]) per era. Full motion at the breakpoint: the set-up stacks the two
+// Beat 6. intro holds the heading and [data-date-line]; children hold [data-stage] with a media
+// layer ([data-media]) and a caption ([data-caption]) per era. The era switch sits between them,
+// above the stage, so it is never below the fold. Full motion at the breakpoint: the set-up stacks the two
 // media layers at one position (data-overlap) with the captions stacked below, pins for one
 // viewport height and scrubs one timeline (media cross-fade, date line); the era switch then
 // scrolls to the pin's start or end. Otherwise everything stays one after the other and the
 // era switch plays a timed fade of the media layers in place. Captions are never animated.
-export function ChangeOfDateMotion({ presentYear, children }: { presentYear: number; children: ReactNode }) {
+export function ChangeOfDateMotion({ presentYear, intro, children }: { presentYear: number; intro: ReactNode; children: ReactNode }) {
   const { mode } = useMotionMode();
   const wrapper = useRef<HTMLDivElement>(null);
   const trigger = useRef<ScrollTrigger | null>(null);
@@ -98,9 +99,10 @@ export function ChangeOfDateMotion({ presentYear, children }: { presentYear: num
 
   return (
     <section data-beat="6" id="beat-6" aria-labelledby="beat-6-heading" data-era-shown={shown} className="p-8">
-      <div ref={wrapper} className="flex flex-col gap-6">
-        {children}
+      <div ref={wrapper} data-change-of-date className="flex flex-col gap-6">
+        {intro}
         <EraSwitch presentYear={presentYear} pressed={shown === "present"} onPress={onPress} />
+        {children}
       </div>
     </section>
   );

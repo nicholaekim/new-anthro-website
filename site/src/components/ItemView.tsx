@@ -18,9 +18,7 @@ const PROVENANCE_FIELDS = [
 export function ItemView({ item }: { item: Item }) {
   const body = (
     <div className="flex flex-col gap-3">
-      <Mount image={item.image} alt={item.alt}>
-        {item.gapNote !== null && <SlotText value={item.gapNote} />}
-      </Mount>
+      <Mount image={item.image} alt={item.alt} gapNote={item.gapNote} />
       <div className="flex flex-wrap gap-x-4">
         <CloseView item={item} />
         {item.image?.largeSrc && (

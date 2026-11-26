@@ -5,13 +5,24 @@ import { PersonCardView } from "./PersonCardView";
 // pool of light behind the sections, and the person card fixed in its reserved column (see
 // [data-person-card] in globals.css). Below it there is no backdrop, and the person card is a
 // native popover opened by a fixed button, which works without scripts. One card in the page,
-// so its ids stay unique.
-export function Backdrop({ person, used }: { person: PersonCard; used: readonly string[] }) {
+// so its ids stay unique. With person null (a chapter that shows no card) only the surface is
+// drawn, across the whole width.
+export function Backdrop({ person, used }: { person: PersonCard | null; used: readonly string[] }) {
   return (
     <>
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 hidden bg-surround lg:block">
-        <div className="absolute inset-y-0 left-72 right-0 bg-[radial-gradient(ellipse_at_50%_40%,color-mix(in_srgb,var(--color-paper)_7%,transparent),transparent_60%)]" />
+        <div
+          className={`absolute inset-y-0 right-0 bg-[radial-gradient(ellipse_at_50%_40%,color-mix(in_srgb,var(--color-paper)_7%,transparent),transparent_60%)] ${person ? "left-72" : "left-0"}`}
+        />
       </div>
+      {person && <PersonCardPanel person={person} used={used} />}
+    </>
+  );
+}
+
+function PersonCardPanel({ person, used }: { person: PersonCard; used: readonly string[] }) {
+  return (
+    <>
       <button
         type="button"
         popoverTarget="person-card-panel"

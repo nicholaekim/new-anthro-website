@@ -18,10 +18,11 @@ function Part({ id, heading, children }: { id: string; heading: string; children
   );
 }
 
+// Line breaks in a filled note are kept, as in a transcription (a bibliography, one entry a line).
 function Note({ id, heading, value }: { id: string; heading: string; value: Text }) {
   return (
     <Part id={id} heading={heading}>
-      <p><SlotText value={value} /></p>
+      <p className="whitespace-pre-line"><SlotText value={value} /></p>
     </Part>
   );
 }

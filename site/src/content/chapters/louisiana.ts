@@ -16,6 +16,7 @@ export const louisiana: Chapter = {
   country: "United States",
   historicalYear: 1930,
   presentYear: 2020,
+  showPersonCard: true,
   contentNote: slot("your chapter-level content note"),
   photograph: {
     id: "louisiana-photograph",

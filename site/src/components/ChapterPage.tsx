@@ -21,6 +21,8 @@ export function ChapterPage({
   person: PersonCard;
   next: { href: string; label: string };
 }) {
+  // No person card at all (no column, no button, no facts listed) when the chapter does not show it.
+  const card = chapter.showPersonCard ? person : null;
   const historical = chapter.changeOfDate && chapter.items.find((i) => i.id === chapter.changeOfDate?.historicalItemId);
   const instrument = chapter.present.instrument;
   const present = instrument && instrument.id === chapter.changeOfDate?.presentItemId ? instrument : null;
@@ -30,13 +32,13 @@ export function ChapterPage({
   );
 
   return (
-    <div data-chapter={chapter.slug} className="grid pb-28 lg:grid-cols-[18rem_1fr]">
+    <div data-chapter={chapter.slug} className={card ? "grid pb-28 lg:grid-cols-[18rem_1fr]" : "grid pb-28"}>
       <StartAtTop />
-      <main className="lg:col-start-2">
+      <main className={card ? "lg:col-start-2" : undefined}>
         <ChapterCard chapter={chapter} />
         <PlacePhotograph chapter={chapter} />
         <ItemsBeat items={chapter.items} />
-        {chapter.basis && <BasisBeat basis={chapter.basis} person={person} />}
+        {chapter.basis && <BasisBeat basis={chapter.basis} person={card} />}
         {chapter.outcome && <OutcomeBeat outcome={chapter.outcome} />}
         {historical && present && (
           <ChangeOfDate
@@ -46,10 +48,10 @@ export function ChapterPage({
             presentYear={chapter.presentYear}
           />
         )}
-        <PresentDay chapter={chapter} person={person} />
+        <PresentDay chapter={chapter} person={card} />
         <CloseBeat next={next} />
       </main>
-      <Backdrop person={person} used={used} />
+      <Backdrop person={card} used={used} />
       <PlaceDateTag place={chapter.place} historicalYear={chapter.historicalYear} presentYear={chapter.presentYear} />
       <BeatTicks beats={beats} />
     </div>

@@ -4,7 +4,6 @@ import type { MouseEvent } from "react";
 
 // Client only because previous and next depend on where the reader is. Every control is a
 // plain #beat-N link first, so without scripts the ticks still jump to each beat.
-// The search stays inside this chapter: hidden, preserved routes keep the same ids.
 
 type Pick = (sections: HTMLElement[], line: number) => HTMLElement | undefined;
 

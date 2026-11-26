@@ -4,6 +4,9 @@ import { useRef, useSyncExternalStore } from "react";
 
 // Shows the historical year until the present-day beat (7) reaches the top of the view,
 // so it changes only at that beat boundary. Without scripts it shows the historical year.
+// It never takes clicks. Below the breakpoint it sits on its own row under the header, at the
+// right (the person card button is at the left of that row), so it covers no control; at the
+// breakpoint it sits in the header's row, which has room for it.
 
 function subscribe(onChange: () => void) {
   window.addEventListener("scroll", onChange, { passive: true });
@@ -29,7 +32,7 @@ export function PlaceDateTag({ place, historicalYear, presentYear }: { place: st
       ref={ref}
       data-place-date-tag
       data-tag-era={present ? "present" : "historical"}
-      className="fixed right-4 top-2 z-30 max-w-[50vw] text-right font-interface text-xs text-paper"
+      className="pointer-events-none fixed right-2 top-11 z-30 max-w-[50vw] bg-surround px-2 text-right font-interface text-xs text-paper pointer-coarse:top-16 lg:right-4 lg:top-2 lg:px-0"
     >
       {place}, {present ? presentYear : historicalYear}
     </p>
