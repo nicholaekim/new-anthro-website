@@ -1,11 +1,7 @@
 "use client";
 
 import { createContext, use, useSyncExternalStore, type ReactNode } from "react";
-import { STORAGE_PREFIX } from "@/lib/storage";
-import { resolveMotionMode, type MotionMode } from "./motionMode";
-
-const MOTION_KEY = `${STORAGE_PREFIX}motion`;
-const REDUCED_QUERY = "(prefers-reduced-motion: reduce)";
+import { MOTION_KEY, REDUCED_QUERY, resolveMotionMode, type MotionMode } from "./motionMode";
 
 // The override lives in memory, which is what the provider reads; sessionStorage only persists it
 // across reloads. It is read from storage once, on first use. If storage cannot be written, the

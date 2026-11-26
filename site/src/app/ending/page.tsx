@@ -6,6 +6,7 @@ import { chapters } from "@/content";
 import { ending } from "@/content/pages";
 import type { Text } from "@/content/slot";
 import type { Outcome } from "@/content/types";
+import { Reveal } from "@/motion/Reveal";
 
 export const metadata: Metadata = { title: pageTitle("Ending") };
 
@@ -42,7 +43,7 @@ function OutcomeRecord({ year, outcome }: { year: number; outcome: Outcome }) {
 export default function EndingPage() {
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 p-8">
-      <h1 className="font-title text-5xl">Ending</h1>
+      <Reveal className="font-title text-5xl">Ending</Reveal>
       <Note id="comparability" heading="Comparing the four cases" value={ending.comparability} />
       <Part id="records" heading="Records">
         <ol className="flex flex-col gap-4">

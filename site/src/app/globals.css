@@ -79,6 +79,13 @@
   }
 }
 
+/* The one hidden state in CSS. The inline script in the root layout sets data-motion-pending
+   before first paint, only when motion will be full; MotionReady removes it once the reveals are
+   set up, and the script itself after 2500 ms. Without scripts it is never set. */
+html[data-motion-pending] [data-reveal] {
+  visibility: hidden;
+}
+
 /* Below the breakpoint the person card's fixed button sits under the header: keep focused
    elements and #beat-N targets clear of both. */
 @media (max-width: 1023.98px) {

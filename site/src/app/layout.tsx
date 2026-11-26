@@ -8,6 +8,8 @@ import { navLinks } from "@/components/navLinks";
 import { RestartButton } from "@/components/RestartButton";
 import { chapters } from "@/content";
 import { MotionProvider } from "@/motion/MotionProvider";
+import { MotionReady } from "@/motion/MotionReady";
+import { pendingScript } from "@/motion/pending";
 import "./globals.css";
 import { SITE_NAME } from "./title";
 
@@ -26,7 +28,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${source.variable} ${yours.variable} ${title.variable} ${iface.variable} antialiased`}
+      // The inline script below may add data-motion-pending before React hydrates.
+      suppressHydrationWarning
     >
+      <head>
+        {/* Runs before first paint: marks the document while title reveals are not set up yet. */}
+        <script dangerouslySetInnerHTML={{ __html: pendingScript() }} />
+      </head>
       <body>
         <MotionProvider>
           <a href="#content" className="target sr-only px-2 font-interface focus:not-sr-only focus:fixed focus:left-2 focus:top-2 focus:z-40 focus:bg-surround">
@@ -44,6 +52,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <Suspense fallback={null}>
             <FocusOnNavigate />
           </Suspense>
+          {/* After the page, so its effect runs once the reveals are set up. */}
+          <MotionReady />
         </MotionProvider>
       </body>
     </html>

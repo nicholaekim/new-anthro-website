@@ -4,6 +4,7 @@ import { PersonCardView } from "@/components/PersonCardView";
 import { SlotText } from "@/components/SlotText";
 import { chapters, person } from "@/content";
 import { opening } from "@/content/pages";
+import { Reveal } from "@/motion/Reveal";
 import { pageTitle } from "./title";
 
 export const metadata: Metadata = { title: pageTitle("Opening") };
@@ -12,9 +13,9 @@ export default function OpeningPage() {
   const first = chapters[0];
   return (
     <main className="mx-auto flex max-w-3xl flex-col gap-8 p-8">
-      <h1 className="font-title text-5xl">
+      <Reveal className="font-title text-5xl">
         <SlotText value={opening.title} />
-      </h1>
+      </Reveal>
       <section aria-labelledby="framing-heading" className="flex flex-col gap-2">
         <h2 id="framing-heading" className="font-title text-2xl">Introduction</h2>
         <p><SlotText value={opening.framing} /></p>
