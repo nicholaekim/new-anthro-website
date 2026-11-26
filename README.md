@@ -121,7 +121,7 @@ The four type voices are loaded in `site/src/app/layout.tsx` through `next/font/
 
 Three time-based extras run whenever motion is on, at any window width (only the pinning needs 1024 pixels). With motion off, or with the system's reduced-motion setting and no override, none of them runs and nothing is ever hidden.
 
-- **Title reveals.** Each page's main heading (the opening title, the chapter heading with its place and date, the ending heading) rises into place line by line. Screen readers read the whole heading throughout. Once the lines are in place the heading is ordinary text again. Set in `site/src/motion/Reveal.tsx`.
+- **Title reveals.** Each page's main heading (the opening title, the chapter heading with its place and date, the ending heading) rises into place line by line. Once the page has loaded, screen readers read the whole heading, during the reveal too. Once the lines are in place the heading is ordinary text again. Set in `site/src/motion/Reveal.tsx`.
 - **Animated opening.** On the opening page a light comes up behind the person card and a thin border grows around it, then the title rises. It plays once per visit; a "Skip" button jumps to the end. Restart clears the record, so the opening plays again. The light and border are also part of the still page. Set in `site/src/motion/OpeningMotion.tsx`; the light and border are in `site/src/app/page.tsx`.
 - **Cover between pages.** Choosing the menu links, the next-chapter link, the opening's link to chapter 1 or Restart fades a plain dark panel over the page, changes page under it, and fades it away. Links within a page, a link to the page already shown, Back, Forward, reload and opening a link in a new tab are plain cuts. If the new page does not arrive within 4 seconds, the panel fades away anyway. Set in `site/src/motion/CoverProvider.tsx` and `CoverLink.tsx`.
 
@@ -189,6 +189,7 @@ Small issues found in review and left for later:
   - Annotations are shown as a numbered list, not as numbered buttons that move a highlight.
   - The menu marks the current page by an exact path match. This would break if trailing slashes were turned on in the Next.js config.
   - Restart clears what the site has stored, but the Motion button keeps its setting until the page is reloaded.
+  - While the cover between pages is up (about one second), keyboard focus stays on the page beneath it.
   - The place-and-date tag measures the page on every scroll.
   - Scroll positions are measured again whenever any disclosure or the person-card panel opens or closes.
   - Pins are placed under the header by finding it as `body > header`. Moving the header breaks this.

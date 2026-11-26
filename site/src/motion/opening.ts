@@ -1,7 +1,8 @@
+import { STORAGE_PREFIX } from "@/lib/storage";
 import type { MotionMode } from "./motionMode";
 
 // Set once the opening sequence has played or been skipped; Restart clears it (clearStored).
-export const OPENING_SEEN_KEY = "opmb:opening-seen";
+export const OPENING_SEEN_KEY = `${STORAGE_PREFIX}opening-seen`;
 
 export function shouldPlayOpening(mode: MotionMode, seen: boolean): boolean {
   return mode === "full" && !seen;

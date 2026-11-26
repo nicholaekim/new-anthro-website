@@ -6,6 +6,7 @@ import OpeningPage from "@/app/page";
 import { chapters } from "@/content";
 import { ending, opening } from "@/content/pages";
 import { isSlot, type Text } from "@/content/slot";
+import { RestartButton } from "@/components/RestartButton";
 import { MotionProvider } from "@/motion/MotionProvider";
 import { OPENING_SEEN_KEY } from "@/motion/opening";
 
@@ -79,6 +80,20 @@ describe("opening sequence", () => {
     expect(screen.queryByRole("button", { name: "Skip" })).toBeNull();
     expect(screen.getByRole("heading", { name: "Person card" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent(shown(opening.title));
+  });
+
+  it("replays when Restart is chosen on the opening page itself", async () => {
+    const user = userEvent.setup();
+    sessionStorage.setItem(OPENING_SEEN_KEY, "1");
+    render(
+      <MotionProvider>
+        <RestartButton />
+        <OpeningPage />
+      </MotionProvider>,
+    );
+    expect(screen.queryByRole("button", { name: "Skip" })).toBeNull();
+    await user.click(screen.getByRole("link", { name: "Restart" }));
+    expect(screen.getByRole("button", { name: "Skip" })).toBeInTheDocument();
   });
 
   it("in full mode, once seen, offers no Skip", () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clearStored } from "@/lib/storage";
+import { clearStored, STORAGE_PREFIX } from "@/lib/storage";
 import { OPENING_SEEN_KEY, shouldPlayOpening } from "./opening";
 
 describe("shouldPlayOpening", () => {
@@ -14,6 +14,7 @@ describe("shouldPlayOpening", () => {
 describe("OPENING_SEEN_KEY", () => {
   it("is cleared by clearStored, so Restart replays the opening", () => {
     expect(OPENING_SEEN_KEY).toBe("opmb:opening-seen");
+    expect(OPENING_SEEN_KEY.startsWith(STORAGE_PREFIX)).toBe(true);
     sessionStorage.setItem(OPENING_SEEN_KEY, "1");
     clearStored();
     expect(sessionStorage.getItem(OPENING_SEEN_KEY)).toBeNull();

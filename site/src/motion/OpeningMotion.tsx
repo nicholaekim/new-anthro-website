@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { clearCount, subscribeClears } from "@/lib/storage";
 import { useCover } from "./CoverProvider";
 import { gsap, HOUSE_EASE, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
@@ -14,7 +15,14 @@ const noSubscription = () => () => {};
 // while the title reveal is held; then the title reveal plays. Skip jumps the timeline to its end
 // and finishes the title. The person card and all text stay visible throughout; the timeline only
 // sets opacity and scale on the decorations, and reverting it leaves them as the still page has them.
+// Restart clears what is stored; on the opening page itself that is not a remount, so start the
+// sequence again by remounting it.
 export function OpeningMotion({ children }: { children: ReactNode }) {
+  const generation = useSyncExternalStore(subscribeClears, clearCount, () => 0);
+  return <OpeningSequence key={generation}>{children}</OpeningSequence>;
+}
+
+function OpeningSequence({ children }: { children: ReactNode }) {
   const { mode } = useMotionMode();
   // On the server and during hydration: seen, so nothing plays before the client values are known.
   const seen = useSyncExternalStore(noSubscription, readOpeningSeen, () => true);

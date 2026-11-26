@@ -11,7 +11,8 @@ const OPEN_S = 0.5;
 // The open fade ends idle even if its tween never completes, so the cover can never stay up.
 const OPEN_FAILSAFE_MS = 1500;
 
-const CoverContext = createContext<{ state: CoverState; start: (href: string) => boolean }>({
+// Exported for tests that need a given cover state.
+export const CoverContext = createContext<{ state: CoverState; start: (href: string) => boolean }>({
   state: "idle",
   start: () => false,
 });
@@ -83,13 +84,26 @@ export function CoverProvider({ children }: { children: ReactNode }) {
     return () => cancelAnimationFrame(frame);
   }, [state, pathname, router]);
 
-  // One failsafe across closing and covered: if no new page has arrived, open anyway.
+  // One failsafe across closing and covered: if no new page has arrived, open anyway. If the
+  // close never finished, the route was never pushed: push it now, as a plain cut, unless the
+  // page has already changed (Back pressed while closing).
+  const currentPath = useRef(pathname);
+  useEffect(() => {
+    currentPath.current = pathname;
+  }, [pathname]);
   const waiting = state === "closing" || state === "covered";
   useEffect(() => {
     if (!waiting) return;
-    const failsafe = setTimeout(() => dispatch("failsafe"), COVER_FAILSAFE_MS);
+    const failsafe = setTimeout(() => {
+      const t = target.current;
+      if (t && !t.pushed && currentPath.current === t.from) {
+        t.pushed = true;
+        router.push(t.href);
+      }
+      dispatch("failsafe");
+    }, COVER_FAILSAFE_MS);
     return () => clearTimeout(failsafe);
-  }, [waiting]);
+  }, [waiting, router]);
 
   useEffect(() => {
     if (state !== "idle") return;

@@ -85,6 +85,19 @@ describe("CoverLink", () => {
     expect(cover()).toBeNull();
   });
 
+  it("pushes the route as a plain cut when the failsafe fires before the cover has closed", () => {
+    vi.useFakeTimers();
+    renderLink();
+    fireEvent.click(screen.getByRole("link", { name: "Go" }));
+    // The close stalls: its tween never completes.
+    for (const tween of gsap.getTweensOf(cover())) tween.kill();
+    expect(nav.push).not.toHaveBeenCalled();
+    act(() => vi.advanceTimersByTime(COVER_FAILSAFE_MS));
+    expect(nav.push).toHaveBeenCalledWith("/ending");
+    act(() => vi.advanceTimersByTime(2000));
+    expect(cover()).toBeNull();
+  });
+
   it("opens again and goes idle when the route never changes", () => {
     vi.useFakeTimers();
     renderLink();
