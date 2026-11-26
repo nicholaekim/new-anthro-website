@@ -92,6 +92,7 @@ The site's own words (beat headings, button and link labels, and labels such as 
 - `site/src/components/Mount.tsx`: "No image";
 - `site/src/components/PersonCardView.tsx` and `Backdrop.tsx`: "Person card", "Reason:", "Close";
 - `site/src/components/EraSwitch.tsx` ("Show 2020"), `BeatTicks.tsx` ("Previous beat", "Next beat"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
+- `site/src/motion/OpeningMotion.tsx`: "Skip";
 - `site/src/app/layout.tsx`: "Skip to content";
 - `site/src/app/page.tsx`: "Introduction", "Note on language and content", "Begin:";
 - `site/src/app/ending/page.tsx`: "Ending", "Comparing the four cases", "Records", "Outcome,", "Confidence:", "Citation:", "Reflection", "Method note", "Note on language", "Bibliography", "Image credits", "What is fictional or reconstructed", "AI-use disclosure";
@@ -116,6 +117,22 @@ The four type voices are loaded in `site/src/app/layout.tsx` through `next/font/
 - The Motion button in the header turns full motion on or off. When it is pressed, motion is on. It overrides the system's reduced-motion setting for the rest of the visit. With motion off, the site is the still version: nothing pins and beat 6's era switch works as it does below 1024 pixels.
 - By default the site follows the system setting: reduced motion means the still version.
 
+### Motion extras
+
+Three time-based extras run whenever motion is on, at any window width (only the pinning needs 1024 pixels). With motion off, or with the system's reduced-motion setting and no override, none of them runs and nothing is ever hidden.
+
+- **Title reveals.** Each page's main heading (the opening title, the chapter heading with its place and date, the ending heading) rises into place line by line. Screen readers read the whole heading throughout. Once the lines are in place the heading is ordinary text again. Set in `site/src/motion/Reveal.tsx`.
+- **Animated opening.** On the opening page a light comes up behind the person card and a thin border grows around it, then the title rises. It plays once per visit; a "Skip" button jumps to the end. Restart clears the record, so the opening plays again. The light and border are also part of the still page. Set in `site/src/motion/OpeningMotion.tsx`; the light and border are in `site/src/app/page.tsx`.
+- **Cover between pages.** Choosing the menu links, the next-chapter link, the opening's link to chapter 1 or Restart fades a plain dark panel over the page, changes page under it, and fades it away. Links within a page, a link to the page already shown, Back, Forward, reload and opening a link in a new tab are plain cuts. If the new page does not arrive within 4 seconds, the panel fades away anyway. Set in `site/src/motion/CoverProvider.tsx` and `CoverLink.tsx`.
+
+One exception to "no hidden starting state in CSS": while the page loads, a short script in `site/src/app/layout.tsx` marks the page (`data-motion-pending`) when motion will be on, and `site/src/app/globals.css` hides the elements marked for a reveal (`data-reveal`) while that mark is there, so a heading never shows finished and then jumps. The mark is removed as soon as the reveals are set up, and after 2.5 seconds at the latest. Without scripts it is never set.
+
+To turn one extra off for good, leaving the others:
+
+- title reveals: in `site/src/motion/Reveal.tsx`, change `if (mode !== "full" || !el) return;` to `return;`;
+- animated opening: in `site/src/app/page.tsx`, remove the `<OpeningMotion>` wrapper (keep what is inside it), and remove the light and border if you do not want them in the still page either;
+- cover: in `site/src/app/layout.tsx`, remove the `<CoverProvider>` wrapper (keep what is inside it). The links then work as plain links.
+
 ## Assets, credits and AI use
 
 The site holds no generated images, sound or video, and no generated research content: every research field is still a slot for your own work, and every frame without an image is an empty placeholder. Keep it that way.
@@ -133,16 +150,13 @@ Line breaks inside a filled ending note (`bibliography`, `imageCredits` and the 
 These items from the design plan were not built:
 
 - the prediction (no question, guess or reveal anywhere on the site);
-- split-text reveals;
 - snap;
 - pointer drift;
-- an animated opening (the opening and ending are still pages);
 - an outline of the earlier mount left visible after the change of date;
 - a hand-driven change of date (for example a slider);
 - a travelling close view (the close view opens in place);
 - a drawn line (beat 6's date line is a plain bar that grows; it is not drawn as a stroke);
-- hotspots on images;
-- a cover between routes.
+- hotspots on images.
 
 These gaps in the default design were not built either:
 

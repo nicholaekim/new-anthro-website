@@ -1,11 +1,13 @@
 "use client";
 
 import { createContext, use, useEffect, useRef, type ReactNode } from "react";
+import { useCover } from "./CoverProvider";
 import { gsap, HOUSE_EASE, SplitText, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 
 // What a sequence around a Reveal asks of it: hold its tween paused, let it play, or finish it at
-// once. Without a provider the reveal plays as soon as it is set up.
+// once. Without a provider the reveal plays as soon as it is set up. While the cover between
+// pages is closing or up, every reveal is held, and plays when the cover starts opening.
 export type RevealCue = "hold" | "play" | "finish";
 export const RevealCueContext = createContext<RevealCue>("play");
 
@@ -24,7 +26,9 @@ function applyCue(tween: gsap.core.Tween, cue: RevealCue) {
 // split's own revert, never a second time by the context (see ChangeOfDateMotion).
 export function Reveal({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
   const { mode } = useMotionMode();
-  const cue = use(RevealCueContext);
+  const { state: coverState } = useCover();
+  const sequenceCue = use(RevealCueContext);
+  const cue: RevealCue = coverState === "closing" || coverState === "covered" ? "hold" : sequenceCue;
   const heading = useRef<HTMLHeadingElement>(null);
   const tween = useRef<gsap.core.Tween | null>(null);
   const cueNow = useRef(cue);

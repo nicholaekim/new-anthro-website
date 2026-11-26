@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { FocusEvent, KeyboardEvent, MouseEvent } from "react";
+import { CoverLink } from "@/motion/CoverLink";
 import type { NavLink } from "./navLinks";
 
 // A native disclosure: the links are in the HTML and work without scripts. With scripts the
@@ -32,13 +32,13 @@ export function NavMenu({ links }: { links: readonly NavLink[] }) {
         <ol className="flex flex-col">
           {links.map((l) => (
             <li key={l.href}>
-              <Link
+              <CoverLink
                 href={l.href}
                 aria-current={l.href === pathname ? "page" : undefined}
                 className="target w-full px-2 underline aria-[current=page]:font-semibold"
               >
                 {l.label}
-              </Link>
+              </CoverLink>
             </li>
           ))}
         </ol>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useCover } from "./CoverProvider";
 import { gsap, HOUSE_EASE, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 import { readOpeningSeen, shouldPlayOpening, storeOpeningSeen } from "./opening";
@@ -19,12 +20,15 @@ export function OpeningMotion({ children }: { children: ReactNode }) {
   const seen = useSyncExternalStore(noSubscription, readOpeningSeen, () => true);
   const [stage, setStage] = useState<"decor" | "done" | "skipped">("decor");
   const active = shouldPlayOpening(mode, seen) && stage === "decor";
+  // Arriving under the cover (Restart from a chapter), the timeline waits until it opens.
+  const { state: coverState } = useCover();
+  const running = active && (coverState === "idle" || coverState === "opening");
   const scope = useRef<HTMLDivElement>(null);
   const timeline = useRef<gsap.core.Timeline | null>(null);
 
   useGSAP(
     () => {
-      if (!active) return;
+      if (!running) return;
       const tween = { duration: 0.8, ease: HOUSE_EASE };
       const tl = gsap.timeline({
         onComplete: () => {
@@ -40,7 +44,7 @@ export function OpeningMotion({ children }: { children: ReactNode }) {
         timeline.current = null;
       };
     },
-    { scope, dependencies: [active], revertOnUpdate: true },
+    { scope, dependencies: [running], revertOnUpdate: true },
   );
 
   function skip() {

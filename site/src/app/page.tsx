@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { PersonCardView } from "@/components/PersonCardView";
 import { SlotText } from "@/components/SlotText";
 import { chapters, person } from "@/content";
 import { opening } from "@/content/pages";
+import { CoverLink } from "@/motion/CoverLink";
 import { OpeningMotion } from "@/motion/OpeningMotion";
 import { Reveal } from "@/motion/Reveal";
 import { pageTitle } from "./title";
@@ -43,9 +43,9 @@ export default function OpeningPage() {
           <h2 id="site-note-heading" className="font-title text-2xl">Note on language and content</h2>
           <p><SlotText value={opening.siteNote} /></p>
         </section>
-        <Link href={`/chapters/${first.slug}`} className="target self-start font-interface underline">
+        <CoverLink href={`/chapters/${first.slug}`} className="target self-start font-interface underline">
           Begin: {first.place}, {first.historicalYear}
-        </Link>
+        </CoverLink>
       </main>
     </OpeningMotion>
   );
