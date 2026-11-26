@@ -52,6 +52,25 @@ describe("CloseView", () => {
     expect(within(dialog).getByRole("link", { name: /large image/i })).toHaveAttribute("href", "/scan-large.png");
   });
 
+  it("names each opener after the item it opens", () => {
+    const first = itemCopy();
+    const second = itemCopy();
+    first.id = "first";
+    first.provenance.title = "First record";
+    second.id = "second";
+    second.provenance.title = "Second record";
+    render(
+      <>
+        <CloseView item={first} />
+        <CloseView item={second} />
+      </>,
+    );
+    const names = screen.getAllByRole("button", { name: /open close view/i }).map((b) => b.getAttribute("aria-label"));
+    expect(screen.getByRole("button", { name: /open close view.*first record/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /open close view.*second record/i })).toBeInTheDocument();
+    expect(new Set(names).size).toBe(2);
+  });
+
   it("has no large-image link when the item has no large image", async () => {
     const user = userEvent.setup();
     const { container } = render(<CloseView item={itemCopy()} />);

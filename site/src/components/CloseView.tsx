@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { isSlot } from "@/content/slot";
 import type { Item } from "@/content/types";
 import { Mount } from "./Mount";
 import { SlotText } from "./SlotText";
@@ -14,6 +15,7 @@ export function CloseView({ item }: { item: Item }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const headingId = `${item.id}-close-view-heading`;
   const large = item.image?.largeSrc;
+  const title = item.provenance.title;
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -34,6 +36,7 @@ export function CloseView({ item }: { item: Item }) {
         type="button"
         data-close-view-open
         aria-haspopup="dialog"
+        aria-label={`Open close view: ${isSlot(title) ? `[${title.slot}]` : title}`}
         onClick={() => setOpen(true)}
         className="target self-start px-2 font-interface text-sm underline"
       >
