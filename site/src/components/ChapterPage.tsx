@@ -1,5 +1,7 @@
 import type { Chapter, PersonCard } from "@/content/types";
+import { BeatTicks } from "./BeatTicks";
 import { PersonCardView } from "./PersonCardView";
+import { PlaceDateTag } from "./PlaceDateTag";
 import { BasisBeat } from "./beats/BasisBeat";
 import { ChangeOfDate } from "./beats/ChangeOfDate";
 import { ChapterCard } from "./beats/ChapterCard";
@@ -22,9 +24,12 @@ export function ChapterPage({
   const instrument = chapter.present.instrument;
   const present = instrument && instrument.id === chapter.changeOfDate?.presentItemId ? instrument : null;
   const used = [...(chapter.basis?.cardFactsUsed ?? []), ...(chapter.present.basis?.cardFactsUsed ?? [])];
+  const beats = [1, 2, 3, chapter.basis && 4, chapter.outcome && 5, historical && present && 6, 7, 8].filter(
+    (n): n is number => typeof n === "number",
+  );
 
   return (
-    <div className="grid lg:grid-cols-[18rem_1fr]">
+    <div data-chapter={chapter.slug} className="grid pb-28 lg:grid-cols-[18rem_1fr]">
       <main className="lg:col-start-2">
         <ChapterCard chapter={chapter} />
         <PlacePhotograph chapter={chapter} />
@@ -43,10 +48,12 @@ export function ChapterPage({
         <CloseBeat next={next} />
       </main>
       <div className="p-4 lg:col-start-1 lg:row-start-1">
-        <div className="lg:sticky lg:top-4">
+        <div className="lg:sticky lg:top-16">
           <PersonCardView person={person} used={used} />
         </div>
       </div>
+      <PlaceDateTag place={chapter.place} historicalYear={chapter.historicalYear} presentYear={chapter.presentYear} />
+      <BeatTicks beats={beats} />
     </div>
   );
 }

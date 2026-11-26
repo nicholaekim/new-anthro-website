@@ -29,6 +29,15 @@
 @layer base {
   html {
     scroll-behavior: auto;
+    /* Keeps focused elements and #beat-N targets clear of the sticky header and the beat bar. */
+    scroll-padding-top: 4rem;
+    scroll-padding-bottom: 4rem;
+  }
+
+  @media (pointer: coarse) {
+    html {
+      scroll-padding-bottom: 7rem;
+    }
   }
 
   body {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { chapters, getChapter, person } from "@/content";
+import { ending, opening } from "@/content/pages";
 import { isSlot, type Text } from "@/content/slot";
 import type { Chapter } from "@/content/types";
 import { validateChapter } from "@/content/validate";
@@ -88,9 +89,13 @@ describe("chapters", () => {
     const found: string[] = [];
     nonSlotStrings(chapters, "chapters", found);
     nonSlotStrings(person, "person", found);
+    nonSlotStrings(opening, "opening", found);
+    nonSlotStrings(ending, "ending", found);
     expect(found).toEqual([]);
     expect(countSlots(chapters)).toBeGreaterThan(0);
     expect(countSlots(person)).toBeGreaterThan(0);
+    expect(countSlots(opening)).toBeGreaterThan(0);
+    expect(countSlots(ending)).toBeGreaterThan(0);
   });
 
   it("returns undefined for an unknown slug", () => {

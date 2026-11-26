@@ -1,5 +1,6 @@
 import { isSlot } from "@/content/slot";
 import type { Item } from "@/content/types";
+import { CloseView } from "./CloseView";
 import { Disclosure } from "./Disclosure";
 import { Mount } from "./Mount";
 import { SlotText } from "./SlotText";
@@ -20,6 +21,14 @@ export function ItemView({ item }: { item: Item }) {
       <Mount image={item.image} alt={item.alt}>
         {item.gapNote !== null && <SlotText value={item.gapNote} />}
       </Mount>
+      <div className="flex flex-wrap gap-x-4">
+        <CloseView item={item} />
+        {item.image?.largeSrc && (
+          <a href={item.image.largeSrc} className="target font-interface text-sm underline">
+            Large image
+          </a>
+        )}
+      </div>
       <dl className="flex flex-col gap-2">
         {isSlot(item.alt) && (
           <div>
