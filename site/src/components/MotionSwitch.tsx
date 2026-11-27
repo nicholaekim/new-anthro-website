@@ -10,7 +10,7 @@ export function MotionSwitch() {
       type="button"
       aria-pressed={mode === "full"}
       onClick={() => setMode(mode === "full" ? "still" : "full")}
-      className="target px-2 font-interface underline"
+      className="target quiet px-2 hover:text-interface"
     >
       Motion
     </button>

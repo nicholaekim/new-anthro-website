@@ -1,5 +1,6 @@
 import type { Chapter } from "@/content/types";
 import { PlacePhotographMotion } from "@/motion/PlacePhotographMotion";
+import { BeatHeading } from "../BeatHeading";
 import { ItemView } from "../ItemView";
 import { SlotText } from "../SlotText";
 
@@ -7,12 +8,12 @@ import { SlotText } from "../SlotText";
 // their own column at the breakpoint, so they never cover the photograph or any text.
 export function PlacePhotograph({ chapter }: { chapter: Chapter }) {
   return (
-    <section data-beat="2" id="beat-2" aria-labelledby="beat-2-heading" className="bg-surround p-8">
+    <section data-beat="2" id="beat-2" aria-labelledby="beat-2-heading" className="beat bg-surround">
       <PlacePhotographMotion>
-        <div className="flex flex-col gap-4">
-          <h2 id="beat-2-heading" className="font-title text-2xl">Place</h2>
+        <div className="flex flex-col gap-6">
+          <BeatHeading beat={2}>Place</BeatHeading>
           <ItemView item={chapter.photograph} />
-          <p className="font-yours"><SlotText value={chapter.photographContext} /></p>
+          <p className="measure"><SlotText value={chapter.photographContext} /></p>
         </div>
         <div aria-hidden className="relative hidden overflow-hidden lg:block">
           <div data-layer="1" className="absolute inset-x-6 top-[15%] h-1/4 bg-sheet/10" />

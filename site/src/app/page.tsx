@@ -16,15 +16,15 @@ export default function OpeningPage() {
   const first = chapters[0];
   return (
     <OpeningMotion>
-      <main className="mx-auto flex max-w-3xl flex-col gap-8 p-8">
-        <Reveal className="font-title text-5xl">
+      <main className="mx-auto flex max-w-3xl flex-col gap-14 px-6 py-16 sm:px-8 lg:py-24">
+        <Reveal className="font-title type-display max-w-[14em]">
           <SlotText value={opening.title} />
         </Reveal>
-        <section aria-labelledby="framing-heading" className="flex flex-col gap-2">
-          <h2 id="framing-heading" className="font-title text-2xl">Introduction</h2>
-          <p><SlotText value={opening.framing} /></p>
+        <section aria-labelledby="framing-heading" className="flex flex-col gap-4">
+          <h2 id="framing-heading" className="font-title type-heading border-b border-rule pb-3">Introduction</h2>
+          <p className="type-lead"><SlotText value={opening.framing} /></p>
         </section>
-        <div className="relative isolate">
+        <div className="relative isolate mx-auto my-6 w-full max-w-md">
           <div
             data-opening-light
             data-reveal
@@ -39,11 +39,14 @@ export default function OpeningPage() {
           </div>
           <PersonCardView person={person} used={[]} />
         </div>
-        <section aria-labelledby="site-note-heading" className="flex flex-col gap-2">
-          <h2 id="site-note-heading" className="font-title text-2xl">Note on language and content</h2>
-          <p><SlotText value={opening.siteNote} /></p>
+        <section aria-labelledby="site-note-heading" className="flex flex-col gap-3">
+          <h2 id="site-note-heading" className="font-title text-xl">Note on language and content</h2>
+          <p className="measure soft text-base leading-relaxed"><SlotText value={opening.siteNote} /></p>
         </section>
-        <CoverLink href={`/chapters/${first.slug}`} className="target self-start font-interface underline">
+        <CoverLink
+          href={`/chapters/${first.slug}`}
+          className="target self-start border border-paper/70 px-6 py-3 font-interface text-sm tracking-[0.04em] text-paper hover:border-paper hover:bg-paper hover:text-ink"
+        >
           Begin: {first.place}, {first.historicalYear}
         </CoverLink>
       </main>

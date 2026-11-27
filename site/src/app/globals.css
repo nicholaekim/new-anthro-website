@@ -4,12 +4,18 @@
    static: every role is emitted as a custom property, e.g. var(--color-reserved).
    Provisional values: sample the real ones from your scans. */
 @theme static {
-  --color-surround: #1c1a17; /* warm near-black, not pure black */
-  --color-paper: #ece6da; /* sourced items */
-  --color-sheet: #dde4e8; /* your own sheets: a visibly different stock */
+  --color-surround: #191713; /* the dark room: warm near-black, not pure black */
+  --color-raised: #221f1a; /* header, beat bar, menus */
+  --color-paper: #efe9dc; /* sourced items */
+  --color-paper-deep: #e5ddcc; /* transcriptions and mats on paper: the same stock, a shade deeper */
+  --color-sheet: #e2e7e9; /* your own sheets: a visibly different, cooler stock */
   --color-ink: #1f1d1a; /* text inside a document view */
+  --color-ink-soft: #57514a; /* secondary text on paper and sheet: labels, citations */
+  --color-muted: #aaa396; /* secondary text on the dark surround */
+  --color-rule: color-mix(in srgb, #efe9dc 18%, transparent); /* hairlines on the dark surround */
   --color-reserved: #c2410c; /* only the outcome mark in beat 5 */
-  --color-interface: #737373; /* navigation, ticks, focus ring; never the reserved colour */
+  --color-interface: #b8a47a; /* navigation, ticks, focus ring: old brass; never the reserved colour */
+  --color-interface-deep: #6b5a32; /* the same neutral, deep enough for a focus ring on paper */
   /* The one breakpoint, in pixels like MOTION_QUERY in src/motion/gsap.ts and the media queries
      below, so lg and the pins switch at the same width whatever the browser's font size. */
   --breakpoint-lg: 1024px;
@@ -43,12 +49,32 @@
     }
   }
 
+  html {
+    scrollbar-color: #4a443a var(--color-surround);
+    scrollbar-width: thin;
+  }
+
   body {
+    /* Secondary text and hairlines follow the surface they sit on; .leaf resets both for paper. */
+    --soft: var(--color-muted);
+    --hair: var(--color-rule);
     background: var(--color-surround);
     color: var(--color-paper);
     font-family: var(--font-yours), Georgia, serif;
+    font-size: 1.0625rem;
+    line-height: 1.65;
     /* A web address in a citation has no spaces; let it break so it cannot widen the page. */
     overflow-wrap: anywhere;
+  }
+
+  a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.25em;
+  }
+
+  ::selection {
+    background: var(--color-interface);
+    color: var(--color-surround);
   }
 
   summary {
@@ -78,6 +104,114 @@
   @media (pointer: coarse) {
     min-height: 44px;
     min-width: 44px;
+  }
+}
+
+/* Type scale. The page title is the only very large type. */
+@utility type-display {
+  font-size: clamp(2.5rem, 1.6rem + 3.4vw, 4.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+@utility type-heading {
+  font-size: clamp(1.5rem, 1.35rem + 0.5vw, 1.75rem);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+@utility type-lead {
+  font-size: 1.25rem;
+  line-height: 1.55;
+  max-width: 36em;
+}
+/* The site's own reading measure. */
+@utility measure {
+  max-width: 68ch;
+}
+@utility type-source {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* A small uppercase label: field names, status, the section number. */
+@utility caps {
+  font-family: var(--font-interface), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+/* Secondary text in the colour that suits its surface: muted on the dark, ink-soft on paper. */
+@utility soft {
+  color: var(--soft);
+}
+
+/* A sheet laid on the dark surface: a hairline edge and a soft, low shadow. The background
+   (bg-paper for sourced items, bg-sheet for the site's own) is set beside it. */
+@utility leaf {
+  --soft: var(--color-ink-soft);
+  --hair: color-mix(in srgb, var(--color-ink) 16%, transparent);
+  color: var(--color-ink);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.35),
+    0 22px 44px -22px rgb(0 0 0 / 0.75);
+
+  & :focus-visible {
+    outline-color: var(--color-interface-deep);
+  }
+}
+
+/* The mat an image sits in, with a thin keyline. */
+@utility mat {
+  background: var(--color-paper-deep);
+  border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+  padding: 0.75rem;
+
+  @media (min-width: 640px) {
+    padding: 1.25rem;
+  }
+}
+
+/* A chapter section: generous rhythm, and a reading column centred in the space beside the card. */
+@utility beat {
+  padding-block: 4rem;
+  padding-inline: max(1.25rem, calc((100% - 50rem) / 2));
+
+  @media (min-width: 640px) {
+    padding-inline: max(2rem, calc((100% - 50rem) / 2));
+  }
+  @media (min-width: 1024px) {
+    padding-block: 6rem;
+  }
+}
+
+/* The opening of a section: number, heading, then a thin rule. */
+@utility opening {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--hair);
+}
+
+/* A quiet text button: underlined, solid on hover, outlined while pressed. Changes are instant.
+   Its size is set beside it (text-sm, text-xs). */
+@utility quiet {
+  font-family: var(--font-interface), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  border: 1px solid transparent;
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+
+  &:hover {
+    text-decoration-color: currentColor;
+  }
+  &[aria-pressed="true"] {
+    border-color: color-mix(in srgb, currentColor 45%, transparent);
+    text-decoration-line: none;
   }
 }
 
@@ -121,11 +255,25 @@ html[data-motion-pending] [data-reveal] {
 }
 
 /* Beat 2: the place photograph is shown whole. An upright photograph is scaled down to fit the
-   view under the header instead of running past the bottom of it. The close view is not capped. */
+   view under the header instead of running past the bottom of it. The close view is not capped.
+   While pinned, the image starts about 12.2rem below the pin wrapper's top (section number,
+   heading, rule, the sheet's padding and status label, the mat), and the view also holds the
+   header (2.5rem) and the beat bar (2rem): 17.5rem leaves a little air. On touch both bars are
+   1.25rem taller.
+   The image keeps its full width and is contained inside its box rather than given width: auto:
+   an image with width: auto has no size until it has loaded, so the pin, measured before a first
+   load, was too short and the context below the photograph ran over beat 3. */
 [data-beat="2"] [data-mount]:not(dialog [data-mount]) img {
-  width: auto;
-  max-height: calc(100svh - 12rem);
-  margin-inline: auto;
+  width: 100%;
+  max-height: calc(100svh - 17.5rem);
+  object-fit: contain;
+  /* Contained, the box can be wider than the picture: the mat's own edge is the keyline here. */
+  outline: none;
+}
+@media (pointer: coarse) {
+  [data-beat="2"] [data-mount]:not(dialog [data-mount]) img {
+    max-height: calc(100svh - 20rem);
+  }
 }
 
 /* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the

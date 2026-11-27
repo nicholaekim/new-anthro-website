@@ -98,7 +98,7 @@ export function ChangeOfDateMotion({ presentYear, intro, children }: { presentYe
   }
 
   return (
-    <section data-beat="6" id="beat-6" aria-labelledby="beat-6-heading" data-era-shown={shown} className="p-8">
+    <section data-beat="6" id="beat-6" aria-labelledby="beat-6-heading" data-era-shown={shown} className="beat">
       <div ref={wrapper} data-change-of-date className="flex flex-col gap-6">
         {intro}
         <EraSwitch presentYear={presentYear} pressed={shown === "present"} onPress={onPress} />

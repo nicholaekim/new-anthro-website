@@ -32,7 +32,7 @@ export function PlaceDateTag({ place, historicalYear, presentYear }: { place: st
       ref={ref}
       data-place-date-tag
       data-tag-era={present ? "present" : "historical"}
-      className="pointer-events-none fixed right-2 top-11 z-30 max-w-[50vw] bg-surround px-2 text-right font-interface text-xs text-paper pointer-coarse:top-16 lg:right-4 lg:top-2 lg:px-0"
+      className="caps pointer-events-none fixed right-2 top-11 z-30 max-w-[50vw] border border-rule bg-raised px-2 py-1 text-right text-paper pointer-coarse:top-16 lg:right-4 lg:top-2 lg:border-0 lg:border-l lg:bg-transparent lg:pl-3 lg:pr-0"
     >
       {place}, {present ? presentYear : historicalYear}
     </p>

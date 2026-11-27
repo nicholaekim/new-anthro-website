@@ -86,6 +86,7 @@ The item is then shown closed, as a disclosure labelled "Content note:" followed
 
 The site's own words (beat headings, button and link labels, and labels such as "Content note:", "Confidence:", "Citation:", "Person-card facts used:", "No image", "Reason:" and the ending page's headings) are working labels, not research text. They were written by AI, like the code. Review them and reword any you like. They are set in:
 
+- `site/src/components/BeatHeading.tsx`: the small section numbers ("02", "03" and so on) shown above each chapter section heading. They are decoration, hidden from screen readers, and show the beat number;
 - `site/src/components/beats/`: the beat headings ("Place", "Items", "Basis", "Change of date", "Present day", "Next" and the others), "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.";
 - `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance" and its field names, "Large image", "Content note:";
 - `site/src/components/CloseView.tsx`: "Open close view", "Close view:", "Close";

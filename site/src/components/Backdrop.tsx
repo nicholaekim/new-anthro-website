@@ -26,7 +26,7 @@ function PersonCardPanel({ person, used }: { person: PersonCard; used: readonly 
       <button
         type="button"
         popoverTarget="person-card-panel"
-        className="target fixed left-2 top-11 z-20 bg-surround px-2 font-interface text-sm text-paper underline pointer-coarse:top-16 lg:hidden"
+        className="target quiet fixed left-2 top-11 z-20 bg-raised px-2 text-xs text-paper hover:text-interface pointer-coarse:top-16 lg:hidden"
       >
         Person card
       </button>
@@ -34,14 +34,14 @@ function PersonCardPanel({ person, used }: { person: PersonCard; used: readonly 
         id="person-card-panel"
         popover="auto"
         data-person-card
-        className="m-auto max-h-[85vh] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto bg-surround p-2 text-paper backdrop:bg-surround/60"
+        className="m-auto max-h-[85vh] w-[min(22rem,calc(100vw-2rem))] overflow-y-auto border border-rule bg-raised p-3 text-paper backdrop:bg-surround/80"
       >
         <PersonCardView person={person} used={used} />
         <button
           type="button"
           popoverTarget="person-card-panel"
           popoverTargetAction="hide"
-          className="target mt-2 px-2 font-interface text-sm underline lg:hidden"
+          className="target quiet mt-3 px-2 text-sm hover:text-interface lg:hidden"
         >
           Close
         </button>

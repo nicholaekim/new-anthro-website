@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import type { Era, Item } from "@/content/types";
 import { ChangeOfDateMotion } from "@/motion/ChangeOfDateMotion";
+import { BeatHeading } from "../BeatHeading";
 import { Mount } from "../Mount";
 import { SlotText } from "../SlotText";
 
@@ -29,7 +30,8 @@ export function ChangeOfDate({
       presentYear={presentYear}
       intro={
         <>
-          <h2 id="beat-6-heading" className="font-title text-2xl">Change of date</h2>
+          {/* The date line below the heading is this beat's rule. */}
+          <BeatHeading beat={6} rule={false}>Change of date</BeatHeading>
           <div aria-hidden data-date-line className="h-0.5 w-full bg-interface" />
         </>
       }
@@ -37,18 +39,18 @@ export function ChangeOfDate({
       <div data-stage className="flex flex-col gap-4">
         {eras.map(([era, item, year]) => (
           <Fragment key={era}>
-            <div data-media={era} data-era={era} aria-hidden={item.image ? undefined : true} className="bg-paper p-4 text-ink">
+            <div data-media={era} data-era={era} aria-hidden={item.image ? undefined : true} className="leaf bg-paper p-4">
               {item.image ? (
                 <Mount image={item.image} alt={item.alt} />
               ) : (
-                <div className="flex min-h-40 items-center justify-center border border-dashed border-ink/40 font-title text-6xl">
+                <div className="soft flex min-h-40 items-center justify-center border border-dashed border-current/45 font-title text-6xl">
                   {year}
                 </div>
               )}
             </div>
-            <p data-caption={era} className="flex flex-col font-interface text-sm">
-              <span className="font-semibold">{year}</span>
-              {!item.image && <span>{item.gapNote !== null ? <SlotText value={item.gapNote} /> : "No image"}</span>}
+            <p data-caption={era} className="flex flex-col gap-0.5 font-interface text-sm">
+              <span className="caps text-paper">{year}</span>
+              {!item.image && <span className="soft">{item.gapNote !== null ? <SlotText value={item.gapNote} /> : "No image"}</span>}
             </p>
           </Fragment>
         ))}

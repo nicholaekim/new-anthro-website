@@ -28,12 +28,13 @@ function moveTo(event: MouseEvent<HTMLAnchorElement>, pick: Pick) {
 }
 
 export function BeatTicks({ beats }: { beats: readonly number[] }) {
-  const link = "target justify-center px-2 underline";
+  const link = "target quiet justify-center px-2 text-xs hover:text-interface";
+  // The hairline is a shadow, so the bar keeps its 2rem (3.25rem on touch) height.
   return (
     <nav
       data-beat-ticks
       aria-label="Beats in this chapter"
-      className="fixed inset-x-0 bottom-0 z-20 flex flex-wrap items-center justify-center gap-x-2 bg-surround px-2 py-1 font-interface text-xs text-paper"
+      className="fixed inset-x-0 bottom-0 z-20 flex flex-wrap items-center justify-center gap-x-2 bg-raised px-2 py-1 font-interface text-xs text-paper shadow-[0_-1px_0_var(--color-rule)]"
     >
       <a href={`#beat-${beats[0]}`} onClick={(e) => moveTo(e, previous)} className={link}>
         Previous beat
@@ -41,8 +42,8 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
       <ol className="flex">
         {beats.map((n) => (
           <li key={n}>
-            <a href={`#beat-${n}`} onClick={(e) => moveTo(e, beat(n))} data-tick={n} className="target justify-center">
-              <span aria-hidden className="block h-3 w-0.5 bg-interface" />
+            <a href={`#beat-${n}`} onClick={(e) => moveTo(e, beat(n))} data-tick={n} className="group target justify-center">
+              <span aria-hidden className="block h-3 w-px bg-interface group-hover:h-4 group-hover:w-0.5 group-hover:bg-paper" />
               <span className="sr-only">Beat {n}</span>
             </a>
           </li>
