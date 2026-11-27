@@ -1,6 +1,8 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { cleanup as cleanupAll, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Chapter } from "@/content/types";
 import { fixtureChapter, fixturePerson } from "@/test/fixtures";
 
 beforeEach(() => sessionStorage.clear());
@@ -17,9 +19,8 @@ async function load() {
   return { MotionProvider, ChapterPage, MotionSwitch };
 }
 
-async function renderChapter() {
+async function renderChapter(chapter: Chapter = fixtureChapter()) {
   const { MotionProvider, ChapterPage } = await load();
-  const chapter = fixtureChapter();
   const utils = render(
     <MotionProvider>
       <ChapterPage chapter={chapter} person={fixturePerson()} next={{ href: "/chapters/fixture-2", label: "Next" }} />
@@ -30,74 +31,225 @@ async function renderChapter() {
   return { ...utils, chapter, beat6 };
 }
 
-// Text a reader gets: everything outside aria-hidden subtrees.
-function realText(el: Element): string {
-  if (el.getAttribute("aria-hidden") === "true") return "";
-  return [...el.childNodes]
-    .map((n) => (n.nodeType === Node.TEXT_NODE ? (n.textContent ?? "") : n instanceof Element ? realText(n) : ""))
-    .join("")
-    .trim();
-}
+const panel = (beat6: HTMLElement, era: string) => beat6.querySelector<HTMLElement>(`[data-era="${era}"]`) as HTMLElement;
 
-async function pressAndWaitForFade(beat6: HTMLElement) {
-  await userEvent.click(screen.getByRole("button", { name: "Show 2020" }));
-  // The fade has run once the historical media layer carries a reduced inline opacity.
-  await waitFor(() => {
-    const media = beat6.querySelector<HTMLElement>('[data-media="historical"]');
-    expect(Number(media?.style.opacity || 1)).toBeLessThan(1);
-  }, { timeout: 3000 });
-}
+describe("beat 6 without its script", () => {
+  it("shows both eras in full, one after the other, with no control", async () => {
+    const { ChapterPage } = await load();
+    const c = fixtureChapter();
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(<ChapterPage chapter={c} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} />);
+    const beat6 = host.querySelector<HTMLElement>('section[data-beat="6"]') as HTMLElement;
+    expect(beat6.querySelector("input")).toBeNull();
+    expect(beat6.querySelector("[aria-hidden='true'][data-era], [inert]")).toBeNull();
+    expect([...beat6.querySelectorAll("[data-era]")].map((e) => e.getAttribute("data-era"))).toEqual(["historical", "present"]);
+    for (const [era, year, summary] of [
+      ["historical", c.historicalYear, c.summary.historical],
+      ["present", c.presentYear, c.summary.present],
+    ] as const) {
+      const p = panel(beat6, era);
+      expect(p.querySelector("h3")).toHaveTextContent(String(year));
+      expect(p.querySelector("[data-document] [data-mount]")).not.toBeNull();
+      expect(p).toHaveTextContent("Instrument");
+      expect(p).toHaveTextContent("fixture title");
+      expect(p).toHaveTextContent(`Who decides${summary.decides}`);
+      expect(p).toHaveTextContent(`On what evidence${summary.evidence}`);
+      expect(p.querySelector("blockquote")).toHaveTextContent("fixture quote");
+      expect(p.querySelector("details > summary")).toHaveTextContent("Citation");
+    }
+    expect(panel(beat6, "historical").querySelector('a[href="#beat-5"]')).toHaveTextContent("See the outcome");
+    expect(panel(beat6, "historical")).toHaveTextContent("High");
+    expect(panel(beat6, "present").querySelector('a[href="#beat-7"]:not([data-full-rule])')).toHaveTextContent("See the outcome");
+    expect(panel(beat6, "present")).toHaveTextContent("Low");
+  });
+});
 
-describe("EraSwitch", () => {
-  it("in still mode switches the shown era in place, without scrolling", async () => {
+describe("beat 6 comparison", () => {
+  it("is one labelled range from the historical year to 2020, with the year in view as its value text", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6, chapter } = await renderChapter();
+    const range = within(beat6).getByRole("slider", { name: `Date, from ${chapter.historicalYear} to 2020` });
+    expect(range).toHaveAttribute("min", String(chapter.historicalYear));
+    expect(range).toHaveAttribute("max", "2020");
+    expect(range).toHaveAttribute("aria-valuetext", `${chapter.historicalYear} in view`);
+    expect(panel(beat6, "historical")).not.toHaveAttribute("aria-hidden");
+    expect(panel(beat6, "present")).toHaveAttribute("aria-hidden", "true");
+    expect(panel(beat6, "present")).toHaveAttribute("inert");
+
+    fireEvent.change(range, { target: { value: "1950" } });
+    expect(range).toHaveAttribute("aria-valuetext", "1950, 1901 in view");
+    expect(panel(beat6, "present")).toHaveAttribute("aria-hidden", "true");
+
+    fireEvent.change(range, { target: { value: "1961" } });
+    expect(range).toHaveAttribute("aria-valuetext", "1961, 2020 in view");
+    expect(panel(beat6, "present")).not.toHaveAttribute("aria-hidden");
+    expect(panel(beat6, "historical")).toHaveAttribute("aria-hidden", "true");
+    expect(beat6.closest("[data-chapter]")).toHaveAttribute("data-era-in-view", "present");
+
+    // Fully reversible.
+    fireEvent.change(range, { target: { value: String(chapter.historicalYear) } });
+    expect(range).toHaveAttribute("aria-valuetext", `${chapter.historicalYear} in view`);
+    expect(panel(beat6, "historical")).not.toHaveAttribute("aria-hidden");
+    expect(beat6.closest("[data-chapter]")).toHaveAttribute("data-era-in-view", "historical");
+  });
+
+  it("announces the era change in a polite live region, and only once it changes", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const live = beat6.querySelector('[aria-live="polite"]');
+    expect(live).not.toBeNull();
+    expect(live?.textContent).toBe("");
+    const range = within(beat6).getByRole("slider");
+    fireEvent.change(range, { target: { value: "1930" } });
+    expect(live?.textContent).toBe("");
+    fireEvent.change(range, { target: { value: "2020" } });
+    expect(live).toHaveTextContent("Now showing 2020.");
+    fireEvent.change(range, { target: { value: "1902" } });
+    expect(live).toHaveTextContent("Now showing 1901.");
+  });
+
+  it("moves focus to the range when the panel holding it is hidden, without scrolling", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    const link = panel(beat6, "historical").querySelector<HTMLAnchorElement>('a[href="#beat-5"]');
+    if (!link) throw new Error("no outcome link");
+    link.focus();
+    const focus = vi.spyOn(HTMLElement.prototype, "focus");
+    fireEvent.change(range, { target: { value: "2020" } });
+    expect(panel(beat6, "historical")).toHaveAttribute("inert");
+    expect(document.activeElement).toBe(range);
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  });
+
+  it("leaves focus alone when it is not in the panel being hidden", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const button = within(beat6).getByRole("button", { name: "Show 2020" });
+    button.focus();
+    fireEvent.change(within(beat6).getByRole("slider"), { target: { value: "2020" } });
+    expect(document.activeElement).toBe(button);
+  });
+
+  it("does not announce the era in the live region when the focused range already says it", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    const live = beat6.querySelector('[aria-live="polite"]');
+    range.focus();
+    fireEvent.change(range, { target: { value: "2020" } });
+    expect(range).toHaveAttribute("aria-valuetext", "2020 in view");
+    expect(live?.textContent).toBe("");
+  });
+
+  it("keeps the value when Motion is switched below the breakpoint", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { MotionProvider, ChapterPage, MotionSwitch } = await load();
+    const { container } = render(
+      <MotionProvider>
+        <MotionSwitch />
+        <ChapterPage chapter={fixtureChapter()} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} />
+      </MotionProvider>,
+    );
+    const beat6 = container.querySelector<HTMLElement>('section[data-beat="6"]') as HTMLElement;
+    fireEvent.change(within(beat6).getByRole("slider"), { target: { value: "2010" } });
+    await userEvent.click(screen.getByRole("button", { name: "Motion" }));
+    // The switch puts the reader back in place two frames later; let that happen here.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    expect(within(beat6).getByRole("slider")).toHaveValue("2010");
+    expect(beat6.querySelector("[data-date-indicator]")).toHaveTextContent("2010");
+    expect(panel(beat6, "present")).not.toHaveAttribute("aria-hidden");
+  });
+
+  it("wipes between two images, but swaps at the midpoint when a document has no image, so no text is cut", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const stage = beat6.querySelector("[data-stage]");
+    expect(stage).toHaveAttribute("data-swap");
+    cleanupAll();
+    const c = fixtureChapter();
+    c.items[0].image = { src: "/a.png", width: 10, height: 10 };
+    if (c.present.instrument) c.present.instrument.image = { src: "/b.png", width: 10, height: 10 };
+    const both = await renderChapter(c);
+    expect(both.beat6.querySelector("[data-stage]")).not.toHaveAttribute("data-swap");
+  });
+
+  it("hides the divider's year label that would run past the frame's edge", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    const stage = beat6.querySelector("[data-stage]");
+    fireEvent.change(range, { target: { value: "1905" } });
+    expect(stage).toHaveAttribute("data-wipe-edge", "start");
+    fireEvent.change(range, { target: { value: "1960" } });
+    expect(stage).not.toHaveAttribute("data-wipe-edge");
+    fireEvent.change(range, { target: { value: "2015" } });
+    expect(stage).toHaveAttribute("data-wipe-edge", "end");
+  });
+
+  it("offers a link to the full rule from each era's panel, for the pinned stage that shortens it", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    for (const [era, beat] of [["historical", 4], ["present", 7]] as const) {
+      const link = panel(beat6, era).querySelector("a[data-full-rule]");
+      expect(link).toHaveAttribute("href", `#beat-${beat}`);
+      expect(link).toHaveTextContent(/^Read the full rule/);
+    }
+    // The quotation itself is whole in the markup.
+    expect(panel(beat6, "historical").querySelector("blockquote")).toHaveTextContent("fixture quote");
+  });
+
+  it("in still mode the year buttons set the value at once, without scrolling", async () => {
     sessionStorage.setItem("opmb:motion", "still");
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     const { beat6 } = await renderChapter();
-    scrollTo.mockClear(); // the page itself starts at the top on mount; only the press matters here
-    const button = screen.getByRole("button", { name: "Show 2020" });
-    expect(beat6).toContainElement(button);
-    expect(button).toHaveAttribute("aria-pressed", "false");
-    expect(beat6).toHaveAttribute("data-era-shown", "historical");
-
-    await userEvent.click(button);
-    expect(button).toHaveAttribute("aria-pressed", "true");
-    expect(beat6).toHaveAttribute("data-era-shown", "present");
-
-    await userEvent.click(button);
-    expect(button).toHaveAttribute("aria-pressed", "false");
-    expect(beat6).toHaveAttribute("data-era-shown", "historical");
+    scrollTo.mockClear(); // the page itself starts at the top on mount; only the presses matter here
+    const range = within(beat6).getByRole("slider");
+    const show2020 = within(beat6).getByRole("button", { name: "Show 2020" });
+    const show1901 = within(beat6).getByRole("button", { name: "Show 1901" });
+    expect(show1901).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(show2020);
+    expect(range).toHaveValue("2020");
+    expect(show2020).toHaveAttribute("aria-pressed", "true");
+    expect(show1901).toHaveAttribute("aria-pressed", "false");
+    expect(beat6.querySelector("[data-date-indicator]")).toHaveTextContent("2020");
+    await userEvent.click(show1901);
+    expect(range).toHaveValue("1901");
+    expect(beat6.querySelector("[data-date-indicator]")).toHaveTextContent("1901");
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it("keeps both captions as real, unfaded text when two image-less items are switched in still mode", async () => {
-    sessionStorage.setItem("opmb:motion", "still");
-    const { beat6, chapter } = await renderChapter();
-    const historical = chapter.items.find((i) => i.id === chapter.changeOfDate?.historicalItemId);
-    expect(historical?.image).toBeNull();
-    expect(chapter.present.instrument?.image).toBeNull();
-
-    await pressAndWaitForFade(beat6);
-    const captions = [...beat6.querySelectorAll<HTMLElement>("[data-caption]")];
-    expect(captions.map((c) => c.dataset.caption)).toEqual(["historical", "present"]);
-    captions.forEach((caption, i) => {
-      const year = String(i === 0 ? chapter.historicalYear : chapter.presentYear);
-      expect(realText(caption)).toContain(year);
-      expect(realText(caption).replace(year, "").trim()).not.toBe(""); // the gap note or "No image"
-      for (const el of [caption, ...caption.querySelectorAll("*")]) {
-        expect(el.getAttribute("style")).toBeNull();
-        expect(el.getAttribute("class") ?? "").not.toMatch(/opacity/);
-        expect(el.hasAttribute("hidden")).toBe(false);
-      }
-    });
+  it("in full motion below the breakpoint the year buttons carry the value across", async () => {
+    sessionStorage.setItem("opmb:motion", "full");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    await userEvent.click(within(beat6).getByRole("button", { name: "Show 2020" }));
+    await waitFor(() => expect(range).toHaveValue("2020"), { timeout: 4000 });
+    expect(panel(beat6, "present")).not.toHaveAttribute("aria-hidden");
   });
 
-  it("never puts an inline opacity on an element that contains text", async () => {
+  it("keeps the decoration hidden and puts no style attribute on the page at rest", async () => {
     sessionStorage.setItem("opmb:motion", "still");
-    const { container, beat6 } = await renderChapter();
-    await pressAndWaitForFade(beat6);
-    const faded = [...container.querySelectorAll<HTMLElement>("[style]")].filter((el) => el.style.opacity !== "");
-    expect(faded.length).toBeGreaterThan(0);
-    for (const el of faded) expect(realText(el)).toBe("");
+    const { beat6 } = await renderChapter();
+    for (const sel of ["[data-date-indicator]", "[data-divider]", "[data-date-line]"]) {
+      expect(beat6.querySelector(sel)).toHaveAttribute("aria-hidden", "true");
+    }
+    expect(beat6.querySelectorAll("[style]")).toHaveLength(0);
+  });
+
+  it("works for a chapter with no outcomes and no person: empty frames with their notes, and no outcome", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const c = fixtureChapter(4, { withOutcome: false, showPersonCard: false });
+    c.items[0].gapNote = "fixture historical gap note";
+    const { beat6 } = await renderChapter(c);
+    const frames = [...beat6.querySelectorAll("[data-document] [data-empty-mount]")];
+    expect(frames.map((f) => f.textContent)).toEqual(["fixture historical gap note", "No image"]);
+    expect(within(beat6).queryByRole("link", { name: /see the outcome/i })).toBeNull();
+    for (const era of ["historical", "present"]) {
+      expect(panel(beat6, era)).toHaveTextContent("No person is placed in this chapter, so no outcome is given.");
+    }
+    fireEvent.change(within(beat6).getByRole("slider"), { target: { value: "2020" } });
+    expect(panel(beat6, "present")).not.toHaveAttribute("aria-hidden");
   });
 });
 

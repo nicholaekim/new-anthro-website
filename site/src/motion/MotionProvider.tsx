@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, use, useSyncExternalStore, type ReactNode } from "react";
-import { MOTION_KEY, REDUCED_QUERY, resolveMotionMode, type MotionMode } from "./motionMode";
+import { createContext, use, useEffect, useSyncExternalStore, type ReactNode } from "react";
+import { MOTION_ATTR, MOTION_KEY, REDUCED_QUERY, resolveMotionMode, type MotionMode } from "./motionMode";
 
 // The override lives in memory, which is what the provider reads; sessionStorage only persists it
 // across reloads. It is read from storage once, on first use. If storage cannot be written, the
@@ -61,8 +61,14 @@ export function MotionProvider({ children }: { children: ReactNode }) {
   const reduced = useSyncExternalStore(subscribeReduced, () => window.matchMedia(REDUCED_QUERY).matches, () => true);
   const override = useSyncExternalStore(subscribeOverride, readOverride, () => null);
   const ready = useSyncExternalStore(noSubscription, () => true, () => false);
+  const mode = resolveMotionMode(reduced, override);
+  // Only once ready: before it the mode reads as still whatever the client values, and the inline
+  // script has already set the attribute from them.
+  useEffect(() => {
+    if (ready) document.documentElement.setAttribute(MOTION_ATTR, mode);
+  }, [ready, mode]);
   return (
-    <MotionContext value={{ mode: resolveMotionMode(reduced, override), ready, setMode: writeOverride }}>{children}</MotionContext>
+    <MotionContext value={{ mode, ready, setMode: writeOverride }}>{children}</MotionContext>
   );
 }
 

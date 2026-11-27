@@ -22,10 +22,11 @@ export function OutcomeView({ outcome }: { outcome: Outcome }) {
 export function OutcomeBeat({ outcome }: { outcome: Outcome }) {
   return (
     <section data-beat="5" id="beat-5" aria-labelledby="beat-5-heading" className="beat flex flex-col gap-10">
-      <BeatHeading beat={5} className="flex items-center gap-3">
-        <span data-mark aria-hidden="true" className="inline-block size-3 bg-reserved" />
-        Outcome
-      </BeatHeading>
+      <BeatHeading
+        beat={5}
+        className="flex items-center gap-3"
+        before={<span data-mark aria-hidden="true" className="inline-block size-3 bg-reserved" />}
+      />
       <OutcomeView outcome={outcome} />
     </section>
   );

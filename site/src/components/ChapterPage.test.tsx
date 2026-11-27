@@ -9,6 +9,20 @@ import { ChapterPage } from "./ChapterPage";
 const next = { href: "/chapters/fixture-2", label: "Next chapter" };
 const person = fixturePerson();
 
+// Beat 6 repeats, for each era, the instrument's title and the rule with its citation, so it can
+// compare them side by side; every other slot is shown once.
+function beat6Repeats(c: Chapter): number {
+  const historical = c.items.find((i) => i.id === c.changeOfDate?.historicalItemId);
+  return countSlots([
+    historical?.provenance.title,
+    c.present.instrument?.provenance.title,
+    c.basis?.quote,
+    c.basis?.citation,
+    c.present.basis?.quote,
+    c.present.basis?.citation,
+  ]);
+}
+
 function renderChapter(chapter: Chapter) {
   return render(<ChapterPage chapter={chapter} person={person} next={next} />);
 }
@@ -73,12 +87,12 @@ describe("ChapterPage", () => {
     expect(details).toHaveTextContent("fixture transcription");
   });
 
-  it("server-renders both eras and one marked slot per slot in the content", () => {
+  it("server-renders both eras and one marked slot per slot in the content, plus beat 6's repeats", () => {
     const c = fixtureChapter();
     const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
     expect(html).toContain('data-era="historical"');
     expect(html).toContain('data-era="present"');
-    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + countSlots(person));
+    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + countSlots(person) + beat6Repeats(c));
   });
 
   it("gives every details summary an accessible name", () => {
@@ -122,6 +136,39 @@ describe("ChapterPage", () => {
     expect(container.querySelector('[data-beat="4"]')).not.toHaveTextContent("Person-card facts used:");
     // Every slot shown is the chapter's own.
     const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
-    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c));
+    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + beat6Repeats(c));
+  });
+
+  it("shows a translated quotation and transcription as labelled original and translation in beats 3, 4, 6 and 7", () => {
+    const c = fixtureChapter();
+    c.items[0].translation = slot("fixture item translation");
+    c.present.instrument!.translation = slot("fixture instrument translation");
+    if (c.basis) c.basis.quoteTranslation = slot("fixture quote translation");
+    if (c.present.basis) c.present.basis.quoteTranslation = slot("fixture present quote translation");
+    const { container } = renderChapter(c);
+    const pairsIn = (selector: string) =>
+      [...container.querySelectorAll(selector)].map((p) => [p.getAttribute("data-language-part"), p.textContent]);
+    const beat = (n: number) => `section[data-beat="${n}"] [data-language-part]`;
+    expect(pairsIn(beat(3))).toEqual([
+      ["original", "Original[fixture transcription]"],
+      ["translation", "English translation[fixture item translation]"],
+    ]);
+    expect(pairsIn(beat(4))).toEqual([
+      ["original", "Original[fixture quote]"],
+      ["translation", "English translation[fixture quote translation]"],
+    ]);
+    // Beat 6: each era’s rule, original and translation.
+    expect(pairsIn(beat(6)).map(([, t]) => t)).toEqual([
+      "Original[fixture quote]",
+      "English translation[fixture quote translation]",
+      "Original[fixture quote]",
+      "English translation[fixture present quote translation]",
+    ]);
+    expect(pairsIn(beat(7)).map(([, t]) => t)).toEqual([
+      "Original[fixture transcription]",
+      "English translation[fixture instrument translation]",
+      "Original[fixture quote]",
+      "English translation[fixture present quote translation]",
+    ]);
   });
 });

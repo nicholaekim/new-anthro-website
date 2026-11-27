@@ -1,5 +1,6 @@
 import type { Basis, PersonCard } from "@/content/types";
 import { BeatHeading } from "../BeatHeading";
+import { Bilingual } from "../Bilingual";
 import { Disclosure } from "../Disclosure";
 import { SlotText } from "../SlotText";
 
@@ -10,9 +11,18 @@ export function BasisView({ basis, person }: { basis: Basis; person: PersonCard 
   const factsUsed = person?.facts.filter((f) => basis.cardFactsUsed.includes(f.id)) ?? [];
   return (
     <div className="flex flex-col gap-6">
-      <blockquote className="measure border-l-2 border-paper/40 pl-5 font-source text-lg leading-[1.6] sm:pl-7 sm:text-xl">
-        <SlotText value={basis.quote} />
-      </blockquote>
+      <Bilingual
+        original={basis.quote}
+        translation={basis.quoteTranslation}
+        lang={basis.originalLang}
+        render={(text, part) => (
+          <blockquote
+            className={`measure border-l-2 border-paper/40 pl-5 leading-[1.6] sm:pl-7 ${part === "original" ? "font-source text-lg sm:text-xl" : "font-yours text-lg"}`}
+          >
+            {text}
+          </blockquote>
+        )}
+      />
       <Disclosure summary="Citation">
         <span className="soft">
           <SlotText value={basis.citation} />
@@ -36,7 +46,7 @@ export function BasisView({ basis, person }: { basis: Basis; person: PersonCard 
 export function BasisBeat({ basis, person }: { basis: Basis; person: PersonCard | null }) {
   return (
     <section data-beat="4" id="beat-4" aria-labelledby="beat-4-heading" className="beat flex flex-col gap-10">
-      <BeatHeading beat={4}>Basis</BeatHeading>
+      <BeatHeading beat={4} />
       <BasisView basis={basis} person={person} />
     </section>
   );

@@ -13,6 +13,16 @@ export const louisiana: Chapter = {
   historicalYear: 1930,
   presentYear: 2020,
   showPersonCard: true,
+  summary: {
+    historical: {
+      decides: "The census enumerator",
+      evidence: "Ancestry, whatever the share",
+    },
+    present: {
+      decides: "The person, or whoever fills in the household’s form",
+      evidence: "Self-identification; the Census Bureau classifies what is written",
+    },
+  },
   contentNote:
     "This chapter quotes United States census instructions and Louisiana court records that use historical racial terms, some of them now offensive. These terms appear only inside quotation marks, as the sources’ own wording.",
   photograph: {
@@ -24,6 +34,7 @@ export const louisiana: Chapter = {
     longDescription:
       "An oblique aerial view taken from above a river, which fills the lower right corner and is crossed by a steel truss bridge. Rail yards, an overpass and low buildings run across the middle ground, with a cluster of taller downtown buildings to the right and rows of houses and trees stretching back to a lake and a hazy horizon. Visible text: white lettering along the bottom of the print reads “B-2679 Shreveport La. Looking W. (4-12-500) (6-1-30-10:30)”; a sign on a warehouse roof at the left middle ground ends “WAREHOUSE”; the card mount above the print carries the typed captions “Shreveport, La. - looking west” and “Rec’d from Maxwell Field, Ala. - 12/11/31”, has three punch holes along its top edge, and a handwritten mark appears at its lower right corner.",
     transcription: null,
+    translation: null,
     provenance: {
       creator:
         "Not stated on the item record. The record sits in the series “Airscapes” of American and Foreign Areas, whose most recent creator the National Archives gives as War Department. Army Air Forces. (06/20/1941 - 09/26/1947).",
@@ -53,6 +64,7 @@ export const louisiana: Chapter = {
         "The scan shows two facing printed pages side by side, with the binding down the middle. The left page, headed “Instructions to Enumerators” with the page number 26, opens under the centred heading “Personal Description” and runs from paragraph 149 to the start of paragraph 156; paragraphs 150 and 151 sit in the upper third and paragraph 155 near the bottom. The right page, headed “Population” with the page number 27, continues with paragraphs 157 to 162 under a second centred heading, “Education.” The paper edges and a dark strip from the scanner show around the pages.",
       transcription:
         "150. Column 12. Color or race.-Write “W” for white; “Neg” for Negro; “Mex” for Mexican; “In” for Indian; “Ch” for Chinese; “Jp” for Japanese; “Fil” for Filipino; “Hin” for Hindu; and “Kor” for Korean. For a person of any other race, write the race in full.\n151. Negroes.-A person of mixed white and Negro blood should be returned as a Negro, no matter how small the percentage of Negro blood. Both black and mulatto persons are to be returned as Negroes, without distinction. A person of mixed Indian and Negro blood should be returned a Negro, unless the Indian blood predominates and the status as an Indian is generally accepted in the community.\n[...]\n155. Other mixed races.-Any mixture of white and nonwhite should be reported according to the nonwhite parent. [...]",
+      translation: null,
       provenance: {
         creator:
           "U.S. Department of Commerce, Bureau of the Census (Form 15-100, 1930)",
@@ -88,6 +100,7 @@ export const louisiana: Chapter = {
         "A single printed page set in two columns of justified type, with the running head “State v. Treadaway.” centred at the top between the numbers 305 at the left and 306 at the right. The left column finishes one paragraph and begins a new one about two-thirds of the way down; the transcribed passage starts there and runs to the foot of the left column. It continues at the top of the right column, whose opening sentences complete it; the rest of that column lists earlier Louisiana statutes. The lower margin is blank apart from faint marks.",
       transcription:
         "There is a word in the English language which does express the meaning of a person of mixed negro and other blood [...]. That word is the word “colored.” The word “colored,” when used to designate the race of a person, is unmistakable, at least in the United States. It means a person of negro blood pure or mixed; and the term applies no matter what may be the proportions of the admixture, so long as the negro blood is traceable. [...] In our Constitution and laws, when it has become necessary to use a word comprehending within its meaning both negroes, properly so-called, and persons of mixed negro blood, the term “colored” has invariably been used.",
+      translation: null,
       provenance: {
         creator: "Supreme Court of Louisiana (majority opinion; Land and Nicholls, JJ., dissenting)",
         title: "State v. Treadaway et al., 126 La. 300, 52 So. 500 (La. 1910), decided 25 April 1910",
@@ -119,9 +132,11 @@ export const louisiana: Chapter = {
     citation: ipumsCitation,
     explanation:
       "The 1930 instructions speak to the enumerator, who wrote the race entry; these paragraphs give the person counted no part in it. Paragraph 151 made ancestry the test for a person “of mixed white and Negro blood” and fixed the answer in advance: any share at all led to “Neg.” Paragraphs 151 and 152 show the instructions could give weight to how a community regarded someone, but only where the category they call “Indian” was involved, never for this mixture. Louisiana’s Supreme Court read the state’s word “colored” the same way, as covering anyone whose African ancestry was “traceable.” The paragraphs do not say how the enumerator was to learn a person’s ancestry.",
+    quoteTranslation: null,
     cardFactsUsed: ["fact-1"],
   },
   outcome: {
+    level: "high",
     text: "Fact 1 decides the case. One of four grandparents was recorded as of African descent, so under paragraph 151 the person is “of mixed white and Negro blood,” and such a person “should be returned as a Negro, no matter how small the percentage of Negro blood.” The enumerator would write “Neg” in column 12. Facts 2 and 3 do not count: the rule has no place for the word “mixed” or for standing among neighbours. Fact 4 offers no race entry to consult. These paragraphs do not say how the enumerator was to learn of the grandparent.",
     confidence:
       "High. Paragraph 151 names this mixture in so many words; the only open point is whether the enumerator knew of the grandparent, which the card cannot settle.",
@@ -142,6 +157,7 @@ export const louisiana: Chapter = {
         "A form page with a light blue background, divided into two columns and headed “Person 1” at the top left, with a barcode at the top centre. The left column holds Questions 5 to 8 (name, sex, age and date of birth, and Hispanic origin), with a note in bold above Question 8. The right column holds Question 9, the race question transcribed here, with its checkboxes and write-in boxes running down most of the column, and a bold instruction about Person 2 at the foot. The words “Informational Copy” are printed in large outlined letters diagonally across both columns, and the page number 2 is centred at the bottom.",
       transcription:
         "9. What is Person 1’s race?\nMark [X] one or more boxes AND print origins.\nWhite – Print, for example, German, Irish, English, Italian, Lebanese, Egyptian, etc.\nBlack or African Am. – Print, for example, African American, Jamaican, Haitian, Nigerian, Ethiopian, Somali, etc.\nAmerican Indian or Alaska Native – Print name of enrolled or principal tribe(s), for example, Navajo Nation, Blackfeet Tribe, Mayan, Aztec, Native Village of Barrow Inupiat Traditional Government, Nome Eskimo Community, etc.\n[...]\nSome other race – Print race or origin.",
+      translation: null,
       provenance: {
         creator: "U.S. Census Bureau, U.S. Department of Commerce",
         title: "2020 Census informational questionnaire, Question 9 (race)",
@@ -166,9 +182,11 @@ export const louisiana: Chapter = {
       citation: censusRaceCitation,
       explanation:
         "In 2020 the question is put to the household. The Census Bureau states that the answer rests on self-identification and that it does not direct which boxes to mark; the form asks the respondent to mark “one or more boxes AND print origins.” The Bureau describes its categories as “generally” reflecting “a social definition of race” rather than a biological one, and it classifies written answers under the Office of Management and Budget’s standards. Nothing in the question asks for ancestry records or papers. One limit remains: the form is completed by one person in the household, who is asked to “provide information for each person living here,” so the answer may be another household member’s account.",
+      quoteTranslation: null,
       cardFactsUsed: ["fact-2"],
     },
     outcome: {
+      level: "moderate",
       text: "Fact 2 decides the case, as far as the form allows. “Mixed” is not one of the printed boxes, so the person, or the household member filling in the form, would choose how to express it: for example by marking both “White” and “Black or African Am.” and printing origins, or by marking “Some other race” and printing “mixed.” Fact 1 matters only if the respondent chooses to draw on it. Facts 3 and 4 play no part. Which boxes would be marked cannot be known from the card; what is settled is that the choice of answer belongs to the respondent, though the Census Bureau classifies what is written.",
       confidence:
         "Moderate. The sources make clear that the answer is self-identified, but the card does not say which of the permitted ways of reporting “mixed” the person would choose.",

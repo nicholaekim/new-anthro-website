@@ -1,20 +1,26 @@
 "use client";
 
-import { useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { clearCount, subscribeClears } from "@/lib/storage";
-import { useCover } from "./CoverProvider";
-import { gsap, HOUSE_EASE, useGSAP } from "./gsap";
+import { DURATION, RISE } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 import { readOpeningSeen, shouldPlayOpening, storeOpeningSeen } from "./opening";
-import { RevealCueContext, type RevealCue } from "./Reveal";
+import { RevealCueContext } from "./Reveal";
+import { focusTitle, SEQUENCE_CONTROL, useSequence } from "./useSequence";
 
 const noSubscription = () => () => {};
 
-// The opening page's sequence. In full motion, the first time per visit, one timeline brings the
-// decorative light up ([data-opening-light]) and grows the four border bars ([data-opening-bar])
-// while the title reveal is held; then the title reveal plays. Skip jumps the timeline to its end
-// and finishes the title. The person card and all text stay visible throughout; the timeline only
-// sets opacity and scale on the decorations, and reverting it leaves them as the still page has them.
+// When each part of the opening arrives, in seconds from the start: the light comes up, the title
+// rises line by line, the framing follows, the person card is set down and its border draws
+// around it, then the note and the way in.
+const AT = { title: 0.3, framing: 1.0, card: 1.5, border: 1.75, note: 2.35, begin: 2.55 } as const;
+
+// The opening page's sequence (see useSequence). In full motion, the first time per visit: the
+// decorative light ([data-opening-light]) and border ([data-opening-bar]) and the parts marked
+// [data-opening-part] (framing, card, note, begin) arrive in turn around the title's reveal.
+// Only opacity and transform move: every part is in the accessibility tree and reachable by
+// keyboard throughout, and focus landing on one finishes the sequence. Skip finishes it too and
+// keeps focus on the page, at its heading. Reverted at the end, so nothing inline is left.
 // Restart clears what is stored; on the opening page itself that is not a remount, so start the
 // sequence again by remounting it.
 export function OpeningMotion({ children }: { children: ReactNode }) {
@@ -26,46 +32,29 @@ function OpeningSequence({ children }: { children: ReactNode }) {
   const { mode } = useMotionMode();
   // On the server and during hydration: seen, so nothing plays before the client values are known.
   const seen = useSyncExternalStore(noSubscription, readOpeningSeen, () => true);
-  const [stage, setStage] = useState<"decor" | "done" | "skipped">("decor");
-  const active = shouldPlayOpening(mode, seen) && stage === "decor";
-  // Arriving under the cover (Restart from a chapter), the timeline waits until it opens.
-  const { state: coverState } = useCover();
-  const running = active && (coverState === "idle" || coverState === "opening");
-  const scope = useRef<HTMLDivElement>(null);
-  const timeline = useRef<gsap.core.Timeline | null>(null);
-
-  useGSAP(
-    () => {
-      if (!running) return;
-      const tween = { duration: 0.8, ease: HOUSE_EASE };
-      const tl = gsap.timeline({
-        onComplete: () => {
-          storeOpeningSeen();
-          setStage((s) => (s === "decor" ? "done" : s));
-        },
-      });
-      tl.fromTo("[data-opening-light]", { opacity: 0 }, { opacity: 1, duration: 1.2, ease: HOUSE_EASE }, 0)
-        .fromTo('[data-opening-bar="x"]', { scaleX: 0 }, { scaleX: 1, ...tween }, 0.4)
-        .fromTo('[data-opening-bar="y"]', { scaleY: 0 }, { scaleY: 1, ...tween }, 0.4);
-      timeline.current = tl;
-      return () => {
-        timeline.current = null;
-      };
+  const { scope, cue, active, finish } = useSequence(
+    shouldPlayOpening(mode, seen),
+    (tl, playTitle) => {
+      const part = (name: string) => `[data-opening-part="${name}"]`;
+      const arrive = { opacity: 1, y: 0, duration: DURATION.enter };
+      tl.fromTo("[data-opening-light]", { opacity: 0 }, { opacity: 1, duration: DURATION.light }, 0)
+        .call(playTitle, [], AT.title)
+        .fromTo(part("framing"), { opacity: 0, y: RISE }, arrive, AT.framing)
+        // Set down: it settles onto the page from just above.
+        .fromTo(part("card"), { opacity: 0, y: -RISE }, { ...arrive, duration: DURATION.title }, AT.card)
+        .fromTo('[data-opening-bar="x"]', { scaleX: 0 }, { scaleX: 1, duration: DURATION.enter }, AT.border)
+        .fromTo('[data-opening-bar="y"]', { scaleY: 0 }, { scaleY: 1, duration: DURATION.enter }, AT.border)
+        .fromTo(part("note"), { opacity: 0 }, { opacity: 1, duration: DURATION.part }, AT.note)
+        .fromTo(part("begin"), { opacity: 0, y: RISE / 2 }, { ...arrive, duration: DURATION.part }, AT.begin);
     },
-    { scope, dependencies: [running], revertOnUpdate: true },
+    storeOpeningSeen,
   );
 
   function skip() {
-    timeline.current?.progress(1);
-    storeOpeningSeen();
-    setStage("skipped");
+    finish();
     // The button goes away: keep focus on the page, at its heading.
-    const heading = scope.current?.querySelector<HTMLElement>("h1");
-    if (heading && !heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
-    heading?.focus();
+    focusTitle(scope.current);
   }
-
-  const cue: RevealCue = stage === "skipped" ? "finish" : active ? "hold" : "play";
 
   return (
     <RevealCueContext value={cue}>
@@ -74,6 +63,7 @@ function OpeningSequence({ children }: { children: ReactNode }) {
           <button
             type="button"
             onClick={skip}
+            {...{ [SEQUENCE_CONTROL]: "" }}
             className="target fixed bottom-4 right-4 z-30 bg-surround px-2 font-interface text-paper underline"
           >
             Skip

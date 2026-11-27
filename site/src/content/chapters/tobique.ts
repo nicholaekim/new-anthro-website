@@ -25,6 +25,16 @@ export const tobique: Chapter = {
   // false: no person card on this page. Whether a fictional person is placed here at all is
   // your and your instructor's decision (design-plan.md, "The Tobique chapter").
   showPersonCard: false,
+  summary: {
+    historical: {
+      decides: "The Registrar, a federal officer; one reference to a judge",
+      evidence: "Recorded descent through men, band membership and marriage",
+    },
+    present: {
+      decides: "The Registrar, on application",
+      evidence: "Descent through either parent; credible evidence where an ancestor is unknown or unstated",
+    },
+  },
   contentNote:
     "This chapter quotes federal legislation and a United Nations decision; the term \"Indian\" is the legal term of the Indian Act and appears here only as the statute's wording, and the 1950s provisions quoted apply rules that differ by sex. No person, fictional or real, is placed in this community: the chapter describes the federal registration system as it applied to Tobique First Nation (Neqotkuk), a Wolastoqiyik community, using only legislation and a published decision.",
   photograph: {
@@ -35,6 +45,7 @@ export const tobique: Chapter = {
     alt: slot("short alternative text"),
     longDescription: slot("longer description"),
     transcription: null,
+    translation: null,
     provenance: provenance(),
     contentNote: null,
     annotations: [],
@@ -52,6 +63,7 @@ export const tobique: Chapter = {
       longDescription: slot("longer description"),
       transcription:
         "5. An Indian Register shall be maintained in the Department, which shall consist of Band Lists and General Lists and in which shall be recorded the name of every person who is entitled to be registered as an Indian. [...]\n7. (1) The Registrar may at any time add to or delete from a Band List or a General List the name of any person who, in accordance with the provisions of this Act, is entitled or not entitled, as the case may be, to have his name included in that List. [...]\n11. Subject to section 12, a person is entitled to be registered if that person [...]\n(c) is a male person who is a direct descendant in the male line of a male person described in paragraph (a) or (b); [...]\n12. (1) The following persons are not entitled to be registered, namely, [...]\n(b) a woman who is married to a person who is not an Indian.",
+      translation: null,
       provenance: {
         creator: "Parliament of Canada (Indian Act, first enacted as S.C. 1951, c. 29)",
         title: "Indian Act, R.S.C. 1952, c. 149, sections 5, 7, 11 and 12",
@@ -91,6 +103,7 @@ export const tobique: Chapter = {
       longDescription: slot("longer description"),
       transcription:
         "4. Paragraph (b) of subsection (1) of section 12 of the said Act is repealed and the following substituted therefor:\n\"(b) a woman who married a person who is not an Indian, unless that woman is subsequently the wife or widow of a person described in section 11.\" [...]\n26. Subsection (2) of section 108 of the said Act is repealed and the following substituted therefor:\n\"(2) On the report of the Minister that an Indian woman married a person who is not an Indian, the Governor in Council may by order declare that the woman is enfranchised as of the date of her marriage and, on the recommendation of the Minister may by order declare that all or any of her children are enfranchised as of the date of the marriage or such other date as the order may specify.\"",
+      translation: null,
       provenance: {
         creator: "Parliament of Canada",
         title:
@@ -113,7 +126,7 @@ export const tobique: Chapter = {
         },
         {
           id: "tobique-item-2-annotation-3",
-          text: "In Lovelace v. Canada (views adopted 30 July 1981), the UN Human Rights Committee considered Sandra Lovelace, who had lost her status under paragraph 12(1)(b) after marrying in 1970, and found that denying her \"the legal right to reside on the Tobique Reserve\" breached article 27 of the International Covenant on Civil and Political Rights (Communication No. R.6/24, U.N. Doc. A/36/40 at 166, paragraph 19; read in the University of Minnesota Human Rights Library copy listed in the bibliography).",
+          text: "In Lovelace v. Canada (views adopted 30 July 1981), the UN Human Rights Committee considered Sandra Lovelace, who had lost her status under paragraph 12(1)(b) after marrying in 1970, and found that denying her \"the legal right to reside on the Tobique Reserve\" breached article 27 of the International Covenant on Civil and Political Rights (Communication No. R.6/24, Official Records of the General Assembly, Thirty-sixth Session, Supplement No. 40 (A/36/40), annex XVIII, paragraph 19, p. 174; United Nations copy listed in the bibliography).",
         },
       ],
       gapNote:
@@ -131,6 +144,7 @@ export const tobique: Chapter = {
       ", accessed 26 November 2026.",
     explanation:
       "In 1960 the Act defined an \"Indian\" by registration itself: a person was one in law if registered or entitled to be registered. The decision lay with the Registrar, an officer of the federal Department, who added or deleted names using the tests in sections 11 and 12. Those tests turned on recorded descent through men, band membership and marriage, not on how a person or a community described them. Under section 9 a protest against an addition or deletion went first to the Registrar, whose decision could be referred to a judge for review; the 1956 amendment allowed only one such reference. The criteria themselves were set by Parliament.",
+    quoteTranslation: null,
     cardFactsUsed: [],
   },
   // No recorded outcome for a person in this chapter, whatever else is decided.
@@ -149,6 +163,7 @@ export const tobique: Chapter = {
       longDescription: slot("longer description"),
       transcription:
         "6 (1) Subject to section 7, a person is entitled to be registered if\n(a) that person was registered or entitled to be registered immediately before April 17, 1985;\n(a.1) the name of that person was omitted or deleted from the Indian Register, or from a band list before September 4, 1951, under subparagraph 12(1)(a)(iv), paragraph 12(1)(b) or subsection 12(2) or under subparagraph 12(1)(a)(iii) pursuant to an order made under subsection 109(2), as each provision read immediately before April 17, 1985, or under any former provision of this Act relating to the same subject matter as any of those provisions; [...]\n(f) both parents of that person are entitled to be registered under this section or, if the parents are no longer living, were so entitled at the time of death.\n(2) Subject to section 7, a person is entitled to be registered if one of their parents is entitled to be registered under subsection (1) or, if that parent is no longer living, was so entitled at the time of death.",
+      translation: null,
       provenance: {
         creator: "Parliament of Canada; consolidation by the Department of Justice Canada",
         title:
@@ -186,6 +201,7 @@ export const tobique: Chapter = {
         ", accessed 26 November 2026.",
       explanation:
         "In 2020 the Registrar, an officer of the Department of Indigenous Services, still decided entitlement, and under section 5(5) a name did not have to be recorded unless an application was made. Entitlement under section 6 often turned on a parent's or ancestor's entitlement (paragraphs 6(1)(a.3) and (f) and subsection 6(2)), so many applications rested on records of descent. Where a parent or ancestor was unknown or not named on a birth certificate, section 5(6) required the Registrar to rely on any credible evidence and draw every reasonable inference in the applicant's favour. Registration remained federal; band membership could be governed separately under section 10.",
+      quoteTranslation: null,
       cardFactsUsed: [],
     },
     outcome: null,

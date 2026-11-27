@@ -14,7 +14,7 @@ export function PresentDay({ chapter, person }: { chapter: Chapter; person: Pers
   const { instrument, basis, outcome, reflection } = chapter.present;
   return (
     <section data-beat="7" id="beat-7" aria-labelledby="beat-7-heading" className="beat flex flex-col gap-14">
-      <BeatHeading beat={7}>Present day, {chapter.presentYear}</BeatHeading>
+      <BeatHeading beat={7} after={`, ${chapter.presentYear}`} />
       <div className={PART}>
         <h3 className={PART_HEADING}>Instrument</h3>
         {instrument ? <ItemView item={instrument} /> : <Mount image={null} alt="" />}

@@ -1,0 +1,240 @@
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Chapter } from "@/content/types";
+import { MotionProvider } from "@/motion/MotionProvider";
+import { fixtureChapter, fixturePerson } from "@/test/fixtures";
+import { ChapterPage } from "./ChapterPage";
+
+// jsdom has no layout: place each section so that the one named is at the top of the view and the
+// next is a full view below it.
+let current = 1;
+// Tops set by a test, by beat, in place of the default spacing.
+let tops: Record<number, number> = {};
+function place(beat: number) {
+  current = beat;
+  tops = {};
+}
+const scrollPaddingTop = () => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+
+beforeEach(() => {
+  sessionStorage.setItem("opmb:motion", "still");
+  vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
+    const beat = this.matches("section[data-beat]") ? Number(this.dataset.beat) : current;
+    const top = tops[beat] ?? (beat - current) * 1000;
+    return { top, bottom: top + 900, left: 0, right: 0, width: 0, height: 900, x: 0, y: top, toJSON: () => ({}) };
+  });
+});
+afterEach(() => {
+  vi.restoreAllMocks();
+  sessionStorage.clear();
+});
+
+async function scrollTo(beat: number, at: Record<number, number> = {}) {
+  place(beat);
+  tops = at;
+  await act(async () => {
+    window.dispatchEvent(new Event("scroll"));
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  });
+}
+
+function chapterUsing(): Chapter {
+  const c = fixtureChapter(30);
+  if (!c.basis || !c.present.basis) throw new Error("fixture needs both bases");
+  c.basis.cardFactsUsed = ["fact-1"];
+  c.present.basis.cardFactsUsed = ["fact-2", "fact-4"];
+  return c;
+}
+
+function renderChapter(c: Chapter = chapterUsing()) {
+  return render(
+    <MotionProvider>
+      <ChapterPage chapter={c} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} position={{ number: 1, count: 4 }} />
+    </MotionProvider>,
+  );
+}
+
+const bar = () => screen.getByRole("navigation", { name: "Sections in this chapter" });
+
+// What a screen reader is given: the text without the parts hidden from it.
+function spoken(el: Element | null): string {
+  const copy = el?.cloneNode(true) as Element | undefined;
+  copy?.querySelectorAll("[aria-hidden]").forEach((e) => e.remove());
+  return copy?.textContent ?? "";
+}
+
+describe("story navigation", () => {
+  it("marks the active section on the chapter, in the ticks and in the label", async () => {
+    const { container } = renderChapter();
+    await scrollTo(4);
+    expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "4");
+    // One current step, the tick; the list marks its link as the current location.
+    const current = bar().querySelectorAll('[aria-current="step"]');
+    expect([...current].map((a) => a.getAttribute("href"))).toEqual(["#beat-4"]);
+    expect(current[0]).toHaveAttribute("data-tick", "4");
+    expect(bar().querySelector('[data-section-list] [aria-current="location"]')).toHaveAttribute("href", "#beat-4");
+    expect(within(bar()).getByText("04 Basis", { selector: "summary *" })).toBeInTheDocument();
+    expect(spoken(bar().querySelector("summary"))).toBe("Sections, current: 04 Basis");
+    await scrollTo(7);
+    expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "7");
+  });
+
+  it("points previous and next at the neighbouring sections, and marks them unavailable at the ends", async () => {
+    renderChapter();
+    const previous = () => within(bar()).getByRole("link", { name: "Previous section" });
+    const next = () => within(bar()).getByRole("link", { name: "Next section" });
+    await scrollTo(1);
+    expect(previous()).toHaveAttribute("aria-disabled", "true");
+    expect(next()).toHaveAttribute("href", "#beat-2");
+    await scrollTo(5);
+    expect(previous()).toHaveAttribute("href", "#beat-4");
+    expect(next()).toHaveAttribute("href", "#beat-6");
+    expect(previous()).not.toHaveAttribute("aria-disabled");
+    await scrollTo(8);
+    expect(next()).toHaveAttribute("aria-disabled", "true");
+  });
+
+  it("links every section from the ticks and from the list, by its label", () => {
+    renderChapter();
+    const hrefs = [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `#beat-${n}`);
+    expect([...bar().querySelectorAll("[data-tick]")].map((a) => a.getAttribute("href"))).toEqual(hrefs);
+    const list = bar().querySelector("[data-section-list] ol");
+    expect([...(list?.querySelectorAll("a") ?? [])].map((a) => a.textContent)).toEqual([
+      "01 Title",
+      "02 Place",
+      "03 Items",
+      "04 Basis",
+      "05 Outcome",
+      "06 Change of date",
+      "07 Present day",
+      "08 Next",
+    ]);
+  });
+
+  it("names the section list plainly before a section is known", () => {
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(
+      <ChapterPage chapter={chapterUsing()} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} />,
+    );
+    expect(spoken(host.querySelector("[data-section-list] summary"))).toBe("Sections");
+  });
+
+  it("goes next to the section below the top line, even a short one the reading line has passed", async () => {
+    const { container } = renderChapter();
+    // Section 4 is at the top line; section 5 is short, its top already above the reading line,
+    // so it is the active one; an active-section rule would go next to 6.
+    await scrollTo(4, { 4: scrollPaddingTop(), 5: 100 + scrollPaddingTop(), 6: 400 + scrollPaddingTop() });
+    expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "5");
+    const next = within(bar()).getByRole("link", { name: "Next section" });
+    const into = vi.fn();
+    HTMLElement.prototype.scrollIntoView = into;
+    fireEvent.click(next);
+    expect(into.mock.contexts[0]).toBe(document.getElementById("beat-5"));
+  });
+
+  it("leaves a modified click to the browser", async () => {
+    renderChapter();
+    await scrollTo(4);
+    const into = vi.fn();
+    HTMLElement.prototype.scrollIntoView = into;
+    const next = within(bar()).getByRole("link", { name: "Next section" });
+    for (const modifier of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }]) {
+      expect(fireEvent.click(next, modifier)).toBe(true); // not prevented
+    }
+    expect(into).not.toHaveBeenCalled();
+  });
+
+  it("closes the section list when the pointer goes down outside it", async () => {
+    renderChapter();
+    const list = bar().querySelector<HTMLDetailsElement>("[data-section-list]");
+    if (!list) throw new Error("no list");
+    list.open = true;
+    fireEvent.pointerDown(list.querySelector("summary") as Element);
+    expect(list.open).toBe(true);
+    fireEvent.pointerDown(document.body);
+    expect(list.open).toBe(false);
+  });
+
+  it("uses the same labels as the section headings", () => {
+    renderChapter();
+    for (const [n, label] of [[4, "Basis"], [6, "Change of date"], [7, "Present day, 2020"]] as const) {
+      expect(document.getElementById(`beat-${n}-heading`)).toHaveTextContent(label);
+    }
+  });
+
+  it("shows which chapter this is beside the place and date", () => {
+    renderChapter();
+    expect(document.querySelector("[data-chapter-position]")).toHaveTextContent("Chapter 1 of 4");
+  });
+});
+
+describe("person card in a chapter", () => {
+  // The card is in a closed popover below the breakpoint, so it is queried with hidden: true.
+  const card = () => screen.getByRole("complementary", { name: "Person card", hidden: true });
+  const fact = (id: string) => card().querySelector(`[data-fact="${id}"]`) as HTMLElement;
+
+  it("says for each fact whether each era's rule uses it, linking a used one to its rule", () => {
+    renderChapter();
+    expect(fact("fact-1")).toHaveTextContent("1930: used");
+    expect(fact("fact-1")).toHaveTextContent("2020: not used");
+    expect(fact("fact-3")).toHaveTextContent("1930: not used");
+    expect(fact("fact-3")).toHaveTextContent("2020: not used");
+    expect(within(fact("fact-1")).getByRole("link", { name: "See the rule (1930)", hidden: true })).toHaveAttribute("href", "#beat-4");
+    expect(within(fact("fact-2")).getByRole("link", { name: "See the rule (2020)", hidden: true })).toHaveAttribute("href", "#beat-7");
+    expect(within(fact("fact-3")).queryByRole("link", { hidden: true })).toBeNull();
+  });
+
+  it("emphasises the historical rule's facts at the basis, the 2020 rule's at the present day, and neither elsewhere", async () => {
+    renderChapter();
+    const emphasis = () => card().querySelector("[data-fact]")?.closest("[data-emphasis]")?.getAttribute("data-emphasis") ?? null;
+    await scrollTo(2);
+    expect(emphasis()).toBeNull();
+    await scrollTo(4);
+    expect(emphasis()).toBe("historical");
+    await scrollTo(5);
+    expect(emphasis()).toBe("historical");
+    await scrollTo(7);
+    expect(emphasis()).toBe("present");
+    await scrollTo(8);
+    expect(emphasis()).toBeNull();
+    // Still mode: nothing is left inline.
+    expect(card().querySelector("[style]")).toBeNull();
+  });
+
+  it("keeps each reason behind a closed disclosure, and puts the chapter's footer straight after the fiction statement", () => {
+    renderChapter();
+    const reason = fact("fact-1").querySelector("details");
+    expect(reason).not.toBeNull();
+    expect(reason).not.toHaveAttribute("open");
+    expect(reason?.querySelector("summary")).toHaveTextContent("Reason");
+    expect(reason).toHaveTextContent("fixture fact 1 reason");
+    const footer = within(card()).getByRole("region", { name: "In this chapter", hidden: true });
+    expect(footer.compareDocumentPosition(fact("fact-1")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("gives each outcome's confidence in words, linked to its section", () => {
+    const c = chapterUsing();
+    renderChapter(c);
+    const footer = within(card()).getByRole("region", { name: "In this chapter", hidden: true });
+    expect(within(footer).getByRole("link", { name: "1930 outcome, confidence: High", hidden: true })).toHaveAttribute("href", "#beat-5");
+    expect(within(footer).getByRole("link", { name: "2020 outcome, confidence: Low", hidden: true })).toHaveAttribute("href", "#beat-7");
+  });
+
+  it("shows on its button how many facts the section in view uses", async () => {
+    renderChapter();
+    const button = () => screen.getByRole("button", { name: /^Person card/ });
+    await scrollTo(2);
+    expect(button()).toHaveAccessibleName("Person card");
+    await scrollTo(4);
+    expect(button()).toHaveAccessibleName("Person card, 1 fact used in this section");
+    await scrollTo(7);
+    expect(button()).toHaveTextContent("2");
+  });
+
+  it("in a chapter that shows no card, has no card, no marks and no confidence anywhere", () => {
+    renderChapter(fixtureChapter(4, { withOutcome: false, showPersonCard: false }));
+    expect(screen.queryByRole("complementary", { name: "Person card", hidden: true })).toBeNull();
+    expect(document.querySelector("[data-era-mark], [data-meter]")).toBeNull();
+  });
+});

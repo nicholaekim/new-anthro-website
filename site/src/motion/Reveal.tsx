@@ -2,7 +2,7 @@
 
 import { createContext, use, useLayoutEffect, useRef, type ReactNode } from "react";
 import { useCover } from "./CoverProvider";
-import { gsap, HOUSE_EASE, SplitText, useGSAP } from "./gsap";
+import { DURATION, gsap, HOUSE_EASE, SplitText, STAGGER, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 
 // What a sequence around a Reveal asks of it: hold its tween paused, let it play, or finish it at
@@ -28,7 +28,8 @@ function applyCue(tween: gsap.core.Tween, cue: RevealCue) {
 // detached). Once back, nothing is clipped by the masks and nothing re-splits later.
 // The set-up runs outside useGSAP's context (ignore), so the tween is reverted once, by the
 // split's own revert, never a second time by the context (see ChangeOfDateMotion).
-export function Reveal({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
+// label: the heading's accessible name, where its visible text is set out over lines.
+export function Reveal({ children, className, id, label }: { children: ReactNode; className?: string; id?: string; label?: string }) {
   const { mode } = useMotionMode();
   const { state: coverState } = useCover();
   const sequenceCue = use(RevealCueContext);
@@ -72,8 +73,8 @@ export function Reveal({ children, className, id }: { children: ReactNode; class
               // paused still renders the start state at once (a from tween renders immediately).
               const t = gsap.from(self.lines, {
                 yPercent: 100,
-                duration: 0.9,
-                stagger: 0.08,
+                duration: DURATION.title,
+                stagger: STAGGER,
                 ease: HOUSE_EASE,
                 paused: true,
                 onComplete: restore,
@@ -94,7 +95,7 @@ export function Reveal({ children, className, id }: { children: ReactNode; class
   );
 
   return (
-    <h1 ref={heading} id={id} data-reveal className={className}>
+    <h1 ref={heading} id={id} aria-label={label} data-reveal className={className}>
       {children}
     </h1>
   );

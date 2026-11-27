@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import EndingPage from "@/app/ending/page";
 import OpeningPage from "@/app/page";
@@ -68,6 +70,21 @@ describe("opening sequence", () => {
     }
   });
 
+  it("in still mode leaves the framing, card, note and Begin as they are, and never hides them from assistive technology", () => {
+    preferReducedMotion();
+    const { container } = render(
+      <MotionProvider>
+        <OpeningPage />
+      </MotionProvider>,
+    );
+    const parts = [...container.querySelectorAll("[data-opening-part]")];
+    expect(parts.map((p) => p.getAttribute("data-opening-part"))).toEqual(["framing", "card", "note", "begin"]);
+    for (const el of parts) {
+      expect(el).not.toHaveAttribute("style");
+      expect(el.closest("[aria-hidden], [inert]")).toBeNull();
+    }
+  });
+
   it("in full mode, not yet seen, offers Skip, which records the opening as seen and keeps the card and title", async () => {
     const user = userEvent.setup();
     render(
@@ -96,6 +113,53 @@ describe("opening sequence", () => {
     expect(screen.getByRole("button", { name: "Skip" })).toBeInTheDocument();
   });
 
+  it("in full mode, when the sequence ends with focus on Skip, moves focus to the title instead of dropping it", async () => {
+    const { gsap } = await import("@/motion/gsap");
+    render(
+      <MotionProvider>
+        <OpeningPage />
+      </MotionProvider>,
+    );
+    const skip = screen.getByRole("button", { name: "Skip" });
+    act(() => skip.focus());
+    expect(document.activeElement).toBe(skip);
+    // Run every tween to its end, as time passing would.
+    act(() => {
+      gsap.globalTimeline.time(gsap.globalTimeline.time() + 10);
+    });
+    expect(screen.queryByRole("button", { name: "Skip" })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("heading", { level: 1 }));
+  });
+
+  it("in full mode, finishes at once when focus is already on the page before the sequence starts", async () => {
+    // Fresh modules, as a page load: what earlier tests stored in module memory (Restart's count)
+    // would otherwise make the client render differ from the server's and replace the page.
+    vi.resetModules();
+    const [{ MotionProvider: Provider }, { default: Opening }] = await Promise.all([import("@/motion/MotionProvider"), import("@/app/page")]);
+    const page = (
+      <Provider>
+        <Opening />
+      </Provider>
+    );
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(page);
+    document.body.append(host);
+    try {
+      const begin = host.querySelector<HTMLAnchorElement>("[data-opening-part='begin'] a, a[data-opening-part='begin']");
+      if (!begin) throw new Error("no Begin link");
+      begin.focus();
+      vi.spyOn(console, "error").mockImplementation(() => {}); // hydration notes from the client-only values
+      await act(async () => {
+        hydrateRoot(host, page);
+      });
+      expect(within(host).queryByRole("button", { name: "Skip" })).toBeNull();
+      expect(document.activeElement).toBe(begin);
+      for (const el of host.querySelectorAll<HTMLElement>("[data-opening-part]")) expect(el.style.opacity).toBe("");
+    } finally {
+      host.remove();
+    }
+  });
+
   it("in full mode, once seen, offers no Skip", () => {
     sessionStorage.setItem(OPENING_SEEN_KEY, "1");
     render(
@@ -115,6 +179,16 @@ describe("opening page", () => {
     expect(container).toHaveTextContent(shown(opening.framing));
     expect(container).toHaveTextContent(shown(opening.siteNote));
     expect(container.querySelector(`a[href="/chapters/${chapters[0].slug}"]`)).not.toBeNull();
+  });
+});
+
+describe("opening page card", () => {
+  it("shows the facts only, each reason in view: no era marks, no rule links, no confidence", () => {
+    const { container } = render(<OpeningPage />);
+    expect(container.querySelector("[data-fact] details")).toBeNull();
+    expect(container.querySelector("[data-fact]")).toHaveTextContent("Reason:");
+    expect(container.querySelectorAll("[data-fact]")).toHaveLength(4);
+    expect(container.querySelector("[data-era-mark], [data-meter], [data-emphasis], a[href^=\"#beat-\"]")).toBeNull();
   });
 });
 
@@ -138,28 +212,30 @@ describe("ending page", () => {
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
-  it("shows each chapter's record with both years, and outcomes only where they exist", () => {
+  it("compares every chapter in the matrix, in order, with a confidence meter only where an outcome exists", () => {
     const { container } = render(<EndingPage />);
-    const records = [...container.querySelectorAll("[data-record]")];
-    expect(records.map((r) => r.getAttribute("data-record"))).toEqual(chapters.map((c) => c.slug));
+    const outcomeRows = [...container.querySelectorAll("[data-view='outcome'] table [data-matrix-row]")];
+    expect(outcomeRows.map((r) => r.getAttribute("data-matrix-row"))).toEqual(chapters.map((c) => c.slug));
     chapters.forEach((c, i) => {
-      expect(records[i]).toHaveTextContent(String(c.historicalYear));
-      expect(records[i]).toHaveTextContent(String(c.presentYear));
-      const hasOutcome = c.outcome !== null || c.present.outcome !== null;
-      expect(records[i].querySelector("[data-outcome]") !== null).toBe(hasOutcome);
+      expect(outcomeRows[i]).toHaveTextContent(String(c.historicalYear));
+      expect(outcomeRows[i]).toHaveTextContent(String(c.presentYear));
+      const meters = (c.outcome ? 1 : 0) + (c.present.outcome ? 1 : 0);
+      expect(outcomeRows[i].querySelectorAll("[data-meter]")).toHaveLength(meters);
     });
-    expect(records.some((r) => r.querySelector("[data-outcome]") === null)).toBe(true);
+    expect(outcomeRows.some((r) => r.querySelector("[data-meter]") === null)).toBe(true);
     expect(container.querySelector("[data-mark]")).toBeNull();
   });
 
-  it("keeps the line breaks of a filled note, as a transcription does", () => {
+  // The bibliography used to be one paragraph with its line breaks kept; it is now read into
+  // groups and one list item per line (src/components/ending/references.ts).
+  it("lists a filled bibliography one entry per line, grouped under its headings, instead of one paragraph", () => {
     const original = ending.bibliography;
-    ending.bibliography = "first line\nsecond line";
+    ending.bibliography = "Louisiana\nfirst line\nsecond line";
     try {
       const { container } = render(<EndingPage />);
-      const note = container.querySelector("#bibliography-heading + p");
-      expect(note?.textContent).toBe("first line\nsecond line");
-      expect(note).toHaveClass("whitespace-pre-line");
+      const section = container.querySelector("#bibliography-heading")?.closest("section");
+      expect(section?.querySelector("summary")?.textContent).toBe("Louisiana");
+      expect([...(section?.querySelectorAll("li") ?? [])].map((li) => li.textContent)).toEqual(["first line", "second line"]);
     } finally {
       ending.bibliography = original;
     }

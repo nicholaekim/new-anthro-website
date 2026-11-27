@@ -1,108 +1,295 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { EraSwitch } from "@/components/EraSwitch";
+import { useSetEraInView } from "@/components/StoryProgress";
 import type { Era } from "@/content/types";
-import { eraFromProgress, scrollTargetForEra } from "./era";
-import { FADE_EASE, gsap, MOTION_QUERY, pinStart, ScrollTrigger, useGSAP } from "./gsap";
+import { eraFromProgress, progressFromYear, scrollForProgress, scrollTargetForEra, yearFromProgress } from "./era";
+import { gsap, HOUSE_EASE, MOTION_QUERY, pinStart, ScrollTrigger, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 
-// Opacity the media layer of the era not shown fades to when the era switch is pressed in place.
-// Only media layers ever get an opacity below 1; they hold no real text.
-const DIMMED_MEDIA = 0.4;
+const ERAS: readonly Era[] = ["historical", "present"];
 
-// Beat 6. intro holds the heading and [data-date-line]; children hold [data-stage] with a media
-// layer ([data-media]) and a caption ([data-caption]) per era. The era switch sits between them,
-// above the stage, so it is never below the fold. Full motion at the breakpoint: the set-up stacks the two
-// media layers at one position (data-overlap) with the captions stacked below, pins for one
-// viewport height and scrubs one timeline (media cross-fade, date line); the era switch then
-// scrolls to the pin's start or end. Otherwise everything stays one after the other and the
-// era switch plays a timed fade of the media layers in place. Captions are never animated.
-export function ChangeOfDateMotion({ presentYear, intro, children }: { presentYear: number; intro: ReactNode; children: ReactNode }) {
-  const { mode } = useMotionMode();
+// clearProps leaves an empty style attribute behind; remove it.
+const tidy = (targets: unknown[]) =>
+  targets.forEach((t) => {
+    if (t instanceof Element && t.getAttribute("style") === "") t.removeAttribute("style");
+  });
+
+// How long a year button takes to carry the comparison across when nothing is pinned.
+const CROSSING_SECONDS = 1.4;
+
+// Near either end of the wipe, the divider's year label on the outer side would run past the
+// frame: hidden while the wipe is within this share of that end (a label and its gap are about
+// 3rem, under a sixth of the narrowest frame).
+const LABEL_EDGE = 0.16;
+
+// Within this of either end, the value is the end.
+const SNAP = 0.001;
+
+// How far ahead of the view the documents start loading: both are fetched before the wipe can
+// uncover the one behind (a lazy image is not fetched while clipped or hidden).
+const PRELOAD_MARGIN = "150% 0px";
+
+// Beat 6. Without its script (and on the server) the two era panels follow one another and none
+// of the controls below exists. Once the script runs, at every width and in both modes, it is one
+// stage: the two documents in one frame, the information panel of the era in view, a date
+// indicator and one control (EraSwitch). Everything follows one value, the progress from the
+// historical date (0) to 2020 (1); see era.ts.
+// - paint(progress) draws it: the wipe and its divider (--wipe and data-wipe on [data-stage],
+//   read by globals.css), the date indicator, and the era in view (the midpoint), which picks
+//   the panel, tells the live region and the person card, and fades the panel in, in full motion.
+//   If focus is inside the panel being hidden, it moves to the range first (inert would drop it).
+//   The live region is quiet while the range has focus: its value text already says the era.
+// - swap: when either document has no image, the documents swap at the midpoint instead of
+//   wiping, so an empty frame's note is never cut in two.
+// - Full motion at the breakpoint: the section pins and scroll scrubs a timeline that paints. The
+//   range follows the scroll position itself (not the scrub's eased copy), so dragging it scrolls
+//   the page to the matching place and the scroll then sets the range to the year it was given;
+//   the year buttons scroll there smoothly.
+// - Otherwise nothing pins: the range paints at once, and the year buttons carry the value
+//   across with a tween in full motion and at once in still mode. Switching Motion or crossing
+//   the breakpoint between two such set-ups keeps the value; leaving the pin returns it to the
+//   historical date, since the page is no longer scrolled through the pin.
+export function ChangeOfDateMotion({
+  historicalYear: from,
+  presentYear: to,
+  intro,
+  eras,
+  swap,
+}: {
+  historicalYear: number;
+  presentYear: number;
+  intro: ReactNode;
+  eras: Record<Era, ReactNode>;
+  swap: boolean;
+}) {
+  const { mode, ready } = useMotionMode();
+  const enhanced = ready;
   const wrapper = useRef<HTMLDivElement>(null);
-  const trigger = useRef<ScrollTrigger | null>(null);
-  const fade = useRef<((era: Era) => void) | null>(null);
-  const [scrubbed, setScrubbed] = useState(false);
-  const [scrolledEra, setScrolledEra] = useState<Era>("historical");
-  const [chosenEra, setChosenEra] = useState<Era>("historical");
+  const stage = useRef<HTMLDivElement>(null);
+  const date = useRef<HTMLParagraphElement>(null);
+  const pin = useRef<ScrollTrigger | null>(null);
+  const cross = useRef<((progress: number) => void) | null>(null);
+  const stopCrossing = useRef<(() => void) | null>(null);
+  const progress = useRef(0);
+  const painted = useRef<Era>("historical");
+  const [year, setYear] = useState(from);
+  const [eraInView, setEraInView] = useState<Era>("historical");
+  const [message, setMessage] = useState("");
+  const setStoryEra = useSetEraInView();
+
+  function paint(raw: number) {
+    // On the stage, not the wrapper: the pin writes and restores the wrapper's own inline style.
+    const el = stage.current;
+    if (!el) return;
+    // A scrub or a tween can stop a hair short of an end; that would leave the divider at the
+    // frame's edge.
+    const p = raw < SNAP ? 0 : raw > 1 - SNAP ? 1 : raw;
+    progress.current = p;
+    // At the start nothing is written inline: the page at rest carries no style attribute.
+    if (p > 0) el.style.setProperty("--wipe", String(p));
+    else el.style.removeProperty("--wipe");
+    if (el.style.length === 0) el.removeAttribute("style");
+    el.dataset.wipe = p <= 0 ? "start" : p >= 1 ? "end" : "between";
+    if (p > 0 && p < LABEL_EDGE) el.dataset.wipeEdge = "start";
+    else if (p < 1 && p > 1 - LABEL_EDGE) el.dataset.wipeEdge = "end";
+    else delete el.dataset.wipeEdge;
+    if (date.current) date.current.textContent = String(yearFromProgress(p, from, to));
+    const era = eraFromProgress(p);
+    if (era !== painted.current) {
+      const leaving = el.querySelector(`[data-era="${painted.current}"]`);
+      painted.current = era;
+      const range = wrapper.current?.querySelector<HTMLInputElement>("[data-era-control] input");
+      if (range && leaving?.contains(document.activeElement)) range.focus({ preventScroll: true });
+      setEraInView(era);
+      setMessage(range && document.activeElement === range ? "" : `Now showing ${era === "present" ? to : from}.`);
+    }
+  }
+
+  // Unpinned, the range and the painting are the same value.
+  function apply(p: number) {
+    paint(p);
+    setYear(yearFromProgress(p, from, to));
+  }
 
   useGSAP(
     (context) => {
       const el = wrapper.current;
-      const stage = el?.querySelector("[data-stage]");
-      if (!el || !stage) return;
-      const historical = '[data-media="historical"]';
-      const present = '[data-media="present"]';
-      // useGSAP records the matchMedia and reverts it on a mode change, once. Its set-up runs
-      // outside useGSAP's context (ignore): run inside, its context became a child whose tweens
-      // were reverted twice, and the second revert wrote the fromTo start values back inline
-      // (traced in Chrome). A media-query change reverts it once, the same way.
+      if (!el || !enhanced) return;
+      // Copies the matchMedia pattern of the other pins: recorded by useGSAP, set up outside its
+      // context (ignore), reverted once on a mode change, a breakpoint change or unmount.
       const mm = gsap.matchMedia(el);
-      // Runs at every width ("all") and re-runs on every crossing of the breakpoint, so a timed
-      // fade never outlives its layout and the scrubbed set-up exists only under MOTION_QUERY.
       context.ignore(() =>
         mm.add({ all: "all", wide: MOTION_QUERY }, (media) => {
-          if (mode === "full" && media.conditions?.wide) {
-            stage.setAttribute("data-overlap", "");
-            const sync = (self: ScrollTrigger) => setScrolledEra(eraFromProgress(self.progress));
+          const pinned = mode === "full" && !!media.conditions?.wide;
+          if (pinned) {
+            // The scroll position sets the value from here on; it starts from the historical date.
+            apply(0);
+            el.setAttribute("data-pinned", "");
+            const value = { p: 0 };
+            const follow = (self: ScrollTrigger) => setYear(yearFromProgress(self.progress, from, to));
             const tl = gsap.timeline({
               scrollTrigger: {
                 trigger: el,
                 pin: true,
                 start: pinStart,
-                end: "+=100%",
-                scrub: 0.5,
-                onUpdate: sync,
-                onRefresh: sync,
+                end: "+=150%",
+                scrub: 0.6,
+                onUpdate: follow,
+                onRefresh: follow,
               },
             });
-            tl.fromTo("[data-date-line]", { scaleX: 0, transformOrigin: "left center" }, { scaleX: 1, ease: "none", duration: 1 }, 0)
-              .fromTo(historical, { opacity: 1 }, { opacity: 0, ease: "none", duration: 0.4 }, 0.3)
-              .fromTo(present, { opacity: 0 }, { opacity: 1, ease: "none", duration: 0.4 }, 0.3);
-            trigger.current = tl.scrollTrigger ?? null;
-            setScrubbed(true);
-          } else {
-            fade.current = media.add("fade", (era: Era) => {
-              const tween = { duration: 0.6, ease: FADE_EASE, overwrite: "auto" } as const;
-              gsap.to(era === "present" ? present : historical, { ...tween, opacity: 1 });
-              gsap.to(era === "present" ? historical : present, { ...tween, opacity: DIMMED_MEDIA });
-            }) as (era: Era) => void;
+            tl.fromTo(value, { p: 0 }, { p: 1, ease: "none", duration: 1, onUpdate: () => paint(value.p) });
+            pin.current = tl.scrollTrigger ?? null;
+          } else if (mode === "full") {
+            let running: gsap.core.Tween | null = null;
+            stopCrossing.current = () => running?.kill();
+            cross.current = media.add("cross", (target: number) => {
+              running?.kill();
+              const value = { p: progress.current };
+              running = gsap.to(value, {
+                p: target,
+                duration: CROSSING_SECONDS * Math.abs(target - value.p),
+                ease: HOUSE_EASE,
+                onUpdate: () => apply(value.p),
+              });
+            }) as (progress: number) => void;
           }
           return () => {
-            stage.removeAttribute("data-overlap");
-            trigger.current = null;
-            fade.current = null;
-            setScrubbed(false);
-            setScrolledEra("historical");
-            setChosenEra("historical");
+            el.removeAttribute("data-pinned");
+            pin.current = null;
+            cross.current = null;
+            stopCrossing.current = null;
+            if (pinned) apply(0);
           };
         }),
       );
     },
-    { scope: wrapper, dependencies: [mode], revertOnUpdate: true },
+    { scope: wrapper, dependencies: [mode, enhanced], revertOnUpdate: true },
   );
 
-  const shown = scrubbed ? scrolledEra : chosenEra;
+  // In full motion the panel coming into view rises a little and fades in; the other is hidden at once.
+  const faded = useRef<Era>("historical");
+  useGSAP(
+    () => {
+      const before = faded.current;
+      faded.current = eraInView;
+      if (mode !== "full" || before === eraInView) return;
+      const tween = gsap.fromTo(
+        `[data-era="${eraInView}"] [data-info]`,
+        { opacity: 0, y: 8 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.5,
+          ease: HOUSE_EASE,
+          clearProps: "opacity,transform",
+          onComplete: () => tidy(tween.targets()),
+        },
+      );
+      // Reverting (a mode change, or the era changing again) also leaves nothing inline.
+      return () => tidy(tween.targets());
+    },
+    { scope: wrapper, dependencies: [eraInView, mode], revertOnUpdate: true },
+  );
 
-  function onPress() {
-    const next: Era = shown === "present" ? "historical" : "present";
-    const st = trigger.current;
+  // Both documents load once the stage nears the view. They stay lazy in the markup: without
+  // scripts they follow one another and load as they are reached; eager, Next would preload both
+  // with the page, and Chrome reports the preloads as unused.
+  useEffect(() => {
+    const el = stage.current;
+    if (!enhanced || !el) return;
+    const load = () => el.querySelectorAll<HTMLImageElement>("[data-document] img").forEach((img) => (img.loading = "eager"));
+    if (typeof IntersectionObserver === "undefined") return load();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        load();
+        observer.disconnect();
+      },
+      { rootMargin: PRELOAD_MARGIN },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [enhanced]);
+
+  // The era in view is passed to the person card while enhanced.
+  useEffect(() => {
+    if (enhanced) setStoryEra(eraInView);
+  }, [enhanced, eraInView, setStoryEra]);
+  useEffect(() => () => setStoryEra(null), [setStoryEra]);
+
+  function onYear(y: number) {
+    setYear(y);
+    const p = progressFromYear(y, from, to);
+    const st = pin.current;
     if (st) {
-      // Scroll drives the timeline; the switch only moves the page to where that era is shown.
-      window.scrollTo(0, scrollTargetForEra(st.start, st.end, next));
+      window.scrollTo({ top: scrollForProgress(p, st.start, st.end), behavior: "instant" });
       return;
     }
-    setChosenEra(next);
-    fade.current?.(next);
+    stopCrossing.current?.();
+    paint(p);
+  }
+
+  function onEra(era: Era) {
+    const st = pin.current;
+    if (st) {
+      window.scrollTo({ top: scrollTargetForEra(st.start, st.end, era), behavior: "smooth" });
+      return;
+    }
+    const p = era === "present" ? 1 : 0;
+    if (cross.current) cross.current(p);
+    else apply(p);
   }
 
   return (
-    <section data-beat="6" id="beat-6" aria-labelledby="beat-6-heading" data-era-shown={shown} className="beat">
-      <div ref={wrapper} data-change-of-date className="flex flex-col gap-6">
-        {intro}
-        <EraSwitch presentYear={presentYear} pressed={shown === "present"} onPress={onPress} />
-        {children}
+    <section data-beat="6" id="beat-6" aria-labelledby="beat-6-heading" className="beat">
+      <div ref={wrapper} data-change-of-date data-enhanced={enhanced ? "" : undefined} className="flex flex-col gap-5">
+        <div className="flex items-end justify-between gap-4">
+          {intro}
+          {enhanced && (
+            <p ref={date} aria-hidden data-date-indicator className="font-title font-light leading-none tabular-nums">
+              {from}
+            </p>
+          )}
+        </div>
+        {/* The rule under the heading; drawn as the section enters, like the others (SectionReveals). */}
+        <div aria-hidden data-date-line data-rule />
+        {enhanced && (
+          <EraSwitch from={from} to={to} year={year} eraInView={eraInView} onYear={onYear} onEra={onEra} />
+        )}
+        {/* data-enter: the stage rises in as the section enters, in full motion (SectionReveals). */}
+        <div ref={stage} data-stage data-swap={swap ? "" : undefined} data-enter className="flex flex-col gap-14">
+          {ERAS.map((era) => {
+            const hidden = enhanced && era !== eraInView;
+            return (
+              <div
+                key={era}
+                data-era={era}
+                data-in-view={enhanced ? String(!hidden) : undefined}
+                aria-hidden={hidden || undefined}
+                inert={hidden}
+                className="flex flex-col gap-5"
+              >
+                {eras[era]}
+              </div>
+            );
+          })}
+          {enhanced && (
+            <div aria-hidden data-divider>
+              <div data-divider-line>
+                <span data-divider-label="present">{to}</span>
+                <span data-divider-label="historical">{from}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        {enhanced && (
+          <p aria-live="polite" className="sr-only">
+            {message}
+          </p>
+        )}
       </div>
     </section>
   );

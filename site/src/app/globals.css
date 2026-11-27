@@ -38,16 +38,27 @@
 }
 
 @layer base {
+  /* Heights these paddings, the pins below and the chapter's bottom padding (ChapterPage, 7rem)
+     depend on: the header is 2.5rem tall, 3.75rem on touch; the story bar (BeatTicks) is one
+     row, 2rem tall, 3.25rem on touch, at every width. */
   html {
     scroll-behavior: auto;
-    /* Keeps focused elements and #beat-N targets clear of the sticky header and the beat bar. */
+    /* Keeps focused elements and #beat-N targets clear of the sticky header and the story bar. */
     scroll-padding-top: 4rem;
     scroll-padding-bottom: 4rem;
   }
 
   @media (pointer: coarse) {
     html {
-      scroll-padding-bottom: 7rem;
+      scroll-padding-bottom: 5.25rem;
+    }
+  }
+  /* A touch screen 1024px and wider: the 3.75rem header needs more than 4rem above a target.
+     (Narrower, the rules after the person card's emphasis below allow for its button too.) The
+     person card's column ends above the 3.25rem story bar: see [data-person-card] below. */
+  @media (min-width: 1024px) and (pointer: coarse) {
+    html {
+      scroll-padding-top: 4.5rem;
     }
   }
 
@@ -159,6 +170,9 @@
     0 1px 2px rgb(0 0 0 / 0.35),
     0 22px 44px -22px rgb(0 0 0 / 0.75);
 
+  /* A scroll area on paper (the close view and its side panel) gets a scrollbar to match. */
+  scrollbar-color: color-mix(in srgb, var(--color-ink) 35%, transparent) transparent;
+
   & :focus-visible {
     outline-color: var(--color-interface-deep);
   }
@@ -188,13 +202,18 @@
   }
 }
 
-/* The opening of a section: number, heading, then a thin rule. */
+/* The opening of a section: number, heading, then a thin rule ([data-rule], its own element so a
+   section reveal can draw it). 1rem above the rule and its 1px, as when it was a border. */
 @utility opening {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--hair);
+}
+[data-rule] {
+  display: block;
+  height: 1px;
+  background: var(--hair);
+  transform-origin: left;
 }
 
 /* A quiet text button: underlined, solid on hover, outlined while pressed. Changes are instant.
@@ -224,20 +243,96 @@
 html[data-motion-pending] [data-reveal] {
   visibility: hidden;
 }
+/* The opening page's text and controls that its sequence brings in. While the mark is there they
+   are see-through only, never hidden: a screen reader reads them and the keyboard reaches them
+   from the first frame. */
+html[data-motion-pending] [data-opening-part] {
+  opacity: 0;
+}
+/* Printed, anything a reveal or a sequence had not yet brought in is shown, the decoration too. */
+@media print {
+  [data-opening-part],
+  [data-opening-light],
+  [data-opening-bar],
+  [data-chapter-figures],
+  [data-chapter-number],
+  [data-chapter-rule],
+  [data-entering] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
 
-/* Below the breakpoint the person card's fixed button sits under the header: keep focused
-   elements and #beat-N targets clear of both. */
+/* Motion tokens shared with src/motion/gsap.ts (HOUSE_CURVE, DURATION.quick): a test keeps them equal. */
+:root {
+  --ease-house: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-quick: 150ms;
+}
+
+/* Hover and focus feedback eases, briefly, in full motion only (data-motion on html is set before
+   first paint); in still mode every change is instant. Only colour, border and shadow ease: the
+   motion layer animates opacity and transform on some links, and a transition would fight it. */
+html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: var(--duration-quick);
+  transition-timing-function: var(--ease-house);
+}
+/* A document sheet lifts a little, by its shadow alone, under the pointer or with focus inside. */
+@media (hover: hover) {
+  [data-item]:hover {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.4),
+      0 28px 52px -22px rgb(0 0 0 / 0.85);
+  }
+}
+[data-item]:has(:focus-visible) {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 28px 52px -22px rgb(0 0 0 / 0.85);
+}
+
+/* Below the breakpoint the person card's fixed button and the place-and-date tag sit under the
+   header: keep focused elements and #beat-N targets clear of both. */
 @media (max-width: 1023.98px) {
   html {
     scroll-padding-top: 4.5rem;
   }
 }
-/* On a narrow touch screen the beat bar's 44px targets wrap it to up to three rows (8.75rem
-   measured at 375 and 320 wide); keep the bottom padding clear of it too. */
 @media (max-width: 1023.98px) and (pointer: coarse) {
   html {
     scroll-padding-top: 7rem;
-    scroll-padding-bottom: 9.5rem;
+  }
+}
+
+/* The person card's emphasis (CardEmphasis): a bar at the left edge and a stronger label on
+   the facts the rule in view uses, and that era's marks in bold. Elsewhere no bar is drawn.
+   CardEmphasis tweens the bar's scale in full motion and leaves no inline style. */
+[data-fact-bar] {
+  transform: scaleY(0);
+  transform-origin: top;
+}
+:is([data-emphasis="historical"] [data-uses-historical], [data-emphasis="present"] [data-uses-present]) {
+  & [data-fact-bar] {
+    transform: none;
+  }
+  & [data-fact-label] {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+}
+:is([data-emphasis="historical"] [data-era-mark="historical"], [data-emphasis="present"] [data-era-mark="present"]) {
+  font-weight: 600;
+}
+
+/* In a chapter, a fact's reason opens from a small toggle (PersonCardView). In the card's
+   column, with a fine pointer, the toggle sits at the right of the fact's label row, so a closed
+   reason takes no room and the card fits a laptop's screen; opened, the reason follows the
+   fact's other lines. On touch its 44px target would cover the value, so it keeps its own row. */
+@media (min-width: 1024px) and (pointer: fine) {
+  [data-reason] > summary {
+    position: absolute;
+    top: 0.125rem;
+    right: 0;
   }
 }
 
@@ -247,16 +342,40 @@ html[data-motion-pending] [data-reveal] {
   [data-person-card] {
     display: block;
     position: fixed;
-    inset: 4rem auto 3rem 0;
-    width: 18rem;
+    /* Between the header (2.5rem) and the story bar (2rem), with 0.5rem to spare at each end. */
+    inset: 3rem auto 2.5rem 0;
+    width: 21rem;
     /* The browser's popover style sets height: fit-content, which would let a long card run
        past the bottom of the view with nothing to scroll. auto lets inset set the height. */
     height: auto;
     max-height: none;
     margin: 0;
-    padding: 1rem;
+    padding: 0.5rem 0.75rem;
     border: 0;
     background: transparent;
+    /* A scrollbar that comes and goes would rewrap the card's text: keep its room. */
+    scrollbar-gutter: stable;
+  }
+}
+/* On touch the header is 3.75rem and the story bar 3.25rem tall: the card's column clears both. */
+@media (min-width: 1024px) and (pointer: coarse) {
+  [data-person-card] {
+    top: 4rem;
+    bottom: 3.5rem;
+  }
+}
+
+/* Beat 1, the title page, fills the view below the header (2.5rem, 3.75rem on touch), and its
+   content note ends 2rem above the story bar (2rem, 3.25rem on touch), so the note is whole in
+   the first frame. Unlayered, so it overrides the beat utility's padding. */
+[data-beat="1"] {
+  min-height: calc(100svh - 2.5rem);
+  padding-bottom: 4rem;
+}
+@media (pointer: coarse) {
+  [data-beat="1"] {
+    min-height: calc(100svh - 3.75rem);
+    padding-bottom: 5.25rem;
   }
 }
 
@@ -283,58 +402,311 @@ html[data-motion-pending] [data-reveal] {
 }
 
 /* While a pin holds beat 2 or beat 6 under the header, 1rem keeps the section number off the
-   header's hairline. Beat 2 sets it on its own column (PlacePhotograph). Inside beat 6's fixed
-   height it is taken from the media row. */
+   header's hairline. Beat 2 sets it on its own column (PlacePhotograph). */
 [data-change-of-date] {
   padding-top: 1rem;
 }
 
-/* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the
-   two media layers at one position for the cross-fade and stacks both captions below them.
-   The pinned wrapper is then exactly the height of the view between the header (2.5rem, 3.75rem
-   on touch) and the beat bar (2rem, 3.25rem on touch), and the media row takes what the heading,
-   date line, era switch and captions leave, so a tall image is scaled down to fit and nothing in
-   beat 6 is out of view during the pin. Layout only: no starting state. */
-[data-change-of-date]:has(> [data-stage][data-overlap]) {
-  height: calc(100svh - 4.5rem);
+/* Beat 6, the comparison between the two dates (ChangeOfDateMotion). Without its script the two
+   era panels follow one another and none of this applies. Once it runs ([data-enhanced]) the
+   stage is one grid: the two documents share one cell, the present one on top, cut back to the
+   left share --wipe (0 to 1, set by the script) of its width; the two information panels share
+   another, and only the era in view is shown. The divider marks the cut and moves by transform. */
+[data-date-indicator] {
+  font-size: clamp(2.75rem, 2rem + 3vw, 4.5rem);
+  color: var(--color-paper);
+}
+[data-enhanced] [data-stage] {
+  --wipe: 0;
+  display: grid;
+  grid-template-areas: "doc" "info";
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.75rem;
+}
+@media (min-width: 1024px) {
+  [data-enhanced] [data-stage] {
+    grid-template-areas: "doc info";
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem;
+  }
+}
+[data-enhanced] [data-stage] > [data-era] {
+  display: contents;
+}
+/* The year heading of each panel is still read; the date indicator shows it. */
+[data-enhanced] [data-era-year] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+[data-enhanced] [data-document] {
+  grid-area: doc;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+[data-enhanced] [data-era="present"] > [data-document] {
+  clip-path: inset(0 calc((1 - var(--wipe)) * 100%) 0 0);
+}
+[data-enhanced] [data-info] {
+  grid-area: info;
+}
+[data-enhanced] [data-in-view="false"] > [data-info] {
+  visibility: hidden;
+}
+[data-divider] {
+  grid-area: doc;
+  position: relative;
+  overflow: hidden;
+  pointer-events: none;
+}
+[data-divider-line] {
+  position: absolute;
+  inset: 0;
+  transform: translateX(calc(var(--wipe) * 100%));
+  border-left: 2px solid var(--color-interface);
+  margin-left: -1px;
+}
+[data-stage]:not([data-wipe="between"]) > [data-divider] {
+  visibility: hidden;
+}
+/* Swapped instead of wiped (a document without an image): no cut and no divider; only the
+   document of the era in view is shown, whole. */
+[data-enhanced] [data-stage][data-swap] [data-era="present"] > [data-document] {
+  clip-path: none;
+}
+[data-enhanced] [data-stage][data-swap] [data-in-view="false"] > [data-document],
+[data-stage][data-swap] > [data-divider] {
+  visibility: hidden;
+}
+/* Near either end, the label on the outer side of the divider would run past the frame. */
+[data-wipe-edge="start"] [data-divider-label="present"],
+[data-wipe-edge="end"] [data-divider-label="historical"] {
+  visibility: hidden;
+}
+[data-divider-label] {
+  position: absolute;
+  top: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  background: var(--color-raised);
+  color: var(--color-paper);
+  font-family: var(--font-interface), system-ui, sans-serif;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  letter-spacing: 0.06em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+[data-divider-label="present"] {
+  right: calc(100% + 0.25rem);
+}
+[data-divider-label="historical"] {
+  left: 0.25rem;
+}
+/* Unpinned, a document is kept short enough to see the control and most of the page at once:
+   contained in its box, never cropped; the mat's edge is the keyline. */
+[data-enhanced]:not([data-pinned]) [data-document] img {
+  width: 100%;
+  height: auto;
+  max-height: 60svh;
+  object-fit: contain;
+  outline: none;
+}
+/* The mount fills its document's share of the stage, its content centred. */
+[data-enhanced] [data-document] > [data-mount] {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+/* An empty frame shows its era's year, on the side that era keeps during the wipe (2020 comes
+   in from the left), so both years stay whole while the divider is between them. */
+[data-frame-year] {
+  display: none;
+}
+[data-enhanced] [data-frame-year] {
+  display: block;
+  text-align: right;
+}
+[data-enhanced] [data-era="present"] [data-frame-year] {
+  text-align: left;
+}
+/* The range: native, in the interface colour, as tall as a target. */
+.era-range {
+  accent-color: var(--color-interface);
+  min-height: 24px;
+  cursor: pointer;
 }
 @media (pointer: coarse) {
-  [data-change-of-date]:has(> [data-stage][data-overlap]) {
+  .era-range {
+    min-height: 44px;
+  }
+}
+
+/* Pinned (full motion at the breakpoint; the script adds data-pinned before the pin is made):
+   the wrapper is exactly the height of the view between the header (2.5rem, 3.75rem on touch)
+   and the story bar (2rem, 3.25rem on touch). The stage takes what the heading, rule and control
+   leave; a tall document is scaled down to fit, never cropped. Nothing scrolls inside the pin:
+   the panel is shortened to fit instead, its quotation clamped to a few lines (the whole of it
+   stays in the markup, and is read in full) with a link to the section that quotes it in full,
+   which holds its citation too. Measured at 1280 by 800 for all four chapters, both eras.
+   Layout only: no starting state. */
+[data-change-of-date][data-pinned] {
+  height: calc(100svh - 4.5rem);
+  gap: 1rem;
+}
+@media (pointer: coarse) {
+  [data-change-of-date][data-pinned] {
     height: calc(100svh - 7rem);
   }
 }
-[data-stage][data-overlap] {
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto auto;
+[data-pinned] [data-stage] {
   flex: 1 1 0;
   min-height: 0;
+  grid-template-rows: minmax(0, 1fr);
 }
-[data-stage][data-overlap] > [data-media] {
-  grid-area: 1 / 1;
-  display: flex;
-  flex-direction: column;
+[data-pinned] [data-document] {
   min-height: 0;
 }
-[data-stage][data-overlap] > [data-media] > [data-mount] {
+[data-pinned] [data-document] > [data-mount] {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* As in beat 2, the image box fills the mat and the picture is contained in it, so it has a size
+   before it loads (a lazy image without one is never fetched); the mat's edge is the keyline. */
+[data-pinned] [data-document] img {
+  width: 100%;
   height: 100%;
+  object-fit: contain;
+  outline: none;
 }
-[data-stage][data-overlap] > [data-media] img {
-  width: auto;
-  height: auto;
-  max-height: 100%;
-  margin-inline: auto;
+/* The document takes the wide column and nearly all of its height: the heading row, the date
+   and the gaps are tighter, and the sheet and mat have thin margins, so the scan is as large as
+   the view allows (at 1280 by 800 a portrait page is drawn about 360 to 410px wide and 577px
+   tall: the height is what limits it). The panel takes the narrow column, tighter too. */
+[data-change-of-date][data-pinned] {
+  gap: 0.5rem;
+  padding-top: 0.5rem;
 }
-/* Still, or below the breakpoint, the eras follow one another (media, caption, media, caption):
-   each caption sits close under its own image, with room before the next. */
-[data-stage]:not([data-overlap]) > [data-caption] {
-  margin-top: -0.5rem;
+[data-pinned] [data-date-indicator] {
+  font-size: 2.75rem;
 }
-[data-stage]:not([data-overlap]) > [data-caption]:not(:last-child) {
-  margin-bottom: 1.5rem;
+[data-pinned] [data-stage] {
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.5rem;
 }
-[data-stage][data-overlap] > [data-caption="historical"] {
-  grid-row: 2;
+[data-pinned] [data-document] {
+  padding: 0.5rem;
 }
-[data-stage][data-overlap] > [data-caption="present"] {
-  grid-row: 3;
+[data-pinned] [data-document] > [data-mount]:not([data-empty-mount]) {
+  padding: 0.25rem;
+}
+[data-pinned] [data-info] {
+  min-height: 0;
+  gap: 0.5rem;
+}
+[data-pinned] [data-info] > * {
+  padding-top: 0.5rem;
+}
+[data-pinned] [data-info] > :first-child {
+  padding-top: 0;
+}
+[data-pinned] [data-rule-quote] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+/* A translated rule shows both texts: the opening lines of each. */
+[data-pinned] [data-language-part] [data-rule-quote] {
+  -webkit-line-clamp: 2;
+}
+[data-full-rule],
+[data-pinned] [data-rule-citation] {
+  display: none;
+}
+[data-pinned] [data-full-rule] {
+  display: inline-flex;
+}
+
+/* While the close view (a modal dialog) is open the page behind it does not scroll. The gutter
+   is kept, so the page does not shift sideways when its scrollbar goes. */
+html {
+  scrollbar-gutter: stable;
+}
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* The close view's highlights (ViewerStage). Each outline is a button placed over its region from
+   the same view the page is drawn with; the line is drawn just outside the region so it never
+   covers the passage: a thin line, so the neighbouring lines stay readable at the whole page,
+   and three times heavier when chosen (shape, not only tone). The number sits just outside the
+   region's left edge, in the margin, so it covers neither the document's own paragraph numbers
+   nor a neighbouring passage. Hiding the outlines removes them altogether. */
+.viewer-outline [data-outline-line] {
+  position: absolute;
+  inset: -3px;
+  border: 1px solid var(--color-interface-deep);
+  pointer-events: none;
+}
+.viewer-outline[aria-current="true"] [data-outline-line] {
+  inset: -4px;
+  border: 3px solid var(--color-interface-deep);
+}
+.viewer-outline [data-outline-number] {
+  position: absolute;
+  right: calc(100% + 6px);
+  top: -4px;
+  min-width: 1.125rem;
+  padding: 0 0.25rem;
+  background: var(--color-interface-deep);
+  color: var(--color-paper);
+  font-family: var(--font-interface), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.viewer-outline:focus-visible {
+  outline-offset: 6px;
+}
+/* An annotation that discusses the chosen highlight: a bar at its left edge and a label. */
+.viewer-annotation[aria-current="true"] {
+  border-left: 3px solid var(--color-interface-deep);
+  margin-left: -3px;
+}
+
+/* The ending's comparison matrix (ComparisonMatrix): every view is a table from 768px wide and
+   one card per place below that, the same cells in both. */
+[data-matrix-table] {
+  display: none;
+}
+@media (min-width: 768px) {
+  [data-matrix-table] {
+    display: table;
+  }
+  [data-matrix-cards] {
+    display: none;
+  }
+}
+/* One date's column emphasised (MatrixViews): a bar beside its cells and its header in bold;
+   the other column's text in the secondary colour, which keeps 4.5:1 on the sheet. */
+:is([data-matrix][data-emphasis="historical"], [data-matrix][data-emphasis="present"]) [data-era] {
+  color: var(--soft);
+}
+:is([data-matrix][data-emphasis="historical"] [data-era="historical"], [data-matrix][data-emphasis="present"] [data-era="present"]) {
+  color: var(--color-ink);
+  box-shadow: inset 3px 0 0 var(--color-ink-soft);
+  &:is(th) {
+    font-weight: 700;
+  }
 }

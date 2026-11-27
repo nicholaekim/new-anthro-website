@@ -1,8 +1,11 @@
 import type { Chapter, PersonCard } from "@/content/types";
+import type { TitleCard } from "@/motion/cover";
+import { SectionReveals } from "@/motion/SectionReveals";
 import { Backdrop } from "./Backdrop";
 import { BeatTicks } from "./BeatTicks";
 import { PlaceDateTag } from "./PlaceDateTag";
 import { StartAtTop } from "./StartAtTop";
+import { StoryProgressProvider } from "./StoryProgress";
 import { BasisBeat } from "./beats/BasisBeat";
 import { ChangeOfDate } from "./beats/ChangeOfDate";
 import { ChapterCard } from "./beats/ChapterCard";
@@ -16,49 +19,52 @@ export function ChapterPage({
   chapter,
   person,
   next,
+  position,
 }: {
   chapter: Chapter;
   person: PersonCard;
-  next: { href: string; label: string };
+  next: { href: string; label: string; card?: TitleCard };
+  // Which chapter this is, for the tag beside the place and date ("Chapter 1 of 4").
+  position?: { number: number; count: number };
 }) {
   // No person card at all (no column, no button, no facts listed) when the chapter does not show it.
   const card = chapter.showPersonCard ? person : null;
   const historical = chapter.changeOfDate && chapter.items.find((i) => i.id === chapter.changeOfDate?.historicalItemId);
   const instrument = chapter.present.instrument;
   const present = instrument && instrument.id === chapter.changeOfDate?.presentItemId ? instrument : null;
-  const used = [...(chapter.basis?.cardFactsUsed ?? []), ...(chapter.present.basis?.cardFactsUsed ?? [])];
   const beats = [1, 2, 3, chapter.basis && 4, chapter.outcome && 5, historical && present && 6, 7, 8].filter(
     (n): n is number => typeof n === "number",
   );
 
   return (
-    // The bottom padding keeps the last content clear of the fixed beat bar, which wraps to up to
-    // three rows (8.75rem) on a narrow touch screen.
-    <div
-      data-chapter={chapter.slug}
-      className={`grid pb-28 max-lg:pointer-coarse:pb-[9.5rem] ${card ? "lg:grid-cols-[18rem_1fr]" : ""}`}
+    // The bottom padding (7rem) keeps the last content clear of the fixed story bar, one row of
+    // 2rem, 3.25rem on touch (BeatTicks). Keyed by the chapter, so moving to another chapter
+    // starts its progress afresh and measures it again.
+    <StoryProgressProvider
+      key={chapter.slug}
+      slug={chapter.slug}
+      beats={beats}
+      className={`grid pb-28 ${card ? "lg:grid-cols-[21rem_1fr]" : ""}`}
     >
       <StartAtTop />
-      <main className={card ? "lg:col-start-2" : undefined}>
-        <ChapterCard chapter={chapter} />
+      <SectionReveals className={card ? "lg:col-start-2" : undefined}>
+        <ChapterCard chapter={chapter} number={position?.number} />
         <PlacePhotograph chapter={chapter} />
         <ItemsBeat items={chapter.items} />
         {chapter.basis && <BasisBeat basis={chapter.basis} person={card} />}
         {chapter.outcome && <OutcomeBeat outcome={chapter.outcome} />}
-        {historical && present && (
-          <ChangeOfDate
-            historical={historical}
-            present={present}
-            historicalYear={chapter.historicalYear}
-            presentYear={chapter.presentYear}
-          />
-        )}
+        {historical && present && <ChangeOfDate chapter={chapter} historical={historical} present={present} />}
         <PresentDay chapter={chapter} person={card} />
         <CloseBeat next={next} />
-      </main>
-      <Backdrop person={card} used={used} />
-      <PlaceDateTag place={chapter.place} historicalYear={chapter.historicalYear} presentYear={chapter.presentYear} />
+      </SectionReveals>
+      <Backdrop person={card} chapter={chapter} />
+      <PlaceDateTag
+        place={chapter.place}
+        historicalYear={chapter.historicalYear}
+        presentYear={chapter.presentYear}
+        position={position}
+      />
       <BeatTicks beats={beats} />
-    </div>
+    </StoryProgressProvider>
   );
 }

@@ -5,7 +5,15 @@ import { SlotText } from "./SlotText";
 
 // The frame every item sits in: a mat with a thin keyline around the image. Without an image it
 // is an empty mount holding the gap note, or "No image" when there is none; never a stand-in picture.
-export function Mount({ image, alt, gapNote = null }: { image: ImageRef | null; alt: Text; gapNote?: Text | null }) {
+export function Mount({
+  image,
+  alt,
+  gapNote = null,
+}: {
+  image: ImageRef | null;
+  alt: Text;
+  gapNote?: Text | null;
+}) {
   if (image) {
     return (
       <div data-mount className="mat">

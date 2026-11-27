@@ -73,7 +73,7 @@ function expectNoInlineStyles(root: Element) {
 function withImages(): Chapter {
   const c = fixtureChapter();
   c.photograph.image = { src: "/fixture-photo.jpg", width: 800, height: 600 };
-  c.items[0].image = { src: "/fixture-item.jpg", width: 800, height: 1000, largeSrc: "/fixture-item-large.jpg" };
+  c.items[0].image = { src: "/fixture-item.jpg", width: 800, height: 1000 };
   if (c.present.instrument) c.present.instrument.image = { src: "/fixture-instrument.jpg", width: 800, height: 1000 };
   return c;
 }
@@ -111,11 +111,16 @@ describe("chapter pages", () => {
     expect(images.length).toBeGreaterThanOrEqual(6);
     for (const img of images) expect(img).toHaveAttribute("alt");
 
+    // Beat 6's empty frames hold their gap note or "No image" as text, so they are not decoration.
     const decorative = [
-      ...container.querySelectorAll("[data-layer], [data-date-line], [data-mark], [data-tick] > span:not(.sr-only)"),
-      ...[...container.querySelectorAll("[data-media]")].filter((m) => !m.querySelector("img")),
+      ...container.querySelectorAll(
+        "[data-place-figures], [data-depth], [data-chapter-figures], [data-chapter-number], [data-rule], [data-date-line], [data-date-indicator], [data-divider], [data-mark], [data-tick] > span:not(.sr-only)",
+      ),
     ];
-    expect(container.querySelectorAll("[data-layer]")).toHaveLength(3);
+    // Beat 2's side column: the year and the place set large, as type only.
+    expect(container.querySelectorAll("[data-place-figures] [data-depth]")).toHaveLength(2);
+    expect(container.querySelector("[data-place-figures] img")).toBeNull();
+    expect(container.querySelector("[data-chapter-figures]")).toHaveTextContent(String(c.historicalYear));
     expect(container.querySelector("[data-date-line]")).not.toBeNull();
     expect(container.querySelector("[data-mark]")).not.toBeNull();
     for (const el of decorative) expect(el.closest('[aria-hidden="true"]')).not.toBeNull();

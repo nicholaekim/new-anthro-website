@@ -1,6 +1,6 @@
 import { isSlot, slot, type Text } from "@/content/slot";
 import type { ending, opening } from "@/content/pages";
-import type { Chapter, Item, PersonCard, Provenance } from "@/content/types";
+import type { Chapter, ConfidenceLevel, Item, PersonCard, Provenance } from "@/content/types";
 
 // The content every component and page test runs against, built from slots only, so filling the
 // live content files never changes what these tests see. Only src/content/content.test.ts reads
@@ -24,6 +24,7 @@ export function fixtureItem(id: string, kind: Item["kind"] = "document"): Item {
     alt: slot("fixture alt"),
     longDescription: slot("fixture description"),
     transcription: kind === "document" ? slot("fixture transcription") : null,
+    translation: null,
     provenance: provenance(),
     contentNote: null,
     annotations: kind === "document" ? [{ id: `${id}-annotation-1`, text: slot("fixture annotation") }] : [],
@@ -33,14 +34,16 @@ export function fixtureItem(id: string, kind: Item["kind"] = "document"): Item {
 
 const basis = () => ({
   quote: slot("fixture quote"),
+  quoteTranslation: null,
   citation: slot("fixture citation"),
   explanation: slot("fixture explanation"),
   cardFactsUsed: [] as string[],
 });
 
-const outcome = () => ({
+const outcome = (level: ConfidenceLevel) => ({
   text: slot("fixture outcome"),
   confidence: slot("fixture confidence"),
+  level,
   citation: slot("fixture citation"),
 });
 
@@ -57,17 +60,22 @@ export function fixtureChapter(
     historicalYear: 1900 + n,
     presentYear: 2020,
     showPersonCard,
+    // Plain strings, not slots: the summaries are not shown by every page that counts slots.
+    summary: {
+      historical: { decides: `fixture ${n} historical decides`, evidence: `fixture ${n} historical evidence` },
+      present: { decides: `fixture ${n} present decides`, evidence: `fixture ${n} present evidence` },
+    },
     contentNote: slot("fixture chapter content note"),
     photograph: fixtureItem(`${slug}-photograph`, "photograph"),
     photographContext: slot("fixture context"),
     items: [fixtureItem(`${slug}-item-1`), fixtureItem(`${slug}-item-2`)],
     basis: basis(),
-    outcome: withOutcome ? outcome() : null,
+    outcome: withOutcome ? outcome("high") : null,
     changeOfDate: { historicalItemId: `${slug}-item-1`, presentItemId: `${slug}-instrument` },
     present: {
       instrument: fixtureItem(`${slug}-instrument`),
       basis: basis(),
-      outcome: withOutcome ? outcome() : null,
+      outcome: withOutcome ? outcome("low") : null,
       reflection: slot("fixture reflection"),
     },
   };

@@ -1,21 +1,32 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { highlights as allHighlights, type Highlight } from "@/content/regions";
 import { isSlot } from "@/content/slot";
 import type { Item } from "@/content/types";
-import { Mount } from "./Mount";
-import { SlotText } from "./SlotText";
+import { DocumentViewer } from "./viewer/DocumentViewer";
+import { HighlightList } from "./viewer/HighlightList";
 
-// A modal native dialog. Its contents (and so the large image) render only while it is open.
-// The dialog's own Escape handling closes it; either way focus returns to the opener.
-export function CloseView({ item }: { item: Item }) {
-  const [open, setOpen] = useState(false);
+// The close view: a modal native dialog holding the document viewer, opened by "Open close view"
+// or, under a document image, by the name of one of its highlights, which opens it at that
+// highlight. Its contents (and so the full-size image) render only while it is open. The
+// dialog's own Escape handling closes it; either way focus returns to the control that opened it.
+export function CloseView({
+  item,
+  highlights = allHighlights[item.id] ?? [],
+}: {
+  item: Item;
+  highlights?: Highlight[];
+}) {
+  const [open, setOpen] = useState<{ at: string | null } | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const openerRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<HTMLElement | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const headingId = `${item.id}-close-view-heading`;
-  const large = item.image?.largeSrc;
+  const listId = `${item.id}-highlights-label`;
   const title = item.provenance.title;
+  // A highlight is a place on the image: without one there is nothing to point at.
+  const pageHighlights = item.image ? highlights : [];
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -24,77 +35,56 @@ export function CloseView({ item }: { item: Item }) {
     closeRef.current?.focus();
   }, [open]);
 
+  function openAt(at: string | null, event: MouseEvent<HTMLButtonElement>) {
+    openerRef.current = event.currentTarget;
+    setOpen({ at });
+  }
+
   function handleClose() {
-    setOpen(false);
+    setOpen(null);
     openerRef.current?.focus();
   }
 
   return (
-    <>
-      <button
-        ref={openerRef}
-        type="button"
-        data-close-view-open
-        aria-haspopup="dialog"
-        aria-label={`Open close view: ${isSlot(title) ? `[${title.slot}]` : title}`}
-        onClick={() => setOpen(true)}
-        className="target quiet self-start px-2 text-sm"
-      >
-        Open close view
-      </button>
+    <div className="flex flex-col gap-3">
+      {pageHighlights.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <p id={listId} className="caps soft">
+            Highlights on this page
+          </p>
+          <HighlightList labelledBy={listId} highlights={pageHighlights} onChoose={openAt} opensDialog />
+        </div>
+      )}
+      <div className="-mx-2 flex flex-wrap gap-x-2">
+        <button
+          type="button"
+          data-close-view-open
+          aria-haspopup="dialog"
+          aria-label={`Open close view: ${isSlot(title) ? `[${title.slot}]` : title}`}
+          onClick={(e) => openAt(null, e)}
+          className="target quiet px-2 text-sm"
+        >
+          Open close view
+        </button>
+      </div>
       <dialog
         ref={dialogRef}
         data-close-view
         aria-labelledby={headingId}
         onClose={handleClose}
-        className="leaf m-auto h-full max-h-none w-full max-w-none bg-paper p-5 backdrop:bg-surround/85 sm:h-auto sm:max-h-[90svh] sm:max-w-5xl sm:p-8"
+        className="leaf m-auto h-full max-h-none w-full max-w-none overflow-y-auto overscroll-contain bg-paper p-4 backdrop:bg-surround/85 sm:h-auto sm:max-h-[94svh] sm:w-[calc(100%-2rem)] sm:max-w-6xl sm:p-6 lg:h-[92svh] lg:overflow-hidden"
       >
         {open && (
-          <div className="flex flex-col gap-6">
-            <div className="flex items-start justify-between gap-4 border-b border-(--hair) pb-4">
-              <h2 id={headingId} className="font-title type-heading">
-                Close view: <SlotText value={item.provenance.title} />
-              </h2>
-              <button
-                ref={closeRef}
-                type="button"
-                onClick={() => dialogRef.current?.close()}
-                className="target quiet shrink-0 px-2 text-sm"
-              >
-                Close
-              </button>
-            </div>
-            <div className="flex flex-col gap-6 md:flex-row">
-              {item.transcription !== null && (
-                <div className="md:order-2 md:w-1/2">
-                  <h3 className="caps soft mb-1">Transcription</h3>
-                  <p className="font-source type-source whitespace-pre-line border-l-2 border-ink/25 bg-paper-deep px-4 py-3">
-                    <SlotText value={item.transcription} />
-                  </p>
-                </div>
-              )}
-              <div className="flex flex-col gap-2 md:order-1 md:flex-1">
-                <Mount image={item.image && { ...item.image, src: large ?? item.image.src }} alt={item.alt} gapNote={item.gapNote} />
-                {large && (
-                  <a href={large} className="target quiet -mx-2 self-start px-2 text-sm">
-                    Large image
-                  </a>
-                )}
-              </div>
-            </div>
-            {item.annotations.length > 0 && (
-              <div>
-                <h3 className="caps soft mb-1">Annotations</h3>
-                <ol className="measure flex list-decimal flex-col gap-2 pl-7 font-yours marker:font-interface marker:text-sm marker:text-ink-soft">
-                  {item.annotations.map((a) => (
-                    <li key={a.id}><SlotText value={a.text} /></li>
-                  ))}
-                </ol>
-              </div>
-            )}
-          </div>
+          <DocumentViewer
+            item={item}
+            highlights={pageHighlights}
+            initialId={open.at}
+            headingId={headingId}
+            closeRef={closeRef}
+            onCloseClick={() => dialogRef.current?.close()}
+          />
         )}
       </dialog>
-    </>
+    </div>
   );
 }
