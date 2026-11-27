@@ -32,7 +32,12 @@ export function ChapterPage({
   );
 
   return (
-    <div data-chapter={chapter.slug} className={card ? "grid pb-28 lg:grid-cols-[18rem_1fr]" : "grid pb-28"}>
+    // The bottom padding keeps the last content clear of the fixed beat bar, which wraps to up to
+    // three rows (8.75rem) on a narrow touch screen.
+    <div
+      data-chapter={chapter.slug}
+      className={`grid pb-28 max-lg:pointer-coarse:pb-[9.5rem] ${card ? "lg:grid-cols-[18rem_1fr]" : ""}`}
+    >
       <StartAtTop />
       <main className={card ? "lg:col-start-2" : undefined}>
         <ChapterCard chapter={chapter} />

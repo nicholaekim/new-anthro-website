@@ -1,4 +1,5 @@
 import type { Basis, PersonCard } from "@/content/types";
+import { BeatHeading } from "../BeatHeading";
 import { Disclosure } from "../Disclosure";
 import { SlotText } from "../SlotText";
 
@@ -8,16 +9,20 @@ import { SlotText } from "../SlotText";
 export function BasisView({ basis, person }: { basis: Basis; person: PersonCard | null }) {
   const factsUsed = person?.facts.filter((f) => basis.cardFactsUsed.includes(f.id)) ?? [];
   return (
-    <div className="flex flex-col gap-3">
-      <blockquote className="font-source"><SlotText value={basis.quote} /></blockquote>
+    <div className="flex flex-col gap-6">
+      <blockquote className="measure border-l-2 border-paper/40 pl-5 font-source text-lg leading-[1.6] sm:pl-7 sm:text-xl">
+        <SlotText value={basis.quote} />
+      </blockquote>
       <Disclosure summary="Citation">
-        <SlotText value={basis.citation} />
+        <span className="soft">
+          <SlotText value={basis.citation} />
+        </span>
       </Disclosure>
-      <p className="font-yours"><SlotText value={basis.explanation} /></p>
+      <p className="measure"><SlotText value={basis.explanation} /></p>
       {factsUsed.length > 0 && (
         <div className="font-interface text-sm">
-          <p>Person-card facts used:</p>
-          <ul className="list-disc pl-5">
+          <p className="caps soft mb-2">Person-card facts used:</p>
+          <ul className="flex list-disc flex-col gap-1 pl-5 marker:text-(--soft)">
             {factsUsed.map((f) => (
               <li key={f.id}><SlotText value={f.label} /></li>
             ))}
@@ -30,8 +35,8 @@ export function BasisView({ basis, person }: { basis: Basis; person: PersonCard 
 
 export function BasisBeat({ basis, person }: { basis: Basis; person: PersonCard | null }) {
   return (
-    <section data-beat="4" id="beat-4" aria-labelledby="beat-4-heading" className="flex flex-col gap-4 p-8">
-      <h2 id="beat-4-heading" className="font-title text-2xl">Basis</h2>
+    <section data-beat="4" id="beat-4" aria-labelledby="beat-4-heading" className="beat flex flex-col gap-10">
+      <BeatHeading beat={4}>Basis</BeatHeading>
       <BasisView basis={basis} person={person} />
     </section>
   );
