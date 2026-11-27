@@ -49,14 +49,7 @@ export function ChapterPage({
         <ItemsBeat items={chapter.items} />
         {chapter.basis && <BasisBeat basis={chapter.basis} person={card} />}
         {chapter.outcome && <OutcomeBeat outcome={chapter.outcome} />}
-        {historical && present && (
-          <ChangeOfDate
-            historical={historical}
-            present={present}
-            historicalYear={chapter.historicalYear}
-            presentYear={chapter.presentYear}
-          />
-        )}
+        {historical && present && <ChangeOfDate chapter={chapter} historical={historical} present={present} />}
         <PresentDay chapter={chapter} person={card} />
         <CloseBeat next={next} />
       </main>

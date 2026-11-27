@@ -1,12 +1,15 @@
 "use client";
 
 import { createContext, use, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import type { Era } from "@/content/types";
 import { activeIndex, progressBetween } from "./story";
 
 // Where the reader is in a chapter: the active section (beat) and the progress through the
 // chapter, 0 to 1. Measured on scroll and resize at every width and in both modes: this is
 // feedback, not decoration. The provider renders the chapter's root ([data-chapter]) and sets
-// data-active-beat on it once a section is known; without scripts neither exists.
+// data-active-beat on it once a section is known; without scripts neither exists. Beat 6's
+// comparison reports the era it shows (useSetEraInView); the provider passes it to the person
+// card and sets data-era-in-view on the root while that comparison is set up.
 
 // The reading line, as a share of the view's height from its top: a section is active once its
 // top has passed it.
@@ -35,9 +38,13 @@ function progressStore() {
 
 type ProgressStore = ReturnType<typeof progressStore>;
 
-const StoryContext = createContext<{ beats: readonly number[]; activeBeat: number | null; progress: ProgressStore } | null>(
-  null,
-);
+const StoryContext = createContext<{
+  beats: readonly number[];
+  activeBeat: number | null;
+  eraInView: Era | null;
+  setEraInView: (era: Era | null) => void;
+  progress: ProgressStore;
+} | null>(null);
 
 export function StoryProgressProvider({
   slug,
@@ -52,6 +59,7 @@ export function StoryProgressProvider({
 }) {
   const root = useRef<HTMLDivElement>(null);
   const [activeBeat, setActiveBeat] = useState<number | null>(null);
+  const [eraInView, setEraInView] = useState<Era | null>(null);
   const [progress] = useState(progressStore);
 
   useEffect(() => {
@@ -88,18 +96,32 @@ export function StoryProgressProvider({
   }, [progress]);
 
   return (
-    <StoryContext value={{ beats, activeBeat, progress }}>
-      <div ref={root} data-chapter={slug} data-active-beat={activeBeat ?? undefined} className={className}>
+    <StoryContext value={{ beats, activeBeat, eraInView, setEraInView, progress }}>
+      <div
+        ref={root}
+        data-chapter={slug}
+        data-active-beat={activeBeat ?? undefined}
+        data-era-in-view={eraInView ?? undefined}
+        className={className}
+      >
         {children}
       </div>
     </StoryContext>
   );
 }
 
-// The chapter's sections and the active one. Outside a chapter (the opening page) there is none.
-export function useActiveBeat(): { beats: readonly number[]; activeBeat: number | null } {
+// The chapter's sections, the active one, and the era beat 6 shows (null until its comparison is
+// set up). Outside a chapter (the opening page) there is none.
+export function useActiveBeat(): { beats: readonly number[]; activeBeat: number | null; eraInView: Era | null } {
   const story = use(StoryContext);
-  return { beats: story?.beats ?? [], activeBeat: story?.activeBeat ?? null };
+  return { beats: story?.beats ?? [], activeBeat: story?.activeBeat ?? null, eraInView: story?.eraInView ?? null };
+}
+
+const noEra = () => {};
+
+// For beat 6's comparison: report the era in view, or null once it is no longer set up.
+export function useSetEraInView(): (era: Era | null) => void {
+  return use(StoryContext)?.setEraInView ?? noEra;
 }
 
 const noProgress = { get: () => 0, subscribe: () => () => {} };

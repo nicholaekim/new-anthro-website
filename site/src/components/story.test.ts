@@ -103,7 +103,7 @@ describe("factMarks", () => {
 
 describe("emphasisFor", () => {
   it("is the historical rule at basis and outcome, the 2020 rule at the present day, none elsewhere", () => {
-    expect([1, 2, 3, 4, 5, 6, 7, 8, null].map(emphasisFor)).toEqual([
+    expect([1, 2, 3, 4, 5, 6, 7, 8, null].map((beat) => emphasisFor(beat))).toEqual([
       null,
       null,
       null,
@@ -114,6 +114,14 @@ describe("emphasisFor", () => {
       null,
       null,
     ]);
+  });
+
+  it("is the era in view at the change of date, and only there", () => {
+    expect(emphasisFor(6, "historical")).toBe("historical");
+    expect(emphasisFor(6, "present")).toBe("present");
+    expect(emphasisFor(4, "present")).toBe("historical");
+    expect(emphasisFor(7, "historical")).toBe("present");
+    expect(emphasisFor(3, "present")).toBeNull();
   });
 });
 
@@ -128,6 +136,9 @@ describe("factsUsedAt", () => {
     expect(factsUsedAt(c, 7)).toEqual(["fact-2", "fact-4"]);
     expect(factsUsedAt(c, 2)).toEqual([]);
     expect(factsUsedAt(c, null)).toEqual([]);
+    expect(factsUsedAt(c, 6)).toEqual([]);
+    expect(factsUsedAt(c, 6, "historical")).toEqual(["fact-1"]);
+    expect(factsUsedAt(c, 6, "present")).toEqual(["fact-2", "fact-4"]);
   });
 });
 

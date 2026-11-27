@@ -75,16 +75,22 @@ export function factMarks(c: FactUses, factId: string): FactMark[] {
 }
 
 // Which era's facts the person card emphasises while a section is active: the historical rule
-// at the basis and the outcome, the 2020 rule at the present day, neither elsewhere.
-export function emphasisFor(beat: number | null): Era | null {
+// at the basis and the outcome, the era in view at the change of date (none until its comparison
+// has been set up), the 2020 rule at the present day, neither elsewhere.
+export function emphasisFor(beat: number | null, eraInView: Era | null = null): Era | null {
   if (beat === 4 || beat === 5) return "historical";
+  if (beat === 6) return eraInView;
   if (beat === 7) return "present";
   return null;
 }
 
 // The facts the rule in view uses while a section is active.
-export function factsUsedAt(c: Pick<FactUses, "basis" | "present">, beat: number | null): readonly string[] {
-  const era = emphasisFor(beat);
+export function factsUsedAt(
+  c: Pick<FactUses, "basis" | "present">,
+  beat: number | null,
+  eraInView: Era | null = null,
+): readonly string[] {
+  const era = emphasisFor(beat, eraInView);
   if (era === "historical") return c.basis?.cardFactsUsed ?? [];
   if (era === "present") return c.present.basis?.cardFactsUsed ?? [];
   return [];

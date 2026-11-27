@@ -88,13 +88,13 @@ The site's own words (beat headings, button and link labels, and labels such as 
 
 - `site/src/components/story.ts`: the section labels ("Title", "Place", "Items", "Basis", "Outcome", "Change of date", "Present day", "Next"), used both for the section headings and in the story bar ("04 Basis"), and the confidence words ("High", "Moderate", "Low", "Cannot be determined") and the person card's marks ("1930: used", "2020: not used");
 - `site/src/components/BeatHeading.tsx`: the small section numbers ("02", "03" and so on) shown above each chapter section heading. They are decoration, hidden from screen readers, and show the beat number;
-- `site/src/components/beats/`: "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.";
+- `site/src/components/beats/`: "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.", and in beat 6 (`ChangeOfDate.tsx`) "Who decides", "On what evidence", "The rule, as quoted", "Outcome confidence", "See the outcome" and "No person is placed in this chapter, so no outcome is given.";
 - `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance" and its field names, "Large image", "Content note:";
 - `site/src/components/CloseView.tsx`: "Open close view", "Close view:", "Close";
 - `site/src/components/Mount.tsx`: "No image";
 - `site/src/components/PersonCardView.tsx` and `PersonCardPanel.tsx`: "Person card", "Reason:", "See the rule", "In this chapter", "Outcome confidence", "Close", and for screen readers "outcome, confidence:" and "facts used in this section";
 - `site/src/components/PlaceDateTag.tsx`: "Chapter 1 of 4" and the others;
-- `site/src/components/EraSwitch.tsx` ("Show 2020"), `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Current section:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
+- `site/src/components/EraSwitch.tsx` (the two years as buttons, named "Show 1930" and "Show 2020" and so on for screen readers, and the range, named "Date, from 1930 to 2020"); `site/src/motion/era.ts` (the range's spoken value, such as "1962, 1930 in view"); `site/src/motion/ChangeOfDateMotion.tsx` (what screen readers hear when the era changes, "Now showing 2020."); `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Current section:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
 - `site/src/motion/OpeningMotion.tsx`: "Skip";
 - `site/src/app/layout.tsx`: "Skip to content";
 - `site/src/app/page.tsx`: "Introduction", "Note on language and content", "Begin:";
@@ -115,10 +115,24 @@ The four type voices are loaded in `site/src/app/layout.tsx` through `next/font/
 ## Motion
 
 - Full motion runs only when the window is at least 1024 pixels wide. The same width is the layout breakpoint (Tailwind's `lg`). It is set in pixels in three places that must agree: `MOTION_QUERY` in `site/src/motion/gsap.ts`, `--breakpoint-lg` and the media queries in `site/src/app/globals.css`.
-- At that width, only beats 2 and 6 pin, each for about one screen of scrolling. Beat 2 moves the decorative layers; beat 6 cross-fades the two images and grows the date line.
-- Below 1024 pixels nothing pins. Beat 6's era switch cross-fades the images in place.
-- The Motion button in the header turns full motion on or off. When it is pressed, motion is on. It overrides the system's reduced-motion setting for the rest of the visit. With motion off, the site is the still version: nothing pins and beat 6's era switch works as it does below 1024 pixels.
+- At that width, only beats 2 and 6 pin. Beat 2 pins for about one screen of scrolling and moves the decorative layers. Beat 6 pins for about one and a half screens; see "Beat 6, the change of date" below.
+- Below 1024 pixels nothing pins.
+- The Motion button in the header turns full motion on or off. When it is pressed, motion is on. It overrides the system's reduced-motion setting for the rest of the visit. With motion off, the site is the still version: nothing pins and nothing moves over time, but beat 6's controls still work, instantly.
 - By default the site follows the system setting: reduced motion means the still version.
+
+### Beat 6, the change of date
+
+Beat 6 compares the two dates. Without scripts, and before the page's script has run, it shows each era as a complete panel, one after the other: the year, the document (or its empty frame with the gap note), the instrument's title, who decides, on what evidence, the rule as quoted (with its citation behind "Citation") and, where the chapter has outcomes, the outcome's confidence with a link to the outcome. Tobique, which places no person, says so instead.
+
+Once the script runs, at every width and in both motion modes, the two panels become one stage with one control:
+
+- a range from the historical year to 2020, with the two years as buttons at its ends. Arrow keys, Home and End work on the range;
+- the 2020 document wipes over the historical one from the left, with a brass divider, as the range moves;
+- a large date counts between the two years (decoration; screen readers hear the range's value instead);
+- the information panel shows the era in view, switching at the midpoint, and screen readers hear "Now showing 2020." (or the historical year) when it switches. The panel not in view is hidden;
+- the person card emphasises the facts used by the rule of the era in view.
+
+In full motion at 1024 pixels and wider, the section pins and scrolling moves the same value: scrolling moves the range, dragging the range scrolls the page to the matching place, and the year buttons scroll there smoothly. Elsewhere nothing pins: the range moves the stage directly, and the year buttons carry it across in about a second and a half in full motion, or at once with motion off. Set in `site/src/components/beats/ChangeOfDate.tsx` (the panels), `site/src/motion/ChangeOfDateMotion.tsx` (the stage), `site/src/components/EraSwitch.tsx` (the control), `site/src/motion/era.ts` (the arithmetic) and the beat 6 rules in `site/src/app/globals.css`.
 
 ### Motion extras
 
@@ -156,16 +170,15 @@ These items from the design plan were not built:
 - snap;
 - pointer drift;
 - an outline of the earlier mount left visible after the change of date;
-- a hand-driven change of date (for example a slider);
 - a travelling close view (the close view opens in place);
-- a drawn line (beat 6's date line is a plain bar that grows; it is not drawn as a stroke);
+- a drawn line (beat 6's rule under its heading is a plain hairline);
 - hotspots on images.
 
 These gaps in the default design were not built either:
 
 - There is no separate translation field. A source not in English has only its `transcription`; the design plan asks for your transcription and your translation as separate labelled text.
 - The person card and the outcome sheet carry no status label (sourced, reconstructed or fictional). Only items do.
-- Images have no `sizes` hint, and none is set to load eagerly. The browser may fetch a larger file than it shows, and the first image on a page is not given priority.
+- Images have no `sizes` hint, and only beat 6's two documents are set to load eagerly (a document hidden behind the wipe is otherwise never fetched). The browser may fetch a larger file than it shows, and the first image on a page is not given priority.
 
 The Tobique chapter has no outcome and no reserved-colour mark. A test checks this.
 
@@ -181,8 +194,9 @@ Small issues found in review and left for later:
 - The tests for names only check that a name exists. Many disclosures share the plain labels "Citation" and "Provenance".
 - Layout:
   - On large screens the person card sits on the left, but in reading order it comes after the main content.
-  - At the end of beat 6 the place-and-date tag still shows the historical year, while beat 6 already shows the present day. The tag changes at beat 7.
-  - Beats 2 and 6 pin their whole content. In beat 6 the images are scaled down so the heading, era switch, images and both captions fit the window during the pin; very long gap notes in the captions could still push it past the window. Beat 2 is not scaled: if your real content there is taller than the window, the bottom part is out of view until the pin ends.
+  - While beat 6 shows 2020, the place-and-date tag still shows the historical year. The tag changes at beat 7.
+  - Beats 2 and 6 pin their whole content. In beat 6 the documents are scaled down so the heading, the control, the date and the documents fit the window during the pin; where the information panel is longer than the window allows (the São Paulo and Johannesburg quotations at 1280 by 800), the panel scrolls inside itself, and while the pointer is over it the mouse wheel scrolls the panel before the page. Beat 2 is not scaled: if your real content there is taller than the window, the bottom part is out of view until the pin ends.
+  - During beat 6's wipe, two documents without images show their notes cut at the divider; each note is whole at either end of the range.
   - Below 1024 pixels the place-and-date tag sits on its own row under the header and lets clicks through, so it covers no control, but it does cover a strip of the page beneath it.
   - A person-card panel opened on a narrow window stays open if the window is widened past 1024 pixels.
 - Without scripts:

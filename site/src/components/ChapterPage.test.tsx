@@ -9,6 +9,20 @@ import { ChapterPage } from "./ChapterPage";
 const next = { href: "/chapters/fixture-2", label: "Next chapter" };
 const person = fixturePerson();
 
+// Beat 6 repeats, for each era, the instrument's title and the rule with its citation, so it can
+// compare them side by side; every other slot is shown once.
+function beat6Repeats(c: Chapter): number {
+  const historical = c.items.find((i) => i.id === c.changeOfDate?.historicalItemId);
+  return countSlots([
+    historical?.provenance.title,
+    c.present.instrument?.provenance.title,
+    c.basis?.quote,
+    c.basis?.citation,
+    c.present.basis?.quote,
+    c.present.basis?.citation,
+  ]);
+}
+
 function renderChapter(chapter: Chapter) {
   return render(<ChapterPage chapter={chapter} person={person} next={next} />);
 }
@@ -73,12 +87,12 @@ describe("ChapterPage", () => {
     expect(details).toHaveTextContent("fixture transcription");
   });
 
-  it("server-renders both eras and one marked slot per slot in the content", () => {
+  it("server-renders both eras and one marked slot per slot in the content, plus beat 6's repeats", () => {
     const c = fixtureChapter();
     const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
     expect(html).toContain('data-era="historical"');
     expect(html).toContain('data-era="present"');
-    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + countSlots(person));
+    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + countSlots(person) + beat6Repeats(c));
   });
 
   it("gives every details summary an accessible name", () => {
@@ -122,6 +136,6 @@ describe("ChapterPage", () => {
     expect(container.querySelector('[data-beat="4"]')).not.toHaveTextContent("Person-card facts used:");
     // Every slot shown is the chapter's own.
     const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
-    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c));
+    expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + beat6Repeats(c));
   });
 });

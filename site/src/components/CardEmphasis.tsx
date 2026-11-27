@@ -12,9 +12,9 @@ import { useActiveBeat } from "./StoryProgress";
 // ([data-uses-historical], [data-uses-present]). In full motion the bars grow in and out with a
 // short tween and are left with no inline style; in still mode the emphasis just switches.
 export function CardEmphasis({ children }: { children: ReactNode }) {
-  const { activeBeat } = useActiveBeat();
+  const { activeBeat, eraInView } = useActiveBeat();
   const { mode } = useMotionMode();
-  const emphasis = emphasisFor(activeBeat);
+  const emphasis = emphasisFor(activeBeat, eraInView);
   const ref = useRef<HTMLDivElement>(null);
   const shown = useRef<Era | null>(null);
 

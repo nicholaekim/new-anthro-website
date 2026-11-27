@@ -111,9 +111,11 @@ describe("chapter pages", () => {
     expect(images.length).toBeGreaterThanOrEqual(6);
     for (const img of images) expect(img).toHaveAttribute("alt");
 
+    // Beat 6's empty frames hold their gap note or "No image" as text, so they are not decoration.
     const decorative = [
-      ...container.querySelectorAll("[data-layer], [data-date-line], [data-mark], [data-tick] > span:not(.sr-only)"),
-      ...[...container.querySelectorAll("[data-media]")].filter((m) => !m.querySelector("img")),
+      ...container.querySelectorAll(
+        "[data-layer], [data-date-line], [data-date-indicator], [data-divider], [data-mark], [data-tick] > span:not(.sr-only)",
+      ),
     ];
     expect(container.querySelectorAll("[data-layer]")).toHaveLength(3);
     expect(container.querySelector("[data-date-line]")).not.toBeNull();

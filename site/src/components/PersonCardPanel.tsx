@@ -9,8 +9,8 @@ import { useActiveBeat } from "./StoryProgress";
 // scripts) with its own Close control. A link chosen inside the sheet closes it, so the section
 // it goes to is not covered. At the breakpoint globals.css shows the card in its column instead.
 export function PersonCardPanel({ uses, children }: { uses: Pick<FactUses, "basis" | "present">; children: ReactNode }) {
-  const { activeBeat } = useActiveBeat();
-  const count = factsUsedAt(uses, activeBeat).length;
+  const { activeBeat, eraInView } = useActiveBeat();
+  const count = factsUsedAt(uses, activeBeat, eraInView).length;
 
   function onClick(e: MouseEvent<HTMLDivElement>) {
     const panel = e.currentTarget;
