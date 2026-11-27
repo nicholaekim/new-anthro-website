@@ -138,4 +138,37 @@ describe("ChapterPage", () => {
     const html = renderToString(<ChapterPage chapter={c} person={person} next={next} />);
     expect(html.match(/data-slot=/g)?.length ?? 0).toBe(countSlots(c) + beat6Repeats(c));
   });
+
+  it("shows a translated quotation and transcription as labelled original and translation in beats 3, 4, 6 and 7", () => {
+    const c = fixtureChapter();
+    c.items[0].translation = slot("fixture item translation");
+    c.present.instrument!.translation = slot("fixture instrument translation");
+    if (c.basis) c.basis.quoteTranslation = slot("fixture quote translation");
+    if (c.present.basis) c.present.basis.quoteTranslation = slot("fixture present quote translation");
+    const { container } = renderChapter(c);
+    const pairsIn = (selector: string) =>
+      [...container.querySelectorAll(selector)].map((p) => [p.getAttribute("data-language-part"), p.textContent]);
+    const beat = (n: number) => `section[data-beat="${n}"] [data-language-part]`;
+    expect(pairsIn(beat(3))).toEqual([
+      ["original", "Original[fixture transcription]"],
+      ["translation", "English translation[fixture item translation]"],
+    ]);
+    expect(pairsIn(beat(4))).toEqual([
+      ["original", "Original[fixture quote]"],
+      ["translation", "English translation[fixture quote translation]"],
+    ]);
+    // Beat 6: each era’s rule, original and translation.
+    expect(pairsIn(beat(6)).map(([, t]) => t)).toEqual([
+      "Original[fixture quote]",
+      "English translation[fixture quote translation]",
+      "Original[fixture quote]",
+      "English translation[fixture present quote translation]",
+    ]);
+    expect(pairsIn(beat(7)).map(([, t]) => t)).toEqual([
+      "Original[fixture transcription]",
+      "English translation[fixture instrument translation]",
+      "Original[fixture quote]",
+      "English translation[fixture present quote translation]",
+    ]);
+  });
 });

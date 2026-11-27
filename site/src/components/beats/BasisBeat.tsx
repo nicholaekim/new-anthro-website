@@ -1,5 +1,6 @@
 import type { Basis, PersonCard } from "@/content/types";
 import { BeatHeading } from "../BeatHeading";
+import { Bilingual } from "../Bilingual";
 import { Disclosure } from "../Disclosure";
 import { SlotText } from "../SlotText";
 
@@ -10,9 +11,17 @@ export function BasisView({ basis, person }: { basis: Basis; person: PersonCard 
   const factsUsed = person?.facts.filter((f) => basis.cardFactsUsed.includes(f.id)) ?? [];
   return (
     <div className="flex flex-col gap-6">
-      <blockquote className="measure border-l-2 border-paper/40 pl-5 font-source text-lg leading-[1.6] sm:pl-7 sm:text-xl">
-        <SlotText value={basis.quote} />
-      </blockquote>
+      <Bilingual
+        original={basis.quote}
+        translation={basis.quoteTranslation}
+        render={(text, part) => (
+          <blockquote
+            className={`measure border-l-2 border-paper/40 pl-5 leading-[1.6] sm:pl-7 ${part === "original" ? "font-source text-lg sm:text-xl" : "font-yours text-lg"}`}
+          >
+            {text}
+          </blockquote>
+        )}
+      />
       <Disclosure summary="Citation">
         <span className="soft">
           <SlotText value={basis.citation} />

@@ -476,3 +476,41 @@ html[data-motion-pending] [data-reveal] {
   overflow-y: auto;
   padding-right: 0.5rem;
 }
+
+/* The close view's highlights (ViewerStage). Each outline is a button placed over its region from
+   the same view the page is drawn with; the line is drawn just outside the region so it never
+   covers the passage, dashed, and solid and heavier when chosen (shape, not only tone). The
+   number sits above its top left corner. Hiding the outlines removes them altogether. */
+.viewer-outline [data-outline-line] {
+  position: absolute;
+  inset: -3px;
+  border: 2px dashed var(--color-interface-deep);
+  pointer-events: none;
+}
+.viewer-outline[aria-current="true"] [data-outline-line] {
+  inset: -4px;
+  border: 3px solid var(--color-interface-deep);
+}
+.viewer-outline [data-outline-number] {
+  position: absolute;
+  left: -4px;
+  bottom: calc(100% + 4px);
+  min-width: 1.125rem;
+  padding: 0 0.25rem;
+  background: var(--color-interface-deep);
+  color: var(--color-paper);
+  font-family: var(--font-interface), system-ui, sans-serif;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1.125rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.viewer-outline:focus-visible {
+  outline-offset: 6px;
+}
+/* An annotation that discusses the chosen highlight: a bar at its left edge and a label. */
+.viewer-annotation[aria-current="true"] {
+  border-left: 3px solid var(--color-interface-deep);
+  margin-left: -3px;
+}

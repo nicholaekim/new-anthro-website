@@ -56,7 +56,7 @@ Only one test file reads your content files: `site/src/content/content.test.ts`.
    image: { src: "/images/your-file.jpg", width: 1200, height: 1600 },
    ```
 
-3. You can add a larger version for the close view with `largeSrc: "/images/your-file-large.jpg"`. It loads only when the close view opens, and a "Large image" link to it appears beside the item.
+3. You can add a larger version for the close view with `largeSrc: "/images/your-file-large.jpg"`. It loads only when the close view opens, and a "Large image" link to it appears beside the item. Without it, the close view loads the file at `src` as it is (not resized), so zooming in stays sharp up to that file's own size.
 4. Fill the item's `alt` (short alternative text) and `longDescription`. A document with an image must also have a `transcription`. The tests report a document image without one.
 5. Add the image's row to your credits ledger (see below), and fill the item's `provenance` fields.
 
@@ -82,6 +82,14 @@ contentNote: "…", // your content note between the quotes
 
 The item is then shown closed, as a disclosure labelled "Content note:" followed by your note, and opens only when the visitor chooses to. Each chapter also has its own chapter-level `contentNote`, shown under the chapter heading.
 
+## The close view
+
+"Open close view" under each item opens a dialog that fills a phone's screen and is a large sheet on wider ones. On the left (on top, on narrower screens) is the page itself; beside it, the transcription, the annotations and the source information (the provenance fields, folded). Focus moves into the dialog when it opens and back to the control that opened it when it closes; Escape closes it, and nothing behind it can be reached while it is open.
+
+- **Zoom and move.** Zoom in, Zoom out, Fit width (the page's width across the view) and Reset (back to the whole page) are buttons. The mouse wheel or a trackpad zooms about the pointer, two fingers pinch on a touch screen, and dragging moves the page. When the image area itself has keyboard focus, the arrow keys move the page and plus and minus zoom; a line under the image says so. The page can be zoomed up to eight times its whole-page size and can never be moved out of view. With motion on, Reset, Fit width and choosing a highlight glide to their view; with motion off every change is instant. The arithmetic is in `site/src/components/viewer/transform.ts`, with its tests beside it.
+- **Highlights.** `site/src/content/regions.ts` lists, for each document image, the passages its transcription quotes, as rectangles in fractions of the image, each with a label ("Paragraph 151") and the annotations that discuss it. In the close view each one is a numbered outline over the page, a button named by its label; choosing it zooms to it and marks its annotations (a bar and "About the chosen highlight"), scrolling them into view when the panel scrolls on its own. An annotation with a highlight has a "Show on page" button that does the same from the other side, and the highlights are also listed by name under the image. "Show highlights" hides the outlines for an unobstructed page. In the chapter page, the highlights are listed under each document image ("Highlights on this page"); each opens the close view at that passage. An item with no image, or no entry in `regions.ts`, simply has no highlights. To add or move one, measure the rectangle on the image file and give it as `x`, `y`, `w`, `h` between 0 and 1; the tests report a region outside the image or an annotation id that is not on the item.
+- **Translations.** An item's `translation` and a basis's `quoteTranslation` hold an English translation of a source that is not in English (`null` otherwise). Where one is set, the original and the translation are shown side by side, each labelled ("Original", "English translation"), wherever there is room, and one above the other in narrow spaces: in the item, the close view, beat 4, beat 6 and beat 7. The original keeps the source's typeface; the translation is in the site's own.
+
 ## Interface labels
 
 The site's own words (beat headings, button and link labels, and labels such as "Content note:", "Confidence:", "Citation:", "Person-card facts used:", "No image", "Reason:" and the ending page's headings) are working labels, not research text. They were written by AI, like the code. Review them and reword any you like. They are set in:
@@ -89,8 +97,12 @@ The site's own words (beat headings, button and link labels, and labels such as 
 - `site/src/components/story.ts`: the section labels ("Title", "Place", "Items", "Basis", "Outcome", "Change of date", "Present day", "Next"), used both for the section headings and in the story bar ("04 Basis"), and the confidence words ("High", "Moderate", "Low", "Cannot be determined") and the person card's marks ("1930: used", "2020: not used");
 - `site/src/components/BeatHeading.tsx`: the small section numbers ("02", "03" and so on) shown above each chapter section heading. They are decoration, hidden from screen readers, and show the beat number;
 - `site/src/components/beats/`: "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.", and in beat 6 (`ChangeOfDate.tsx`) "Who decides", "On what evidence", "The rule, as quoted", "Outcome confidence", "See the outcome" and "No person is placed in this chapter, so no outcome is given.";
-- `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance" and its field names, "Large image", "Content note:";
-- `site/src/components/CloseView.tsx`: "Open close view", "Close view:", "Close";
+- `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance", "Large image", "Content note:";
+- `site/src/components/CloseView.tsx`: "Open close view", "Highlights on this page";
+- `site/src/components/viewer/DocumentViewer.tsx`: "Close view:", "Close", "Highlights", "Show highlights", "Transcription", "Annotations", "About the chosen highlight", "Show on page:", "Source information", "Large image", and what screen readers hear when a highlight is chosen ("Showing Paragraph 151. Annotations 1 and 2 marked.");
+- `site/src/components/viewer/ViewerStage.tsx`: "Zoom in", "Zoom out", "Fit width", "Reset" (read as "Reset to the whole page"), the instruction under the image, the image area's name "Page image", and the spoken zoom level ("Zoom 125 percent");
+- `site/src/components/Bilingual.tsx`: "Original" and "English translation";
+- `site/src/components/ProvenanceList.tsx`: the provenance field names, shared by the item and the close view;
 - `site/src/components/Mount.tsx`: "No image";
 - `site/src/components/PersonCardView.tsx` and `PersonCardPanel.tsx`: "Person card", "Reason:", "See the rule", "In this chapter", "Outcome confidence", "Close", and for screen readers "outcome, confidence:" and "facts used in this section";
 - `site/src/components/PlaceDateTag.tsx`: "Chapter 1 of 4" and the others;
@@ -171,12 +183,10 @@ These items from the design plan were not built:
 - pointer drift;
 - an outline of the earlier mount left visible after the change of date;
 - a travelling close view (the close view opens in place);
-- a drawn line (beat 6's rule under its heading is a plain hairline);
-- hotspots on images.
+- a drawn line (beat 6's rule under its heading is a plain hairline).
 
 These gaps in the default design were not built either:
 
-- There is no separate translation field. A source not in English has only its `transcription`; the design plan asks for your transcription and your translation as separate labelled text.
 - The person card and the outcome sheet carry no status label (sourced, reconstructed or fictional). Only items do.
 - Images have no `sizes` hint, and only beat 6's two documents are set to load eagerly (a document hidden behind the wipe is otherwise never fetched). The browser may fetch a larger file than it shows, and the first image on a page is not given priority.
 
@@ -200,10 +210,9 @@ Small issues found in review and left for later:
   - Below 1024 pixels the place-and-date tag sits on its own row under the header and lets clicks through, so it covers no control, but it does cover a strip of the page beneath it.
   - A person-card panel opened on a narrow window stays open if the window is widened past 1024 pixels.
 - Without scripts:
-  - The "Open close view" button does nothing. The "Large image" link still works when the item has a `largeSrc`.
+  - The "Open close view" button and the highlight names under a document image do nothing. The image, transcription and annotations are shown in the page itself, and the "Large image" link still works when the item has a `largeSrc`.
   - The previous and next beat links go to beats 1 and 2.
 - Behaviour:
-  - Annotations are shown as a numbered list, not as numbered buttons that move a highlight.
   - The menu marks the current page by an exact path match. This would break if trailing slashes were turned on in the Next.js config.
   - Restart clears what the site has stored, but the Motion button keeps its setting until the page is reloaded.
   - While the cover between pages is up (about one second), keyboard focus stays on the page beneath it.
@@ -211,4 +220,5 @@ Small issues found in review and left for later:
   - Scroll positions are measured again whenever any disclosure or the person-card panel opens or closes.
   - Pins are placed under the header by finding it as `body > header`. Moving the header breaks this.
   - A link to a part of a chapter page (`#…`) that names nothing on the page starts at the top.
-- Untested: closing the close view with Escape, scrolling and focus after choosing a story-bar link, moving focus after a page change, scrolling to a named part of a page, starting at the top, and scroll restoration.
+- Checked by hand in a browser but not by the automated tests: closing the close view with Escape, and the close view's wheel, drag, pinch and keys and the alignment of its outlines (the arithmetic behind them is tested).
+- Untested: scrolling and focus after choosing a story-bar link, moving focus after a page change, scrolling to a named part of a page, starting at the top, and scroll restoration.

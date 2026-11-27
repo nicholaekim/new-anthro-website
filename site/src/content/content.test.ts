@@ -94,6 +94,22 @@ describe("chapters", () => {
     for (const key of Object.keys(highlights)) expect(ids.has(key)).toBe(true);
   });
 
+  it("keeps each translation in its own field, never after a marker inside the original", () => {
+    const strings = JSON.stringify(chapters);
+    expect(strings).not.toContain("English translation:");
+    const saoPaulo = getChapter("sao-paulo");
+    const translated = [...(saoPaulo?.items ?? []), saoPaulo?.present.instrument].map((i) => i?.translation);
+    for (const t of [...translated, saoPaulo?.basis?.quoteTranslation, saoPaulo?.present.basis?.quoteTranslation]) {
+      expect(typeof t === "string" && t.trim() !== "").toBe(true);
+    }
+    // Only the São Paulo sources are quoted in a language other than English.
+    for (const c of chapters.filter((c) => c.slug !== "sao-paulo")) {
+      const items = [c.photograph, ...c.items, ...(c.present.instrument ? [c.present.instrument] : [])];
+      expect(items.map((i) => i.translation).filter((t) => t !== null)).toEqual([]);
+      expect([c.basis, c.present.basis].map((b) => b?.quoteTranslation ?? null).filter((t) => t !== null)).toEqual([]);
+    }
+  });
+
   it("returns undefined for an unknown slug", () => {
     expect(getChapter("nope")).toBeUndefined();
   });

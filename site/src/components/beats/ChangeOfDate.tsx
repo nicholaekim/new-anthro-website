@@ -1,6 +1,7 @@
 import type { Basis, Chapter, EraSummary, Item, Outcome } from "@/content/types";
 import { ChangeOfDateMotion } from "@/motion/ChangeOfDateMotion";
 import { BeatHeading } from "../BeatHeading";
+import { Bilingual } from "../Bilingual";
 import { ConfidenceMeter } from "../ConfidenceMeter";
 import { Disclosure } from "../Disclosure";
 import { Mount } from "../Mount";
@@ -92,9 +93,17 @@ function EraPanel({
         {basis && (
           <div className="flex flex-col gap-3 border-t border-(--hair) pt-3">
             <p className="caps soft">The rule, as quoted</p>
-            <blockquote className="border-l-2 border-paper/40 pl-4 font-source text-[0.875rem] leading-[1.6] whitespace-pre-line">
-              <SlotText value={basis.quote} />
-            </blockquote>
+            <Bilingual
+              original={basis.quote}
+              translation={basis.quoteTranslation}
+              render={(text, part) => (
+                <blockquote
+                  className={`border-l-2 border-paper/40 pl-4 leading-[1.6] whitespace-pre-line ${part === "original" ? "font-source text-[0.875rem]" : "font-yours text-[0.9375rem]"}`}
+                >
+                  {text}
+                </blockquote>
+              )}
+            />
             <Disclosure summary="Citation">
               <span className="soft"><SlotText value={basis.citation} /></span>
             </Disclosure>
