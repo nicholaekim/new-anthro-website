@@ -86,13 +86,15 @@ The item is then shown closed, as a disclosure labelled "Content note:" followed
 
 The site's own words (beat headings, button and link labels, and labels such as "Content note:", "Confidence:", "Citation:", "Person-card facts used:", "No image", "Reason:" and the ending page's headings) are working labels, not research text. They were written by AI, like the code. Review them and reword any you like. They are set in:
 
+- `site/src/components/story.ts`: the section labels ("Title", "Place", "Items", "Basis", "Outcome", "Change of date", "Present day", "Next"), used both for the section headings and in the story bar ("04 Basis"), and the confidence words ("High", "Moderate", "Low", "Cannot be determined") and the person card's marks ("1930: used", "2020: not used");
 - `site/src/components/BeatHeading.tsx`: the small section numbers ("02", "03" and so on) shown above each chapter section heading. They are decoration, hidden from screen readers, and show the beat number;
-- `site/src/components/beats/`: the beat headings ("Place", "Items", "Basis", "Change of date", "Present day", "Next" and the others), "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.";
+- `site/src/components/beats/`: "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.";
 - `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance" and its field names, "Large image", "Content note:";
 - `site/src/components/CloseView.tsx`: "Open close view", "Close view:", "Close";
 - `site/src/components/Mount.tsx`: "No image";
-- `site/src/components/PersonCardView.tsx` and `Backdrop.tsx`: "Person card", "Reason:", "Close";
-- `site/src/components/EraSwitch.tsx` ("Show 2020"), `BeatTicks.tsx` ("Previous beat", "Next beat"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
+- `site/src/components/PersonCardView.tsx` and `PersonCardPanel.tsx`: "Person card", "Reason:", "See the rule", "In this chapter", "Outcome confidence", "Close", and for screen readers "outcome, confidence:" and "facts used in this section";
+- `site/src/components/PlaceDateTag.tsx`: "Chapter 1 of 4" and the others;
+- `site/src/components/EraSwitch.tsx` ("Show 2020"), `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Current section:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
 - `site/src/motion/OpeningMotion.tsx`: "Skip";
 - `site/src/app/layout.tsx`: "Skip to content";
 - `site/src/app/page.tsx`: "Introduction", "Note on language and content", "Begin:";
@@ -195,4 +197,4 @@ Small issues found in review and left for later:
   - Scroll positions are measured again whenever any disclosure or the person-card panel opens or closes.
   - Pins are placed under the header by finding it as `body > header`. Moving the header breaks this.
   - A link to a part of a chapter page (`#…`) that names nothing on the page starts at the top.
-- Untested: closing the close view with Escape, the beat ticks, moving focus after a page change, scrolling to a named part of a page, starting at the top, and scroll restoration.
+- Untested: closing the close view with Escape, scrolling and focus after choosing a story-bar link, moving focus after a page change, scrolling to a named part of a page, starting at the top, and scroll restoration.

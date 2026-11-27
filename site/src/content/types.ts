@@ -2,6 +2,13 @@ import type { Text } from "./slot";
 
 export type Era = "historical" | "present";
 export type Status = "sourced" | "reconstructed" | "fictional";
+export type ConfidenceLevel = "high" | "moderate" | "low" | "undetermined";
+
+// A short structured summary of one era's rule: who applies it, and on what evidence.
+export interface EraSummary {
+  decides: Text;
+  evidence: Text;
+}
 
 export interface ImageRef {
   src: string;
@@ -32,6 +39,8 @@ export interface Item {
   alt: Text;
   longDescription: Text;
   transcription: Text | null;
+  // An English translation of the transcription, where the source is not in English.
+  translation: Text | null;
   provenance: Provenance;
   contentNote: Text | null;
   annotations: Annotation[];
@@ -40,6 +49,8 @@ export interface Item {
 
 export interface Basis {
   quote: Text;
+  // An English translation of the quotation, where the source is not in English.
+  quoteTranslation: Text | null;
   citation: Text;
   explanation: Text;
   cardFactsUsed: string[];
@@ -48,6 +59,7 @@ export interface Basis {
 export interface Outcome {
   text: Text;
   confidence: Text;
+  level: ConfidenceLevel;
   citation: Text;
 }
 
@@ -59,6 +71,7 @@ export interface Chapter {
   presentYear: 2020;
   // Whether the chapter page shows the person card. When false, no basis may list card facts.
   showPersonCard: boolean;
+  summary: { historical: EraSummary; present: EraSummary };
   contentNote: Text;
   photograph: Item;
   photographContext: Text;

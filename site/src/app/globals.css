@@ -38,16 +38,19 @@
 }
 
 @layer base {
+  /* Heights these paddings, the pins below and the chapter's bottom padding (ChapterPage, 7rem)
+     depend on: the header is 2.5rem tall, 3.75rem on touch; the story bar (BeatTicks) is one
+     row, 2rem tall, 3.25rem on touch, at every width. */
   html {
     scroll-behavior: auto;
-    /* Keeps focused elements and #beat-N targets clear of the sticky header and the beat bar. */
+    /* Keeps focused elements and #beat-N targets clear of the sticky header and the story bar. */
     scroll-padding-top: 4rem;
     scroll-padding-bottom: 4rem;
   }
 
   @media (pointer: coarse) {
     html {
-      scroll-padding-bottom: 7rem;
+      scroll-padding-bottom: 5.25rem;
     }
   }
 
@@ -225,20 +228,37 @@ html[data-motion-pending] [data-reveal] {
   visibility: hidden;
 }
 
-/* Below the breakpoint the person card's fixed button sits under the header: keep focused
-   elements and #beat-N targets clear of both. */
+/* Below the breakpoint the person card's fixed button and the place-and-date tag sit under the
+   header: keep focused elements and #beat-N targets clear of both. */
 @media (max-width: 1023.98px) {
   html {
     scroll-padding-top: 4.5rem;
   }
 }
-/* On a narrow touch screen the beat bar's 44px targets wrap it to up to three rows (8.75rem
-   measured at 375 and 320 wide); keep the bottom padding clear of it too. */
 @media (max-width: 1023.98px) and (pointer: coarse) {
   html {
     scroll-padding-top: 7rem;
-    scroll-padding-bottom: 9.5rem;
   }
+}
+
+/* The person card's emphasis (CardEmphasis): a bar at the left edge and a stronger label on
+   the facts the rule in view uses, and that era's marks in bold. Elsewhere no bar is drawn.
+   CardEmphasis tweens the bar's scale in full motion and leaves no inline style. */
+[data-fact-bar] {
+  transform: scaleY(0);
+  transform-origin: top;
+}
+:is([data-emphasis="historical"] [data-uses-historical], [data-emphasis="present"] [data-uses-present]) {
+  & [data-fact-bar] {
+    transform: none;
+  }
+  & [data-fact-label] {
+    color: var(--color-ink);
+    font-weight: 600;
+  }
+}
+:is([data-emphasis="historical"] [data-era-mark="historical"], [data-emphasis="present"] [data-era-mark="present"]) {
+  font-weight: 600;
 }
 
 /* At the breakpoint the person card is part of the backdrop: shown, fixed in its reserved

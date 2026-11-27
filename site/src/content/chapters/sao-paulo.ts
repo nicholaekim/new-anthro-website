@@ -17,6 +17,16 @@ export const saoPaulo: Chapter = {
   historicalYear: 1950,
   presentYear: 2020,
   showPersonCard: true,
+  summary: {
+    historical: {
+      decides: "A declarant, often the head of the family; a coder then matches the word against a list",
+      evidence: "A declared word; no ancestry, standing or papers asked",
+    },
+    present: {
+      decides: "Whoever is interviewed: the person, another resident or a non-resident informant",
+      evidence: "A declaration among five read-out options",
+    },
+  },
   contentNote:
     "The quoted census documents on this page use historical Portuguese colour and race terms, some of which are now considered offensive. They appear only inside quotation marks, as the documents' own wording.",
   photograph: {
@@ -28,6 +38,7 @@ export const saoPaulo: Chapter = {
     longDescription:
       "A tall Gothic-style stone facade fills most of the upright frame, with pointed windows, statues in niches and a large rose window above the arched main doorway. Above it, a dome topped by a lantern and cross rises between two unfinished towers, the left wrapped in timber scaffolding and the right boxed in boards, with more scaffolding over the rose window. In the foreground the paved square holds a close group of five men at lower left: one in a uniform and peaked cap, one in a light jacket and hat with his back to the camera, one in a dark suit, and two in hats, one holding a broom beside a bin. Further back are more pedestrians, among them children in white, people seated at the left edge, a stone plinth in the middle of the square, a street lamp and taller apartment buildings at the edges. Two signboards at lower left name the works on the cathedral's towers. The left one reads \"OBRA TORRES DA CATEDRAL\" and \"COMPANHIA CONSTRUTORA NACIONAL S.A.\"; the right one, partly hidden by the men, reads \"OBRAS DAS TORRES DA CATE…\" above another firm's name. A small red ink mark on the print sits on the board casing of the right tower.",
     transcription: null,
+    translation: null,
     provenance: {
       creator:
         "Photographer unknown (the Wikimedia Commons record, uploaded from the Arquivo Nacional's collection, gives \"Unknown\")",
@@ -57,6 +68,7 @@ export const saoPaulo: Chapter = {
         "A single column of printed text on a greyish scanned page, with the page number 28 centred at the foot. The page opens with the end of the instruction for the preceding question on nationality, then runs through headings of the form \"QUESITO 8 — Côr.\" for questions 8 to 12, each followed by one or more paragraphs. The question 8 instruction on colour is the short section in the upper third of the page. The passage on responsibility for the declarations, also transcribed here, is on a different page (printed page 11) and is not shown.",
       transcription:
         "10.7 — RESPONSABILIDADE DAS DECLARAÇÕES\nA responsabilidade das declarações cabe:\na) no boletim de família, ao Chefe da família; no impedimento dêste, ao cônjuge, ao filho mais velho ou a outra pessoa residente no domicílio e em condições de responsabilizar-se pelas informações;\nb) no boletim individual, ao próprio recenseado; [...]\nQUESITO 8 — Côr.\nA côr Amarela sòmente se aplica a pessoas de raça amarela (japonêses, chineses, etc. e seus descendentes). [...]\nEm caso algum deverá ser usada, como resposta, a expressão \"morena\".\n\nEnglish translation: 10.7 — RESPONSIBILITY FOR THE DECLARATIONS\nResponsibility for the declarations lies:\na) on the family bulletin, with the head of the family; if the head is unable, with the spouse, the eldest child or another person living in the household and able to take responsibility for the information;\nb) on the individual bulletin, with the person enumerated; [...]\nQUESTION 8 — Colour.\nThe colour Yellow applies only to persons of the yellow race (Japanese, Chinese, etc. and their descendants). [...]\nIn no case is the expression \"morena\" to be used as an answer.",
+      translation: null,
       provenance: {
         creator:
           "Instituto Brasileiro de Geografia e Estatística (IBGE), Conselho Nacional de Estatística, Serviço Nacional de Recenseamento",
@@ -92,6 +104,7 @@ export const saoPaulo: Chapter = {
         "A printed page without a visible page number. At the top, the codes for question 7 on nationality are set in two columns; below them, the centred heading for question 8 introduces two columns of numbered colour codes, the passage transcribed here. Lower down come the headings for questions 9 and 10 and instructions for coding age in fields 9 and 10. Faint mirror-image text from the other side of the sheet, a list of numbered country names, shows through across the page.",
       transcription:
         "4. Estão incluídas neste Código, além das designações corretas e adequadas, muitas outras que poderão ocorrer, de acôrdo com o próprio entendimento do declarante. [...]\nQUESITO 8 — Côr.\n[left column] 1 — Branca\n2 — Preta — De côr\n3 — Amarela\n4 — Parda — Mulata\n9 — Ignorada\n[right column] 5 — Cafuso\n6 — Caboclo\n7 — Mestiço\n8 — Índio\n9 — Ignorada\n\nEnglish translation: 4. This Code includes, besides the correct and suitable designations, many others that may occur, according to the declarant's own understanding. [...]\nQUESTION 8 — Colour.\n[left column] 1 — White\n2 — Black — \"De côr\"\n3 — Yellow\n4 — Brown — \"Mulata\"\n9 — Unknown\n[right column] 5 — \"Cafuso\"\n6 — \"Caboclo\"\n7 — \"Mestiço\"\n8 — Indigenous (\"Índio\")\n9 — Unknown",
+      translation: null,
       provenance: {
         creator: "Serviço Nacional de Recenseamento, Divisão Técnica (Brazil)",
         title: "Censo demográfico 1950: Código para uso do codificador",
@@ -122,9 +135,11 @@ export const saoPaulo: Chapter = {
     citation: instructions1950 + ", 11, " + instructions1950Url + ", " + accessed,
     explanation:
       "The 1950 census did not tell enumerators to judge colour by sight. Its instructions placed responsibility for every answer on a declarant: the head of the family for everyone on the family bulletin, or the person themself on the individual bulletin. The colour question came with limits only on 'Amarela', reserved for people of Japanese, Chinese or similar origin, and a bar on the answer 'morena'. The coders' manual then matched the written word against a numbered list, and its cover notes that the list includes many other words that may occur, according to the declarant's own understanding.",
+    quoteTranslation: null,
     cardFactsUsed: ["fact-2"],
   },
   outcome: {
+    level: "low",
     text:
       "First, someone declares a colour. If the person heads their household or lives in a collective dwelling, they answer for themself; otherwise the head of the family, or a stand-in such as a spouse or eldest child, answers for them. The card does not say which. Second, the word written decides the code. Fact 2 counts only if the declarant reports the person's own description; the instructions list no answers for question 8. The code numbers 'Parda — Mulata' as 4 and 'Mestiço' as 7, so the result depends on the Portuguese word used, and the code gives no rule for a word it does not list. Facts 1, 3 and 4 play no part: apart from defining 'Amarela' by origin, the rule asks for no ancestry, community standing or papers.",
     confidence:
@@ -147,6 +162,7 @@ export const saoPaulo: Chapter = {
         "A typeset page with a running header naming the survey and the IBGE logo at top right, and the page number 61 in a box at bottom right. Three numbered section headings run down the page: age (10.9), colour or race (10.10) and the informant for this part (10.11). Under 10.10, two paragraphs (the first with \"pelo próprio entrevistado\" in bold) are followed by a two-column table with a black header row, option names on the left and descriptions on the right in alternating grey bands. Below the table, a warning triangle sits beside a rounded box with a further note on the option 'Amarela'.",
       transcription:
         "Cor ou raça (Quesito 10)\nA cor ou raça dos moradores deve ser determinada pelo próprio entrevistado, sem qualquer influência do entrevistador, mesmo que este discorde das informações declaradas. [...]\nLeia as opções de cor ou raça para o entrevistado e marque aquela que for declarada:\n1. Branca | Para a pessoa que se declarar branca.\n2. Preta | Para a pessoa que se declarar preta.\n3. Amarela | Para a pessoa que se declarar de cor amarela (de origem oriental: japonesa, chinesa, coreana etc.).\n4. Parda | Para a pessoa que se declarar parda.\n5. Indígena | Para a pessoa que se declarar indígena ou índia. [...]\n\nEnglish translation: Colour or race (Question 10)\nThe colour or race of the residents must be determined by the person interviewed, without any influence from the interviewer, even if the interviewer disagrees with the information declared. [...]\nRead the colour or race options to the person interviewed and mark the one declared:\n1. White | For the person who declares themself white.\n2. Black | For the person who declares themself black.\n3. Yellow | For the person who declares themself of yellow colour (of \"oriental\" origin: Japanese, Chinese, Korean etc.).\n4. Brown | For the person who declares themself brown.\n5. Indigenous | For the person who declares themself indigenous or \"índia\". [...]",
+      translation: null,
       provenance: {
         creator:
           "Instituto Brasileiro de Geografia e Estatística (IBGE), Diretoria de Pesquisas, Coordenação de Trabalho e Rendimento",
@@ -176,9 +192,11 @@ export const saoPaulo: Chapter = {
       citation: manual2018 + ", 61, " + manual2018Url + ", " + accessed,
       explanation:
         "IBGE's continuous household survey asks colour or race by declaration. The interviewer's manual says to read out five options and mark the one declared, without influencing the answer even when the interviewer disagrees. Each option is defined only as the category a person declares; 'Amarela' alone carries a note on origin. The manual also has the interviewer record whether the answers came from the person, another resident or a non-resident, so one member of a household may still answer for another.",
+      quoteTranslation: null,
       cardFactsUsed: ["fact-2"],
     },
     outcome: {
+      level: "moderate",
       text:
         "The procedure is fixed, and the answer belongs to whoever is interviewed: the person, another resident or a non-resident informant. Fact 2 is only the starting point. Asked, the person says 'mixed', which is not one of the five options, so to be recorded the respondent must choose 'Branca', 'Preta', 'Amarela', 'Parda' or 'Indígena'. The August 2018 manual gives no rule for an answer outside the five options (the June 2022 edition adds one: the interviewer rereads the options and asks the person to choose), and it does not let the interviewer choose. Facts 1, 3 and 4 play no part: apart from a note on origin under 'Amarela', the instruction asks for no ancestry, community standing or documents.",
       confidence:

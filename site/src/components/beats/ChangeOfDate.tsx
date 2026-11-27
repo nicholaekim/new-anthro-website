@@ -31,7 +31,7 @@ export function ChangeOfDate({
       intro={
         <>
           {/* The date line below the heading is this beat's rule. */}
-          <BeatHeading beat={6} rule={false}>Change of date</BeatHeading>
+          <BeatHeading beat={6} rule={false} />
           <div aria-hidden data-date-line className="h-0.5 w-full bg-interface" />
         </>
       }

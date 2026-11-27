@@ -12,7 +12,7 @@ export function PlacePhotograph({ chapter }: { chapter: Chapter }) {
       <PlacePhotographMotion>
         {/* pt-4 keeps the section number off the header's hairline while pinned (see globals.css). */}
         <div className="flex flex-col gap-6 pt-4">
-          <BeatHeading beat={2}>Place</BeatHeading>
+          <BeatHeading beat={2} />
           <ItemView item={chapter.photograph} />
           <p className="measure"><SlotText value={chapter.photographContext} /></p>
         </div>

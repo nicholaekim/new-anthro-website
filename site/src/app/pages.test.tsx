@@ -118,6 +118,14 @@ describe("opening page", () => {
   });
 });
 
+describe("opening page card", () => {
+  it("shows the facts only: no era marks, no rule links, no confidence", () => {
+    const { container } = render(<OpeningPage />);
+    expect(container.querySelectorAll("[data-fact]")).toHaveLength(4);
+    expect(container.querySelector("[data-era-mark], [data-meter], [data-emphasis], a[href^=\"#beat-\"]")).toBeNull();
+  });
+});
+
 describe("ending page", () => {
   it("renders the conclusion, records, reflection and the closing notes in order", () => {
     const { container } = render(<EndingPage />);

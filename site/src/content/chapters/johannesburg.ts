@@ -15,6 +15,16 @@ export const johannesburg: Chapter = {
   historicalYear: 1955,
   presentYear: 2020,
   showPersonCard: true,
+  summary: {
+    historical: {
+      decides: "The Director of Census; on objection, a board",
+      evidence: "Appearance, general acceptance and, for one category, membership “in fact”",
+    },
+    present: {
+      decides: "The employee, on a workplace form; the employer if the employee refuses or gives inaccurate information",
+      evidence: "Self-declaration; failing that, “reliable historical and existing data”",
+    },
+  },
   contentNote:
     "This chapter quotes South African laws from 1950 that use the racial terms of their time, such as \"native\" and \"coloured person\", and a form in use in 2020 that uses present-day population-group labels. These terms appear only as the sources' own wording.",
   photograph: {
@@ -26,6 +36,7 @@ export const johannesburg: Chapter = {
     longDescription:
       "An oblique aerial view taken from above a traffic circle planted with palm trees in the foreground. Avenues lined with trees run away from the circle between apartment and office blocks of ten or more storeys, mixed with lower houses with pitched roofs. Farther back the buildings grow denser, and along the horizon a row of large pale mine dumps stands against low hills. Faint lettering on shop fronts at the lower left cannot be read; cars and a bus are on the roads, and the print's edges show some wear.",
     transcription: null,
+    translation: null,
     provenance: {
       creator: "Unknown author (as stated by the file page)",
       title: "Aerial view of Johannesburg (Italian: \"Veduta aerea di Johannesburg\")",
@@ -54,6 +65,7 @@ export const johannesburg: Chapter = {
         "A single printed page with the running head \"Population Registration.\" and the page number 277 at the top right, and \"Act No. 30 of 1950.\" in bold in the right margin. Most of the page is a list of definitions numbered (ii) to (xv), the end of section 1; the \"native\" definition sits near the middle of the list and the \"white person\" definition is the last item. The opening words of section 1 and its first definition, (i), are on the preceding English page, 275; the \"coloured person\" definition is near the top of this page. Below the list are sections 2, 3 and the start of section 4, each with a short marginal note in the right margin.",
       transcription:
         "1. In this Act, unless the context otherwise indicates—\n[...]\n(iii) \"coloured person\" means a person who is not a white person or a native; (iv)\n[...]\n(x) \"native\" means a person who in fact is or is generally accepted as a member of any aboriginal race or tribe of Africa; (vii)\n[...]\n(xv) \"white person\" means a person who in appearance obviously is, or who is generally accepted as a white person, but does not include a person who, although in appearance obviously a white person, is generally accepted as a coloured person. (i)",
+      translation: null,
       provenance: {
         creator: "Parliament of the Union of South Africa",
         title: "Population Registration Act, No. 30 of 1950 (assented to 22 June 1950), section 1, as enacted",
@@ -92,6 +104,7 @@ export const johannesburg: Chapter = {
       longDescription: slot("longer description"),
       transcription:
         "2. (1) For the purposes of this Act, there shall be the following groups:\n(a) a white group, in which shall be included any person who in appearance, obviously is, or who is generally accepted as a white person, other than a person who although in appearance obviously a white person, is generally accepted as a coloured person, [...]\n(b) a native group, in which shall be included—\n(i) any person who in fact is, or is generally accepted as a member of an aboriginal race or tribe of Africa, other than a person who is, in terms of sub-paragraph (ii) of paragraph (c), a member of the coloured group; [...]\n(c) a coloured group, in which shall be included—\n(i) any person who is not a member of the white group or of the native group; [...]",
+      translation: null,
       provenance: {
         creator: "Parliament of the Union of South Africa",
         title: "Group Areas Act, No. 41 of 1950 (assented to 24 June 1950), section 2, as enacted",
@@ -129,9 +142,11 @@ export const johannesburg: Chapter = {
       ", accessed 26 November 2026.",
     explanation:
       "The Act made classification an administrative decision. Section 5(1) required the Director of Census to place every registered person in one of three categories, applying the definitions in section 1. Those definitions rest on three tests: how a person looked, whether others generally accepted them as belonging to a group, and, for \"native\", whether the person \"in fact\" was a member of an \"aboriginal race or tribe of Africa\". Section 19(1) added that a person who \"in appearance obviously is a white person\" is \"presumed to be a white person until the contrary is proved\". Section 3 told the Director to draw the register's particulars from the 1951 census returns and other available records. The person's own description of themself is not named anywhere in these provisions.",
+    quoteTranslation: null,
     cardFactsUsed: ["fact-3"],
   },
   outcome: {
+    level: "undetermined",
     text:
       "The Director decides (section 5(1)). The first limb of the \"white person\" definition, appearance, cannot be applied from the card alone. The second limb, general acceptance, depends on fact 3: no single community claims this person, so the card shows no general acceptance as \"white\", as \"coloured\" or as a member of an \"aboriginal race or tribe of Africa\". The Act does not say whether one grandparent recorded as of African descent (fact 1) makes someone \"in fact\" such a member. Self-description (fact 2) is not a test in the definitions, though the person could object to their own classification under section 11(1), and the birth certificate (fact 4) records no race. Because \"coloured person\" is the residual category, the result turns on the Director's judgement of appearance and of whether the person is \"in fact\" such a member.",
     confidence:
@@ -156,6 +171,7 @@ export const johannesburg: Chapter = {
         "The gazette's running head and the page number 13 are at the top, and a footer line about the gazette's online availability is at the bottom. Below the head, a boxed banner carries the Department of Labour emblem on the left and \"PAGE 1 OF 1\" and \"EEA1\" on the right. The form itself is a bordered box under the title and \"(Confidential)\": a narrow left column of notes headed \"Please read this first\" and a wider right column of numbered questions with empty tick boxes. The row of four category boxes sits in the right column under question 3, and the definition of designated groups is in the left column under \"Please note\".",
       transcription:
         "DECLARATION BY EMPLOYEE\n(Confidential)\n[...]\nThis form is used to obtain information from employees for the purpose of assisting employers in conducting an analysis on the workforce profile. [...]\n3. Please indicate to which categories you belong with an 'X' below:\nMale Female\nAfrican Coloured Indian White\n[...]\n'Designated groups', mean black people, women and people with disabilities who-\na) Are citizens of the Republic of South Africa by birth or descent; or\nb) Became citizens of the Republic of South Africa by naturalization - [...]\n4. I verify that the above information is true and correct.",
+      translation: null,
       provenance: {
         creator: "Department of Labour, Republic of South Africa (Minister of Labour, Mildred Nelisiwe Oliphant)",
         title:
@@ -186,9 +202,11 @@ export const johannesburg: Chapter = {
         ", accessed 26 November 2026.",
       explanation:
         "In 2020 the classification that counted at work was, in the first instance, a self-declaration. Regulation 8 required a designated employer to ask each employee to complete the EEA1 form, and allowed the employee to add information to it. The purpose was to count the workforce for employment equity analysis and reporting, not to enter people in a population register. Only if the employee refused, or gave inaccurate information, could the employer fall back on \"reliable historical and existing data\". The regulations do not say what such data are or who judges the inaccuracy.",
+      quoteTranslation: null,
       cardFactsUsed: ["fact-2", "fact-4"],
     },
     outcome: {
+      level: "low",
       text:
         "This applies only if the person works for a designated employer, which the card does not state. The form asks the person to mark with an \"X\" the \"categories\" they belong to, listing \"African\", \"Coloured\", \"Indian\" and \"White\". Fact 2 is the starting point, but \"mixed\" is not offered. The form does not limit the person to one box or say what to do if more than one applies, and the person may add information, as regulation 8(2) allows. Appearance, neighbours' acceptance (fact 3) and ancestry (fact 1) are not asked. If the answer were inaccurate, the employer could use \"reliable historical and existing data\", but the birth certificate (fact 4) holds no race entry. Whether the person falls in a \"designated group\" also depends on citizenship, which the card does not state.",
       confidence:

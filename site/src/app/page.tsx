@@ -39,7 +39,7 @@ export default function OpeningPage() {
             <span data-opening-bar="y" className="absolute inset-y-0 left-0 w-px bg-paper" />
             <span data-opening-bar="y" className="absolute inset-y-0 right-0 w-px bg-paper" />
           </div>
-          <PersonCardView person={person} used={[]} />
+          <PersonCardView person={person} />
         </div>
         <section aria-labelledby="site-note-heading" className="flex flex-col gap-3">
           <h2 id="site-note-heading" className="font-title text-xl">Note on language and content</h2>

@@ -24,5 +24,6 @@ export default async function Page({ params }: PageProps<"/chapters/[slug]">) {
     ? { href: `/chapters/${following.slug}`, label: `${following.place}, ${following.historicalYear}` }
     : { href: "/ending", label: "Ending" };
 
-  return <ChapterPage chapter={chapter} person={person} next={next} />;
+  const position = { number: chapters.indexOf(chapter) + 1, count: chapters.length };
+  return <ChapterPage chapter={chapter} person={person} next={next} position={position} />;
 }

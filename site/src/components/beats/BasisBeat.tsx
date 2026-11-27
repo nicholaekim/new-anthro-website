@@ -36,7 +36,7 @@ export function BasisView({ basis, person }: { basis: Basis; person: PersonCard 
 export function BasisBeat({ basis, person }: { basis: Basis; person: PersonCard | null }) {
   return (
     <section data-beat="4" id="beat-4" aria-labelledby="beat-4-heading" className="beat flex flex-col gap-10">
-      <BeatHeading beat={4}>Basis</BeatHeading>
+      <BeatHeading beat={4} />
       <BasisView basis={basis} person={person} />
     </section>
   );

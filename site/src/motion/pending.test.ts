@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { resolveMotionMode, type MotionMode } from "./motionMode";
+import { MOTION_ATTR, resolveMotionMode, type MotionMode } from "./motionMode";
 import { PENDING_ATTR, PENDING_FAILSAFE_MS, pendingScript, shouldMarkPending } from "./pending";
 
 const combinations: [boolean, MotionMode | null][] = [
@@ -49,6 +49,11 @@ describe("pendingScript", () => {
     expect(PENDING_FAILSAFE_MS).toBe(2500);
     timers[0][0]();
     expect(attrs.has(PENDING_ATTR)).toBe(false);
+  });
+
+  it.each(combinations)("reduced %s, override %s: sets data-motion to the mode", (reduced, override) => {
+    const { attrs } = runScript(reduced, { getItem: (key) => (key === "opmb:motion" ? override : null) });
+    expect(attrs.get(MOTION_ATTR)).toBe(resolveMotionMode(reduced, override));
   });
 
   it("treats storage that throws as no override, without throwing", () => {
