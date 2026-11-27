@@ -93,6 +93,11 @@ describe("comparison matrix tables", () => {
     const disclosures = row.querySelectorAll("details");
     expect(disclosures).toHaveLength(2);
     expect(disclosures[0]).toHaveTextContent("[fixture outcome]");
+    // The written confidence statement and the citation, as each outcome's record gave them.
+    expect(disclosures[0]).toHaveTextContent("Confidence: [fixture confidence]");
+    expect(disclosures[0]).toHaveTextContent("Citation: [fixture citation]");
+    expect(disclosures[1]).toHaveTextContent("Confidence: [fixture confidence]");
+    expect(disclosures[1]).toHaveTextContent("Citation: [fixture citation]");
     const hrefs = [...row.querySelectorAll("a")].map((a) => a.getAttribute("href"));
     expect(hrefs).toEqual([`/chapters/${first.slug}#beat-5`, `/chapters/${first.slug}#beat-7`]);
     const legend = within(section).getByRole("list", { name: "Confidence" });

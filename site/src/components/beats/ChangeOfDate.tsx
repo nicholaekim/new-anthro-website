@@ -6,7 +6,7 @@ import { ConfidenceMeter } from "../ConfidenceMeter";
 import { Disclosure } from "../Disclosure";
 import { Mount } from "../Mount";
 import { SlotText } from "../SlotText";
-import { CONFIDENCE_WORDS, NO_PERSON_PLACED } from "../story";
+import { CONFIDENCE_WORDS, NO_PERSON_PLACED, sectionTag } from "../story";
 
 // Beat 6: the two dates side by side in time. Each era is a complete panel: its year, its
 // document ([data-document]) and what the rule says ([data-info]): the instrument's title, who
@@ -19,6 +19,8 @@ export function ChangeOfDate({ chapter, historical, present }: { chapter: Chapte
       historicalYear={chapter.historicalYear}
       presentYear={chapter.presentYear}
       intro={<BeatHeading beat={6} rule={false} />}
+      // An empty frame's note would be cut by the wipe: swap the documents at the midpoint instead.
+      swap={!historical.image || !present.image}
       eras={{
         historical: (
           <EraPanel
@@ -28,6 +30,7 @@ export function ChangeOfDate({ chapter, historical, present }: { chapter: Chapte
             basis={chapter.basis}
             outcome={chapter.outcome}
             outcomeBeat={5}
+            ruleBeat={4}
             placesPerson={chapter.showPersonCard}
           />
         ),
@@ -39,6 +42,7 @@ export function ChangeOfDate({ chapter, historical, present }: { chapter: Chapte
             basis={chapter.present.basis}
             outcome={chapter.present.outcome}
             outcomeBeat={7}
+            ruleBeat={7}
             placesPerson={chapter.showPersonCard}
           />
         ),
@@ -54,6 +58,7 @@ function EraPanel({
   basis,
   outcome,
   outcomeBeat,
+  ruleBeat,
   placesPerson,
 }: {
   year: number;
@@ -62,6 +67,7 @@ function EraPanel({
   basis: Basis | null;
   outcome: Outcome | null;
   outcomeBeat: 5 | 7;
+  ruleBeat: 4 | 7;
   placesPerson: boolean;
 }) {
   return (
@@ -73,6 +79,9 @@ function EraPanel({
             {year}
           </p>
         )}
+        {/* eager: a lazy image is not fetched while clipped or hidden (checked in Chrome: an image
+            in the 2020 document, cut back to nothing at the start of the wipe, was never
+            requested), so it would appear late, once the wipe had begun to uncover it. */}
         <Mount image={item.image} alt={item.alt} gapNote={item.gapNote} eager />
       </div>
       <div data-info className="flex flex-col gap-4 font-interface text-sm">
@@ -96,17 +105,26 @@ function EraPanel({
             <Bilingual
               original={basis.quote}
               translation={basis.quoteTranslation}
+              lang={basis.originalLang}
               render={(text, part) => (
                 <blockquote
+                  data-rule-quote
                   className={`border-l-2 border-paper/40 pl-4 leading-[1.6] whitespace-pre-line ${part === "original" ? "font-source text-[0.875rem]" : "font-yours text-[0.9375rem]"}`}
                 >
                   {text}
                 </blockquote>
               )}
             />
-            <Disclosure summary="Citation">
-              <span className="soft"><SlotText value={basis.citation} /></span>
-            </Disclosure>
+            {/* While pinned the quotation is shortened to fit the view (globals.css) and this link
+                takes its place's citation's: the section it goes to quotes the rule in full. */}
+            <a data-full-rule href={`#beat-${ruleBeat}`} className="target quiet self-start hover:text-interface">
+              Read the full rule: {sectionTag(ruleBeat)}
+            </a>
+            <div data-rule-citation>
+              <Disclosure summary="Citation">
+                <span className="soft"><SlotText value={basis.citation} /></span>
+              </Disclosure>
+            </div>
           </div>
         )}
         {outcome ? (

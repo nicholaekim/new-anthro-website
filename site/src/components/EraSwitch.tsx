@@ -41,7 +41,7 @@ export function EraSwitch({
         value={year}
         onChange={(e) => onYear(Number(e.currentTarget.value))}
         aria-label={`Date, from ${from} to ${to}`}
-        aria-valuetext={rangeValueText(year, from, to)}
+        aria-valuetext={rangeValueText(year, eraInView, from, to)}
         className="era-range min-w-0 flex-1"
       />
       {button("present", to)}

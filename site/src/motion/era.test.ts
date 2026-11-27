@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { progressBetween } from "@/components/story";
-import { eraYear, progressFromYear, rangeValueText, scrollForProgress, yearFromProgress } from "./era";
+import { progressFromYear, rangeValueText, scrollForProgress, yearFromProgress } from "./era";
 
 describe("yearFromProgress", () => {
   it("is the historical year at 0, 2020 at 1, and whole years between", () => {
@@ -54,19 +54,17 @@ describe("scrollForProgress", () => {
   });
 });
 
-describe("eraYear", () => {
-  it("is the year of the era in view: the historical year below half way, 2020 from half way", () => {
-    expect(eraYear(0, 1930, 2020)).toBe(1930);
-    expect(eraYear(0.49, 1930, 2020)).toBe(1930);
-    expect(eraYear(0.5, 1930, 2020)).toBe(2020);
-  });
-});
-
 describe("rangeValueText", () => {
-  it("names the year in view, and the year the range is at when that differs", () => {
-    expect(rangeValueText(1930, 1930, 2020)).toBe("1930 in view");
-    expect(rangeValueText(1962, 1930, 2020)).toBe("1962, 1930 in view");
-    expect(rangeValueText(1975, 1930, 2020)).toBe("1975, 2020 in view");
-    expect(rangeValueText(2020, 1930, 2020)).toBe("2020 in view");
+  it("names the era in view, and the year the range is at when that differs", () => {
+    expect(rangeValueText(1930, "historical", 1930, 2020)).toBe("1930 in view");
+    expect(rangeValueText(1962, "historical", 1930, 2020)).toBe("1962, 1930 in view");
+    expect(rangeValueText(1975, "present", 1930, 2020)).toBe("1975, 2020 in view");
+    expect(rangeValueText(2020, "present", 1930, 2020)).toBe("2020 in view");
+  });
+
+  it("names the era shown, not one worked out from the year: at the midpoint of an even span they can differ", () => {
+    // Pinned, the range follows the scroll (1975, half way) while the eased scrub still shows 1930.
+    expect(rangeValueText(1975, "historical", 1930, 2020)).toBe("1975, 1930 in view");
+    expect(rangeValueText(1974, "present", 1930, 2020)).toBe("1974, 2020 in view");
   });
 });

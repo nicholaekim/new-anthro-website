@@ -1,9 +1,9 @@
 import { person } from "./person";
 import { highlights as allHighlights, type Highlight } from "./regions";
 import { isSlot, type Text } from "./slot";
-import type { Basis, Chapter, ConfidenceLevel } from "./types";
+import { CONFIDENCE_LEVELS, type Basis, type Chapter, type ConfidenceLevel } from "./types";
 
-const LEVELS: readonly ConfidenceLevel[] = ["high", "moderate", "low", "undetermined"];
+const LEVELS: readonly ConfidenceLevel[] = CONFIDENCE_LEVELS;
 
 // Fractions that add up to 1 may come out a hair over it.
 const EPSILON = 1e-9;

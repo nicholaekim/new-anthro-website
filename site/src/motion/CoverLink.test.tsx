@@ -56,6 +56,30 @@ function renderLink(href = "/ending", card?: TitleCard) {
 const cover = () => document.querySelector("[data-cover]");
 
 describe("CoverLink", () => {
+  it("goes to the second link chosen while the cover closes, with the second link's card", () => {
+    const first: TitleCard = { kicker: "Chapter 1 of 4", title: "First place", year: 1930 };
+    const second: TitleCard = { kicker: "Chapter 2 of 4", title: "Second place", year: 1950 };
+    render(
+      <MotionProvider>
+        <CoverProvider>
+          <CoverLink href="/chapters/first" card={first}>First</CoverLink>
+          <CoverLink href="/chapters/second" card={second}>Second</CoverLink>
+        </CoverProvider>
+      </MotionProvider>,
+    );
+    fireEvent.click(screen.getByRole("link", { name: "First" }));
+    fireEvent.click(screen.getByRole("link", { name: "Second" }));
+    expect(nav.linkNavigated).not.toHaveBeenCalled();
+    expect(cover()).toHaveTextContent("Second place");
+    expect(cover()).not.toHaveTextContent("First place");
+    act(() => {
+      for (const tween of gsap.getTweensOf(cover())) tween.progress(1);
+    });
+    expect(nav.push).toHaveBeenCalledTimes(1);
+    expect(nav.push).toHaveBeenCalledWith("/chapters/second");
+  });
+
+
   it("in still mode navigates as a plain link and renders no cover", () => {
     window.matchMedia = (media: string) => ({ ...realMatchMedia(media), matches: media === "(prefers-reduced-motion: reduce)" });
     renderLink();

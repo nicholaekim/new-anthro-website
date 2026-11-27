@@ -99,7 +99,11 @@ function CellView({ chapter: c, card, era, view }: { chapter: Chapter; card: Tit
           </p>
           <div className="w-full">
             <Disclosure summary={<>Read the outcome<span className="sr-only">{`, ${c.place}, ${year}`}</span></>}>
-              <p className="font-yours text-base leading-normal"><SlotText value={cell.text} /></p>
+              <div className="flex flex-col gap-2">
+                <p className="font-yours text-base leading-normal"><SlotText value={cell.text} /></p>
+                <p><span className="soft">Confidence:</span> <SlotText value={cell.confidence} /></p>
+                <p><span className="soft">Citation:</span> <SlotText value={cell.citation} /></p>
+              </div>
             </Disclosure>
           </div>
         </>

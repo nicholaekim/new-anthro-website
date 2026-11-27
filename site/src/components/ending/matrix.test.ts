@@ -19,8 +19,22 @@ describe("matrixCell", () => {
   });
 
   it("shows each era's outcome level and full text, linked to the section that gives it", () => {
-    expect(matrixCell(c, "historical", "outcome")).toEqual({ kind: "outcome", level: "high", text: c.outcome?.text, beat: 5 });
-    expect(matrixCell(c, "present", "outcome")).toEqual({ kind: "outcome", level: "low", text: c.present.outcome?.text, beat: 7 });
+    expect(matrixCell(c, "historical", "outcome")).toEqual({
+      kind: "outcome",
+      level: "high",
+      text: c.outcome?.text,
+      confidence: c.outcome?.confidence,
+      citation: c.outcome?.citation,
+      beat: 5,
+    });
+    expect(matrixCell(c, "present", "outcome")).toEqual({
+      kind: "outcome",
+      level: "low",
+      text: c.present.outcome?.text,
+      confidence: c.present.outcome?.confidence,
+      citation: c.present.outcome?.citation,
+      beat: 7,
+    });
   });
 
   it("for a chapter with no outcome, says none is given and links to the change of date, which says the same", () => {

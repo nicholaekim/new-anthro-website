@@ -61,6 +61,31 @@ describe("linkSegments", () => {
     expect(linkSegments(`See ${url}.`)).toEqual([{ text: "See " }, { text: url, href: url }, { text: "." }]);
   });
 
+  it("keeps an encoded letter and a comma inside an address, and drops a comma after it", () => {
+    const url = "https://example.org/S%C3%A3o_Paulo,_1950/page";
+    expect(linkSegments(`Census of ${url}, page 11.`)).toEqual([
+      { text: "Census of " },
+      { text: url, href: url },
+      { text: ", page 11." },
+    ]);
+  });
+
+  it("leaves a closing quotation mark, bracket or angle bracket after an address as text", () => {
+    for (const close of ["”", "]", ">"]) {
+      expect(linkSegments(`See https://example.org/a${close}.`)).toEqual([
+        { text: "See " },
+        { text: "https://example.org/a", href: "https://example.org/a" },
+        { text: `${close}.` },
+      ]);
+    }
+  });
+
+  it("is plain text for an entry with no web address, even one that names a site", () => {
+    expect(linkSegments("Arquivo Nacional, Rio de Janeiro, fundo Correio da Manhã.")).toEqual([
+      { text: "Arquivo Nacional, Rio de Janeiro, fundo Correio da Manhã." },
+    ]);
+  });
+
   it("links every address in an entry, and an address at the very end", () => {
     expect(linkSegments("https://a.example/x and https://b.example/y")).toEqual([
       { text: "https://a.example/x", href: "https://a.example/x" },

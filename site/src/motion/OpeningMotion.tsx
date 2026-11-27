@@ -6,7 +6,7 @@ import { DURATION, RISE } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 import { readOpeningSeen, shouldPlayOpening, storeOpeningSeen } from "./opening";
 import { RevealCueContext } from "./Reveal";
-import { SEQUENCE_CONTROL, useSequence } from "./useSequence";
+import { focusTitle, SEQUENCE_CONTROL, useSequence } from "./useSequence";
 
 const noSubscription = () => () => {};
 
@@ -53,9 +53,7 @@ function OpeningSequence({ children }: { children: ReactNode }) {
   function skip() {
     finish();
     // The button goes away: keep focus on the page, at its heading.
-    const heading = scope.current?.querySelector<HTMLElement>("h1");
-    if (heading && !heading.hasAttribute("tabindex")) heading.setAttribute("tabindex", "-1");
-    heading?.focus();
+    focusTitle(scope.current);
   }
 
   return (

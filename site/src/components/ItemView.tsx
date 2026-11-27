@@ -15,13 +15,7 @@ export function ItemView({ item }: { item: Item }) {
   const body = (
     <div className="flex flex-col gap-5 font-yours text-[1.0625rem] leading-[1.65]">
       <Mount image={item.image} alt={item.alt} gapNote={item.gapNote} />
-      <CloseView item={item}>
-        {item.image?.largeSrc && (
-          <a href={item.image.largeSrc} className="target quiet px-2 text-sm">
-            Large image
-          </a>
-        )}
-      </CloseView>
+      <CloseView item={item} />
       <dl className="flex flex-col gap-5">
         {isSlot(item.alt) && (
           <div>
@@ -37,7 +31,7 @@ export function ItemView({ item }: { item: Item }) {
           <div>
             <dt className={FIELD}>Transcription</dt>
             <dd>
-              <Transcription text={item.transcription} translation={item.translation} />
+              <Transcription text={item.transcription} translation={item.translation} lang={item.originalLang} />
             </dd>
           </div>
         )}

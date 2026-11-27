@@ -2,7 +2,10 @@ import type { Text } from "./slot";
 
 export type Era = "historical" | "present";
 export type Status = "sourced" | "reconstructed" | "fictional";
-export type ConfidenceLevel = "high" | "moderate" | "low" | "undetermined";
+// The four confidence levels, most determinable first: the one list the type, the validator and
+// the meter's legend read.
+export const CONFIDENCE_LEVELS = ["high", "moderate", "low", "undetermined"] as const;
+export type ConfidenceLevel = (typeof CONFIDENCE_LEVELS)[number];
 
 // A short structured summary of one era's rule: who applies it, and on what evidence.
 export interface EraSummary {
@@ -14,7 +17,6 @@ export interface ImageRef {
   src: string;
   width: number;
   height: number;
-  largeSrc?: string;
 }
 
 export interface Provenance {
@@ -41,6 +43,9 @@ export interface Item {
   transcription: Text | null;
   // An English translation of the transcription, where the source is not in English.
   translation: Text | null;
+  // The language of the transcription where it is not English, as a BCP 47 tag ("pt"), so the
+  // original is read in its own language. Structural, not wording.
+  originalLang?: string;
   provenance: Provenance;
   contentNote: Text | null;
   annotations: Annotation[];
@@ -51,6 +56,8 @@ export interface Basis {
   quote: Text;
   // An English translation of the quotation, where the source is not in English.
   quoteTranslation: Text | null;
+  // The language of the quotation where it is not English ("pt"), as for an item.
+  originalLang?: string;
   citation: Text;
   explanation: Text;
   cardFactsUsed: string[];

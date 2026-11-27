@@ -10,6 +10,7 @@ import { Disclosure } from "../Disclosure";
 import { Mount } from "../Mount";
 import { ProvenanceList } from "../ProvenanceList";
 import { SlotText } from "../SlotText";
+import { HighlightList } from "./HighlightList";
 import { ViewerStage, type ZoomRequest } from "./ViewerStage";
 
 const PANEL_HEADING = "caps soft mb-2";
@@ -49,7 +50,8 @@ export function DocumentViewer({
   const [selectedId, setSelectedId] = useState<string | null>(initial?.id ?? null);
   const [request, setRequest] = useState<ZoomRequest | null>(initial ? { id: initial.id, seq: 1 } : null);
   const [showOutlines, setShowOutlines] = useState(true);
-  const [message, setMessage] = useState(initial ? choiceMessage(initial, item) : "");
+  // Empty at first: a live region announces a change, not what it held when it appeared.
+  const [message, setMessage] = useState("");
   const seq = useRef(1);
   const panelRef = useRef<HTMLDivElement>(null);
 
@@ -83,6 +85,10 @@ export function DocumentViewer({
   const initialAnnotation = initial?.annotationIds[0];
   useEffect(() => {
     if (initialAnnotation) scrollPanelTo(initialAnnotation);
+    // Said a moment after the dialog opens, once the live region is there to announce it.
+    if (!initial) return;
+    const timer = setTimeout(() => setMessage(choiceMessage(initial, item)), 100);
+    return () => clearTimeout(timer);
     // Once, on opening.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -105,7 +111,7 @@ export function DocumentViewer({
             <div className="flex h-[min(72svh,44rem)] flex-col lg:h-auto lg:min-h-0 lg:flex-1">
               <ViewerStage
                 image={image}
-                src={image.largeSrc ?? image.src}
+                src={image.src}
                 alt={isSlot(item.alt) ? `[${item.alt.slot}]` : item.alt}
                 highlights={highlights}
                 selectedId={selectedId}
@@ -132,27 +138,13 @@ export function DocumentViewer({
                   Show highlights
                 </button>
               </div>
-              <ul aria-labelledby={`${headingId}-highlights`} className="-mx-2 flex flex-wrap gap-x-1">
-                {highlights.map((h, i) => (
-                  <li key={h.id}>
-                    <button
-                      type="button"
-                      aria-current={h.id === selectedId ? "true" : undefined}
-                      onClick={() => choose(h.id, "page")}
-                      className="target quiet gap-1.5 px-2 text-sm aria-[current=true]:border-(--soft) aria-[current=true]:no-underline"
-                    >
-                      <span aria-hidden className="soft tabular-nums">{i + 1}</span>
-                      {h.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <HighlightList
+                labelledBy={`${headingId}-highlights`}
+                highlights={highlights}
+                selectedId={selectedId}
+                onChoose={(id) => choose(id, "page")}
+              />
             </div>
-          )}
-          {image?.largeSrc && (
-            <a href={image.largeSrc} className="target quiet -mx-2 self-start px-2 text-sm">
-              Large image
-            </a>
           )}
         </div>
         <div
@@ -163,7 +155,7 @@ export function DocumentViewer({
           {item.transcription !== null && (
             <div>
               <h3 className={PANEL_HEADING}>Transcription</h3>
-              <Transcription text={item.transcription} translation={item.translation} />
+              <Transcription text={item.transcription} translation={item.translation} lang={item.originalLang} />
             </div>
           )}
           {item.annotations.length > 0 && (

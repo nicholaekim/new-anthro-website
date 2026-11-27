@@ -4,10 +4,11 @@ import Image from "next/image";
 import { useEffect, useEffectEvent, useId, useLayoutEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { Highlight } from "@/content/regions";
 import type { ImageRef } from "@/content/types";
-import { gsap, HOUSE_EASE, useGSAP } from "@/motion/gsap";
+import { DURATION, gsap, HOUSE_EASE, useGSAP } from "@/motion/gsap";
 import { useMotionMode } from "@/motion/MotionProvider";
 import {
   fitSize,
+  MIN_SCALE,
   fitWidthView,
   panBy,
   regionRect,
@@ -19,6 +20,12 @@ import {
   type Size,
   type View,
 } from "./transform";
+
+// A point of an event in the viewport's own coordinates: inside its border, where the page is drawn.
+function inside(el: HTMLElement, e: { clientX: number; clientY: number }): Point {
+  const box = el.getBoundingClientRect();
+  return { x: e.clientX - box.left - el.clientLeft, y: e.clientY - box.top - el.clientTop };
+}
 
 interface Layout {
   viewport: Size;
@@ -80,7 +87,8 @@ export function ViewerStage({
     if (!el || typeof ResizeObserver === "undefined") return;
     const measure = () => {
       const viewport = { width: el.clientWidth, height: el.clientHeight };
-      if (viewport.width === 0 || viewport.height === 0) return;
+      // Nothing to lay out until both the viewport and the image have a size.
+      if (viewport.width === 0 || viewport.height === 0 || !(image.width > 0 && image.height > 0)) return;
       const content = fitSize(image, viewport);
       setLayout((prev) => {
         if (prev && prev.viewport.width === viewport.width && prev.viewport.height === viewport.height) return prev;
@@ -109,7 +117,7 @@ export function ViewerStage({
         const proxy = { ...from };
         tweenRef.current = gsap.to(proxy, {
           ...to,
-          duration: 0.6,
+          duration: DURATION.glide,
           ease: HOUSE_EASE,
           onUpdate: () => setLayout((cur) => cur && { ...cur, view: { ...proxy } }),
         });
@@ -128,14 +136,19 @@ export function ViewerStage({
     setLayout((l) => l && { ...l, view: next(l) });
   };
 
+  const announceZoom = (view: View) => setZoomMessage(`Zoom ${Math.round(view.scale * 100)} percent`);
+
   // Go to a view chosen through a control (Reset, Fit width, a highlight): glides in full motion,
-  // instant in still.
-  const moveTo = (next: (l: Layout) => View) => {
+  // instant in still. announce: say the zoom it ends at (Reset and Fit width; a chosen highlight
+  // says its own name).
+  const moveTo = (next: (l: Layout) => View, announce = false) => {
     const l = layoutRef.current;
     if (!l) return;
     stopTween();
-    if (glide.current) glide.current(l.view, next(l));
-    else setLayout((cur) => cur && { ...cur, view: next(cur) });
+    const view = next(l);
+    if (glide.current) glide.current(l.view, view);
+    else setLayout((cur) => cur && { ...cur, view });
+    if (announce) announceZoom(view);
   };
 
   // A highlight chosen in the panel or on the page: centre and zoom to it, once the viewport is known.
@@ -150,33 +163,37 @@ export function ViewerStage({
     showRegion(h);
   }, [request, measured, highlights]);
 
-  // Wheel and trackpad zoom about the pointer. Not a React listener: those are passive, and the
-  // page behind must not scroll.
+  // Wheel and trackpad zoom about the pointer. Not a React listener: those are passive, and while
+  // zooming the page behind must not scroll. But while the page is whole and the dialog is one
+  // scrolling column (below the breakpoint), a plain wheel scrolls the dialog past the image, as
+  // anywhere else; a trackpad pinch (ctrlKey) and the buttons still zoom, and once zoomed the
+  // wheel zooms until the page is whole again.
+  const onWheel = useEffectEvent((e: WheelEvent, el: HTMLDivElement) => {
+    const l = layoutRef.current;
+    const dialog = el.closest("dialog");
+    const columnScrolls = !!dialog && dialog.scrollHeight > dialog.clientHeight + 1;
+    if (!e.ctrlKey && columnScrolls && (!l || l.view.scale <= MIN_SCALE)) return;
+    e.preventDefault();
+    const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? el.clientHeight : 1;
+    // A trackpad pinch arrives as a wheel with ctrlKey and small deltas.
+    const factor = Math.exp(-e.deltaY * unit * (e.ctrlKey ? 0.01 : 0.002));
+    const point = inside(el, e);
+    update((cur) => zoomAt(cur.view, factor, point, cur.content, cur.viewport));
+  });
   useEffect(() => {
     const el = viewportRef.current;
     if (!el) return;
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? el.clientHeight : 1;
-      // A trackpad pinch arrives as a wheel with ctrlKey and small deltas.
-      const factor = Math.exp(-e.deltaY * unit * (e.ctrlKey ? 0.01 : 0.002));
-      const box = el.getBoundingClientRect();
-      const point = { x: e.clientX - box.left, y: e.clientY - box.top };
-      update((l) => zoomAt(l.view, factor, point, l.content, l.viewport));
-    };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
-  });
+    const listener = (e: WheelEvent) => onWheel(e, el);
+    el.addEventListener("wheel", listener, { passive: false });
+    return () => el.removeEventListener("wheel", listener);
+  }, []);
 
   // Drag with one pointer, pinch with two. A press that does not move stays a click on whatever
   // it landed on (a highlight's outline); once it moves the viewport captures it, so the click
   // that follows a drag lands on the viewport, not on an outline.
   const pointers = useRef(new Map<number, Point>());
   const dragging = useRef(false);
-  const local = (e: PointerEvent) => {
-    const box = e.currentTarget.getBoundingClientRect();
-    return { x: e.clientX - box.left, y: e.clientY - box.top };
-  };
+  const local = (e: PointerEvent<HTMLDivElement>) => inside(e.currentTarget, e);
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     stopTween();
@@ -216,16 +233,13 @@ export function ViewerStage({
     pointers.current.delete(e.pointerId);
   };
 
-  const announceZoom = (l: Layout | null) => {
-    if (l) setZoomMessage(`Zoom ${Math.round(l.view.scale * 100)} percent`);
-  };
   const zoomBy = (factor: number) => {
     const l = layoutRef.current;
     if (!l) return;
     const centre = { x: l.viewport.width / 2, y: l.viewport.height / 2 };
     const view = zoomAt(l.view, factor, centre, l.content, l.viewport);
     update(() => view);
-    announceZoom({ ...l, view });
+    announceZoom(view);
   };
 
   // Keys only while the image area itself has focus; an outline inside it keeps its own keys.
@@ -268,14 +282,14 @@ export function ViewerStage({
         </button>
         <button
           type="button"
-          onClick={() => moveTo((l) => fitWidthView(l.content, l.viewport))}
+          onClick={() => moveTo((l) => fitWidthView(l.content, l.viewport), true)}
           className="target quiet px-2 text-sm"
         >
           Fit width
         </button>
         <button
           type="button"
-          onClick={() => moveTo((l) => wholePage(l.content, l.viewport))}
+          onClick={() => moveTo((l) => wholePage(l.content, l.viewport), true)}
           className="target quiet px-2 text-sm"
         >
           Reset<span className="sr-only"> to the whole page</span>
@@ -299,7 +313,10 @@ export function ViewerStage({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerEnd}
         onPointerCancel={onPointerEnd}
-        className="relative min-h-0 flex-1 cursor-grab touch-none overflow-hidden border border-(--hair) bg-paper-deep select-none active:cursor-grabbing"
+        // While the page is whole a one-finger drag scrolls the dialog past it (a phone); once
+        // zoomed, every touch gesture is the viewer's, to pan and pinch.
+        style={{ touchAction: !view || view.scale <= MIN_SCALE ? "pan-y" : "none" }}
+        className="relative min-h-0 flex-1 cursor-grab overflow-hidden border border-(--hair) bg-paper-deep select-none active:cursor-grabbing"
       >
         <div
           data-viewer-page
@@ -342,8 +359,9 @@ export function ViewerStage({
                   // detail 0: chosen from the keyboard, whatever the pointer did before.
                   if (e.detail === 0 || !dragging.current) onChoose(h.id);
                 }}
-                className="viewer-outline absolute"
-                style={{ left: r.x, top: r.y, width: r.width, height: r.height }}
+                className="viewer-outline absolute top-0 left-0"
+                // Placed by transform; its size follows the zoom so the line stays thin.
+                style={{ width: r.width, height: r.height, transform: `translate(${r.x}px, ${r.y}px)` }}
               >
                 <span aria-hidden data-outline-line />
                 <span aria-hidden data-outline-number>

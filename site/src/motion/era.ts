@@ -33,13 +33,11 @@ export function scrollForProgress(progress: number, start: number, end: number):
   return start + clamp(progress) * (end - start);
 }
 
-// The year of the era in view.
-export function eraYear(progress: number, from: number, to: number): number {
-  return eraFromProgress(progress) === "present" ? to : from;
-}
-
-// The range's aria-valuetext: the year in view, after the range's own year when that differs.
-export function rangeValueText(year: number, from: number, to: number): string {
-  const inView = eraYear(progressFromYear(year, from, to), from, to);
+// The range's aria-valuetext: the year of the era shown, after the range's own year when that
+// differs. The era is the one the stage shows, passed in, not worked out from the year: pinned,
+// the range follows the scroll while the stage follows the scrub's eased copy of it, so near the
+// midpoint the two can disagree, and the reader must hear what is shown.
+export function rangeValueText(year: number, era: Era, from: number, to: number): string {
+  const inView = era === "present" ? to : from;
   return year === inView ? `${inView} in view` : `${year}, ${inView} in view`;
 }

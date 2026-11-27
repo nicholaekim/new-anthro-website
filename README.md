@@ -56,7 +56,7 @@ Only one test file reads your content files: `site/src/content/content.test.ts`.
    image: { src: "/images/your-file.jpg", width: 1200, height: 1600 },
    ```
 
-3. You can add a larger version for the close view with `largeSrc: "/images/your-file-large.jpg"`. It loads only when the close view opens, and a "Large image" link to it appears beside the item. Without it, the close view loads the file at `src` as it is (not resized), so zooming in stays sharp up to that file's own size.
+3. The close view loads the file at `src` as it is (not resized), so zooming in stays sharp up to that file's own size: use the largest file you have.
 4. Fill the item's `alt` (short alternative text) and `longDescription`. A document with an image must also have a `transcription`. The tests report a document image without one.
 5. Add the image's row to your credits ledger (see below), and fill the item's `provenance` fields.
 
@@ -96,17 +96,17 @@ The site's own words (beat headings, button and link labels, and labels such as 
 
 - `site/src/components/story.ts`: the section labels ("Title", "Place", "Items", "Basis", "Outcome", "Change of date", "Present day", "Next"), used both for the section headings and in the story bar ("04 Basis"), and the confidence words ("High", "Moderate", "Low", "Cannot be determined") and the person card's marks ("1930: used", "2020: not used");
 - `site/src/components/BeatHeading.tsx`: the small section numbers ("02", "03" and so on) shown above each chapter section heading. They are decoration, hidden from screen readers, and show the beat number;
-- `site/src/components/beats/`: "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.", and in beat 6 (`ChangeOfDate.tsx`) "Who decides", "On what evidence", "The rule, as quoted", "Outcome confidence" and "See the outcome". "No person is placed in this chapter, so no outcome is given." is in `story.ts` (`NO_PERSON_PLACED`), shared by beat 6 and the ending's matrix;
-- `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance", "Large image", "Content note:";
+- `site/src/components/beats/`: "Content note:", "Person-card facts used:", "Confidence:", "Citation", "Instrument", "Reflection", "No items.", and in beat 6 (`ChangeOfDate.tsx`) "Who decides", "On what evidence", "The rule, as quoted", "Outcome confidence", "See the outcome" and, while the stage is pinned, "Read the full rule:". "No person is placed in this chapter, so no outcome is given." is in `story.ts` (`NO_PERSON_PLACED`), shared by beat 6 and the ending's matrix;
+- `site/src/components/ItemView.tsx`: "Alternative text", "Description", "Transcription", "Annotations", "Provenance", "Content note:";
 - `site/src/components/CloseView.tsx`: "Open close view", "Highlights on this page";
-- `site/src/components/viewer/DocumentViewer.tsx`: "Close view:", "Close", "Highlights", "Show highlights", "Transcription", "Annotations", "About the chosen highlight", "Show on page:", "Source information", "Large image", and what screen readers hear when a highlight is chosen ("Showing Paragraph 151. Annotations 1 and 2 marked.");
+- `site/src/components/viewer/DocumentViewer.tsx`: "Close view:", "Close", "Highlights", "Show highlights", "Transcription", "Annotations", "About the chosen highlight", "Show on page:", "Source information", and what screen readers hear when a highlight is chosen ("Showing Paragraph 151. Annotations 1 and 2 marked.");
 - `site/src/components/viewer/ViewerStage.tsx`: "Zoom in", "Zoom out", "Fit width", "Reset" (read as "Reset to the whole page"), the instruction under the image, the image area's name "Page image", and the spoken zoom level ("Zoom 125 percent");
 - `site/src/components/Bilingual.tsx`: "Original" and "English translation";
 - `site/src/components/ProvenanceList.tsx`: the provenance field names, shared by the item and the close view;
 - `site/src/components/Mount.tsx`: "No image";
 - `site/src/components/PersonCardView.tsx` and `PersonCardPanel.tsx`: "Person card", "Reason:", "See the rule", "In this chapter", "Outcome confidence", "Close", and for screen readers "outcome, confidence:" and "facts used in this section";
 - `site/src/components/PlaceDateTag.tsx`: "Chapter 1 of 4" and the others;
-- `site/src/components/EraSwitch.tsx` (the two years as buttons, named "Show 1930" and "Show 2020" and so on for screen readers, and the range, named "Date, from 1930 to 2020"); `site/src/motion/era.ts` (the range's spoken value, such as "1962, 1930 in view"); `site/src/motion/ChangeOfDateMotion.tsx` (what screen readers hear when the era changes, "Now showing 2020."); `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Current section:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending", and the cover's "Chapter 1 of 4"), `beats/ChapterCard.tsx` ("Chapter 01" on the title page), `RestartButton.tsx` ("Restart"; the ending's closing panel names the same control "Start again"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
+- `site/src/components/EraSwitch.tsx` (the two years as buttons, named "Show 1930" and "Show 2020" and so on for screen readers, and the range, named "Date, from 1930 to 2020"); `site/src/motion/era.ts` (the range's spoken value, such as "1962, 1930 in view"); `site/src/motion/ChangeOfDateMotion.tsx` (what screen readers hear when the era changes, "Now showing 2020."); `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Sections, current:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending", and the cover's "Chapter 1 of 4"), `beats/ChapterCard.tsx` ("Chapter 01" on the title page), `RestartButton.tsx` ("Restart"; the ending's closing panel names the same control "Start again"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
 - `site/src/motion/OpeningMotion.tsx`: "Skip";
 - `site/src/app/layout.tsx`: "Skip to content";
 - `site/src/app/page.tsx`: "Introduction", "Note on language and content", "Begin:";
@@ -140,12 +140,12 @@ Beat 6 compares the two dates. Without scripts, and before the page's script has
 Once the script runs, at every width and in both motion modes, the two panels become one stage with one control:
 
 - a range from the historical year to 2020, with the two years as buttons at its ends. Arrow keys, Home and End work on the range;
-- the 2020 document wipes over the historical one from the left, with a brass divider, as the range moves;
+- the 2020 document wipes over the historical one from the left, with a brass divider, as the range moves; where either document has no image, the two swap at the midpoint instead, so an empty frame's note is never cut;
 - a large date counts between the two years (decoration; screen readers hear the range's value instead);
-- the information panel shows the era in view, switching at the midpoint, and screen readers hear "Now showing 2020." (or the historical year) when it switches. The panel not in view is hidden;
+- the information panel shows the era in view, switching at the midpoint, and screen readers hear "Now showing 2020." (or the historical year) when it switches (not while the range has focus: its own value says it). The panel not in view is hidden; if focus was inside it, focus moves to the range;
 - the person card emphasises the facts used by the rule of the era in view.
 
-In full motion at 1024 pixels and wider, the section pins and scrolling moves the same value: scrolling moves the range, dragging the range scrolls the page to the matching place, and the year buttons scroll there smoothly. Elsewhere nothing pins: the range moves the stage directly, and the year buttons carry it across in about a second and a half in full motion, or at once with motion off. Set in `site/src/components/beats/ChangeOfDate.tsx` (the panels), `site/src/motion/ChangeOfDateMotion.tsx` (the stage), `site/src/components/EraSwitch.tsx` (the control), `site/src/motion/era.ts` (the arithmetic) and the beat 6 rules in `site/src/app/globals.css`.
+In full motion at 1024 pixels and wider, the section pins and scrolling moves the same value: scrolling moves the range, dragging the range scrolls the page to the matching place, and the year buttons scroll there smoothly. Elsewhere nothing pins: the range moves the stage directly, and the year buttons carry it across in about a second and a half in full motion, or at once with motion off. Switching Motion, or crossing 1024 pixels, keeps the value unless the section was pinned; leaving the pin returns it to the historical year. Set in `site/src/components/beats/ChangeOfDate.tsx` (the panels), `site/src/motion/ChangeOfDateMotion.tsx` (the stage), `site/src/components/EraSwitch.tsx` (the control), `site/src/motion/era.ts` (the arithmetic) and the beat 6 rules in `site/src/app/globals.css`.
 
 ### Motion extras
 
@@ -201,7 +201,7 @@ These items from the design plan were not built:
 These gaps in the default design were not built either:
 
 - The person card and the outcome sheet carry no status label (sourced, reconstructed or fictional). Only items do.
-- Images have no `sizes` hint, and only beat 6's two documents are set to load eagerly (a document hidden behind the wipe is otherwise never fetched). The browser may fetch a larger file than it shows, and the first image on a page is not given priority.
+- Images have no `sizes` hint, and only beat 6's two documents are set to load eagerly (a document clipped or hidden by the comparison is otherwise never fetched until it starts to show). The browser may fetch a larger file than it shows, and the first image on a page is not given priority.
 
 The Tobique chapter has no outcome and no reserved-colour mark. A test checks this.
 
@@ -218,20 +218,18 @@ Small issues found in review and left for later:
 - Layout:
   - On large screens the person card sits on the left, but in reading order it comes after the main content.
   - While beat 6 shows 2020, the place-and-date tag still shows the historical year. The tag changes at beat 7.
-  - Beats 2 and 6 pin their whole content. In beat 6 the documents are scaled down so the heading, the control, the date and the documents fit the window during the pin; where the information panel is longer than the window allows (the São Paulo and Johannesburg quotations at 1280 by 800), the panel scrolls inside itself, and while the pointer is over it the mouse wheel scrolls the panel before the page. Beat 2 is not scaled: if your real content there is taller than the window, the bottom part is out of view until the pin ends.
-  - During beat 6's wipe, two documents without images show their notes cut at the divider; each note is whole at either end of the range.
+  - Beats 2 and 6 pin their whole content. In beat 6 the documents are scaled down so the heading, the control, the date and the documents fit the window during the pin; nothing scrolls inside the pin: while pinned, the information panel shows the quotation shortened to a few lines, with a link to the section that quotes it in full (4 or 7) in place of its citation. The full quotation is still in the page and is read in full. Beat 2 is not scaled: if your real content there is taller than the window, the bottom part is out of view until the pin ends.
   - Below 1024 pixels the place-and-date tag sits on its own row under the header and lets clicks through, so it covers no control, but it does cover a strip of the page beneath it.
-  - A person-card panel opened on a narrow window stays open if the window is widened past 1024 pixels.
+  - A person-card panel opened on a narrow window stays open if the window is widened past 1024 pixels; it no longer dims the page there.
 - Without scripts:
-  - The "Open close view" button and the highlight names under a document image do nothing. The image, transcription and annotations are shown in the page itself, and the "Large image" link still works when the item has a `largeSrc`.
+  - The "Open close view" button and the highlight names under a document image do nothing. The image, transcription and annotations are shown in the page itself.
   - The previous and next beat links go to beats 1 and 2.
 - Behaviour:
   - The menu marks the current page by an exact path match. This would break if trailing slashes were turned on in the Next.js config.
   - Restart clears what the site has stored, but the Motion button keeps its setting until the page is reloaded.
   - While the cover between pages is up (about one and a half seconds), keyboard focus stays on the page beneath it.
-  - The place-and-date tag measures the page on every scroll.
   - Scroll positions are measured again whenever any disclosure or the person-card panel opens or closes.
   - Pins are placed under the header by finding it as `body > header`. Moving the header breaks this.
   - A link to a part of a chapter page (`#…`) that names nothing on the page starts at the top.
-- Checked by hand in a browser but not by the automated tests: closing the close view with Escape, and the close view's wheel, drag, pinch and keys and the alignment of its outlines (the arithmetic behind them is tested).
-- Untested: scrolling and focus after choosing a story-bar link, moving focus after a page change, scrolling to a named part of a page, starting at the top, and scroll restoration.
+- Checked by hand in a browser but not by the automated tests: closing the close view with Escape, and the close view's drag and pinch and the alignment of its outlines (the arithmetic behind them is tested; its keys and wheel are tested).
+- Untested: scrolling to a named part of a page, starting at the top, and scroll restoration.

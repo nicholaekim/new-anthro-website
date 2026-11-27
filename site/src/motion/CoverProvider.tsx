@@ -41,6 +41,22 @@ export function CoverProvider({ children }: { children: ReactNode }) {
   const target = useRef<{ href: string; from: string; pushed: boolean; closedAt: number | null } | null>(null);
 
   function start(href: string, next?: TitleCard): boolean {
+    // A second link chosen while the cover is busy: before the first route is pushed the cover
+    // goes to the second instead, with its card; after, the second navigates as a plain cut and
+    // no card is shown, so the first link's title never stands over the second page.
+    const t = target.current;
+    if (busy.current && t) {
+      if (t.pushed) {
+        setCard(null);
+        return false;
+      }
+      // A link back to the page the cover started from is ignored: the cover is already leaving it.
+      if (shouldCover(mode, t.from, href)) {
+        t.href = href;
+        setCard(next ?? null);
+      }
+      return true;
+    }
     if (busy.current || !shouldCover(mode, pathname, href)) return false;
     busy.current = true;
     target.current = { href, from: pathname, pushed: false, closedAt: null };

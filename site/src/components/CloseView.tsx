@@ -1,24 +1,22 @@
 "use client";
 
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { highlights as allHighlights, type Highlight } from "@/content/regions";
 import { isSlot } from "@/content/slot";
 import type { Item } from "@/content/types";
 import { DocumentViewer } from "./viewer/DocumentViewer";
+import { HighlightList } from "./viewer/HighlightList";
 
 // The close view: a modal native dialog holding the document viewer, opened by "Open close view"
 // or, under a document image, by the name of one of its highlights, which opens it at that
 // highlight. Its contents (and so the full-size image) render only while it is open. The
 // dialog's own Escape handling closes it; either way focus returns to the control that opened it.
-// children: further controls for the row beside "Open close view" (the "Large image" link).
 export function CloseView({
   item,
   highlights = allHighlights[item.id] ?? [],
-  children,
 }: {
   item: Item;
   highlights?: Highlight[];
-  children?: ReactNode;
 }) {
   const [open, setOpen] = useState<{ at: string | null } | null>(null);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -54,21 +52,7 @@ export function CloseView({
           <p id={listId} className="caps soft">
             Highlights on this page
           </p>
-          <ul aria-labelledby={listId} className="-mx-2 flex flex-wrap gap-x-1">
-            {pageHighlights.map((h) => (
-              <li key={h.id}>
-                <button
-                  type="button"
-                  data-highlight-opener={h.id}
-                  aria-haspopup="dialog"
-                  onClick={(e) => openAt(h.id, e)}
-                  className="target quiet px-2 text-sm"
-                >
-                  {h.label}
-                </button>
-              </li>
-            ))}
-          </ul>
+          <HighlightList labelledBy={listId} highlights={pageHighlights} onChoose={openAt} opensDialog />
         </div>
       )}
       <div className="-mx-2 flex flex-wrap gap-x-2">
@@ -82,7 +66,6 @@ export function CloseView({
         >
           Open close view
         </button>
-        {children}
       </div>
       <dialog
         ref={dialogRef}

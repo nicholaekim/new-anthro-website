@@ -24,8 +24,9 @@ export function parseReferences(text: string): ReferenceGroup[] {
 export type Segment = { text: string; href?: string };
 
 // An entry split into text and web addresses. An address runs from https:// to the next space;
-// a full stop, comma, semicolon or colon at its end is the sentence's, and so is a closing
-// bracket the address did not open ("(https://…/4.0/).").
+// a full stop, comma, semicolon or colon at its end is the sentence's, and so are a closing
+// quotation mark, square or angle bracket, and a round bracket the address did not open
+// ("(https://…/4.0/).").
 export function linkSegments(entry: string): Segment[] {
   const segments: Segment[] = [];
   let last = 0;
@@ -45,7 +46,7 @@ function trimUrl(url: string): string {
   for (;;) {
     const ch = url[end - 1];
     const part = url.slice(0, end);
-    if (".,;:".includes(ch)) end -= 1;
+    if (".,;:”’\"']>".includes(ch)) end -= 1;
     else if (ch === ")" && count(part, "(") < count(part, ")")) end -= 1;
     else return part;
   }

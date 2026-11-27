@@ -14,7 +14,8 @@ export const MATRIX_VIEWS: readonly { view: MatrixView; label: string }[] = [
 // What one cell shows, and the chapter section it summarises.
 export type Cell =
   | { kind: "text"; text: Text; beat: Beat }
-  | { kind: "outcome"; level: ConfidenceLevel; text: Text; beat: Beat }
+  // The outcome with its written confidence statement and its citation, as the chapter gives them.
+  | { kind: "outcome"; level: ConfidenceLevel; text: Text; confidence: Text; citation: Text; beat: Beat }
   // No outcome: the change of date says that no person is placed in the chapter.
   | { kind: "none"; beat: Beat };
 
@@ -25,7 +26,8 @@ export function matrixCell(c: Pick<Chapter, "summary" | "outcome" | "present">, 
   if (view === "outcome") {
     const outcome = era === "historical" ? c.outcome : c.present.outcome;
     if (!outcome) return { kind: "none", beat: 6 };
-    return { kind: "outcome", level: outcome.level, text: outcome.text, beat: OUTCOME_BEAT[era] };
+    const { level, text, confidence, citation } = outcome;
+    return { kind: "outcome", level, text, confidence, citation, beat: OUTCOME_BEAT[era] };
   }
   return { kind: "text", text: c.summary[era][view], beat: RULE_BEAT[era] };
 }

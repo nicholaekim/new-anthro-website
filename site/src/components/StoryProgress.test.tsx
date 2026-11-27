@@ -1,4 +1,5 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
+import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Chapter } from "@/content/types";
 import { MotionProvider } from "@/motion/MotionProvider";
@@ -8,15 +9,19 @@ import { ChapterPage } from "./ChapterPage";
 // jsdom has no layout: place each section so that the one named is at the top of the view and the
 // next is a full view below it.
 let current = 1;
+// Tops set by a test, by beat, in place of the default spacing.
+let tops: Record<number, number> = {};
 function place(beat: number) {
   current = beat;
+  tops = {};
 }
+const scrollPaddingTop = () => parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
 
 beforeEach(() => {
   sessionStorage.setItem("opmb:motion", "still");
   vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (this: HTMLElement) {
     const beat = this.matches("section[data-beat]") ? Number(this.dataset.beat) : current;
-    const top = (beat - current) * 1000;
+    const top = tops[beat] ?? (beat - current) * 1000;
     return { top, bottom: top + 900, left: 0, right: 0, width: 0, height: 900, x: 0, y: top, toJSON: () => ({}) };
   });
 });
@@ -25,8 +30,9 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-async function scrollTo(beat: number) {
+async function scrollTo(beat: number, at: Record<number, number> = {}) {
   place(beat);
+  tops = at;
   await act(async () => {
     window.dispatchEvent(new Event("scroll"));
     await new Promise((resolve) => requestAnimationFrame(resolve));
@@ -56,9 +62,13 @@ describe("story navigation", () => {
     const { container } = renderChapter();
     await scrollTo(4);
     expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "4");
+    // One current step, the tick; the list marks its link as the current location.
     const current = bar().querySelectorAll('[aria-current="step"]');
-    expect([...current].map((a) => a.getAttribute("href"))).toEqual(["#beat-4", "#beat-4"]);
+    expect([...current].map((a) => a.getAttribute("href"))).toEqual(["#beat-4"]);
+    expect(current[0]).toHaveAttribute("data-tick", "4");
+    expect(bar().querySelector('[data-section-list] [aria-current="location"]')).toHaveAttribute("href", "#beat-4");
     expect(within(bar()).getByText("04 Basis", { selector: "summary *" })).toBeInTheDocument();
+    expect(bar().querySelector("summary")).toHaveTextContent(/^Sections, current: 04 Basis/);
     await scrollTo(7);
     expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "7");
   });
@@ -93,6 +103,50 @@ describe("story navigation", () => {
       "07 Present day",
       "08 Next",
     ]);
+  });
+
+  it("names the section list plainly before a section is known", () => {
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(
+      <ChapterPage chapter={chapterUsing()} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} />,
+    );
+    expect(host.querySelector("[data-section-list] summary")).toHaveTextContent(/^Sections▴$/);
+  });
+
+  it("goes next to the section below the top line, even a short one the reading line has passed", async () => {
+    const { container } = renderChapter();
+    // Section 4 is at the top line; section 5 is short, its top already above the reading line,
+    // so it is the active one; an active-section rule would go next to 6.
+    await scrollTo(4, { 4: scrollPaddingTop(), 5: 100 + scrollPaddingTop(), 6: 400 + scrollPaddingTop() });
+    expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "5");
+    const next = within(bar()).getByRole("link", { name: "Next section" });
+    const into = vi.fn();
+    HTMLElement.prototype.scrollIntoView = into;
+    fireEvent.click(next);
+    expect(into.mock.contexts[0]).toBe(document.getElementById("beat-5"));
+  });
+
+  it("leaves a modified click to the browser", async () => {
+    renderChapter();
+    await scrollTo(4);
+    const into = vi.fn();
+    HTMLElement.prototype.scrollIntoView = into;
+    const next = within(bar()).getByRole("link", { name: "Next section" });
+    for (const modifier of [{ ctrlKey: true }, { metaKey: true }, { shiftKey: true }, { altKey: true }, { button: 1 }]) {
+      expect(fireEvent.click(next, modifier)).toBe(true); // not prevented
+    }
+    expect(into).not.toHaveBeenCalled();
+  });
+
+  it("closes the section list when the pointer goes down outside it", async () => {
+    renderChapter();
+    const list = bar().querySelector<HTMLDetailsElement>("[data-section-list]");
+    if (!list) throw new Error("no list");
+    list.open = true;
+    fireEvent.pointerDown(list.querySelector("summary") as Element);
+    expect(list.open).toBe(true);
+    fireEvent.pointerDown(document.body);
+    expect(list.open).toBe(false);
   });
 
   it("uses the same labels as the section headings", () => {

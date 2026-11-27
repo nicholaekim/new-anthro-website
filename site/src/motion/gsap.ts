@@ -24,6 +24,7 @@ export const DURATION = {
   coverClose: 0.4, // the cover fading in over the page
   coverOpen: 0.5, // the cover fading away over the new page
   part: 0.6, // a small part arriving: a section number, a rule, a label, the Begin link
+  glide: 0.6, // the close view moving to a chosen view (Reset, Fit width, a highlight)
   cardHold: 0.7, // once closed, the cover's title card stays at least this long
   enter: 0.8, // a block rising into place
   title: 0.9, // each line of a page title

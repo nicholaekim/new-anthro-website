@@ -23,6 +23,14 @@ describe("Bilingual", () => {
     expect(parts[1].querySelector("blockquote")).toHaveTextContent("Original text");
   });
 
+  it("sets the original's language on its text only, never on the English label or translation", () => {
+    const { container } = render(<Bilingual original="Texto original" translation="Original text" lang="pt" render={box} />);
+    const marked = [...container.querySelectorAll("[lang]")];
+    expect(marked.map((el) => [el.getAttribute("lang"), el.textContent])).toEqual([["pt", "Texto original"]]);
+    const alone = render(<Bilingual original="Texto" translation={null} lang="pt" render={box} />);
+    expect(alone.container.querySelector("blockquote [lang='pt']")).toHaveTextContent("Texto");
+  });
+
   it("marks a placeholder in either part", () => {
     const { container } = render(<Bilingual original={{ slot: "a" }} translation={{ slot: "b" }} render={box} />);
     expect(container.querySelectorAll("[data-slot]")).toHaveLength(2);

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { cleanup as cleanupAll, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderToString } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -59,7 +59,7 @@ describe("beat 6 without its script", () => {
     }
     expect(panel(beat6, "historical").querySelector('a[href="#beat-5"]')).toHaveTextContent("See the outcome");
     expect(panel(beat6, "historical")).toHaveTextContent("High");
-    expect(panel(beat6, "present").querySelector('a[href="#beat-7"]')).toHaveTextContent("See the outcome");
+    expect(panel(beat6, "present").querySelector('a[href="#beat-7"]:not([data-full-rule])')).toHaveTextContent("See the outcome");
     expect(panel(beat6, "present")).toHaveTextContent("Low");
   });
 });
@@ -108,6 +108,95 @@ describe("beat 6 comparison", () => {
     expect(live).toHaveTextContent("Now showing 1901.");
   });
 
+  it("moves focus to the range when the panel holding it is hidden, without scrolling", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    const link = panel(beat6, "historical").querySelector<HTMLAnchorElement>('a[href="#beat-5"]');
+    if (!link) throw new Error("no outcome link");
+    link.focus();
+    const focus = vi.spyOn(HTMLElement.prototype, "focus");
+    fireEvent.change(range, { target: { value: "2020" } });
+    expect(panel(beat6, "historical")).toHaveAttribute("inert");
+    expect(document.activeElement).toBe(range);
+    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+  });
+
+  it("leaves focus alone when it is not in the panel being hidden", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const button = within(beat6).getByRole("button", { name: "Show 2020" });
+    button.focus();
+    fireEvent.change(within(beat6).getByRole("slider"), { target: { value: "2020" } });
+    expect(document.activeElement).toBe(button);
+  });
+
+  it("does not announce the era in the live region when the focused range already says it", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    const live = beat6.querySelector('[aria-live="polite"]');
+    range.focus();
+    fireEvent.change(range, { target: { value: "2020" } });
+    expect(range).toHaveAttribute("aria-valuetext", "2020 in view");
+    expect(live?.textContent).toBe("");
+  });
+
+  it("keeps the value when Motion is switched below the breakpoint", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { MotionProvider, ChapterPage, MotionSwitch } = await load();
+    const { container } = render(
+      <MotionProvider>
+        <MotionSwitch />
+        <ChapterPage chapter={fixtureChapter()} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} />
+      </MotionProvider>,
+    );
+    const beat6 = container.querySelector<HTMLElement>('section[data-beat="6"]') as HTMLElement;
+    fireEvent.change(within(beat6).getByRole("slider"), { target: { value: "2010" } });
+    await userEvent.click(screen.getByRole("button", { name: "Motion" }));
+    expect(within(beat6).getByRole("slider")).toHaveValue("2010");
+    expect(beat6.querySelector("[data-date-indicator]")).toHaveTextContent("2010");
+    expect(panel(beat6, "present")).not.toHaveAttribute("aria-hidden");
+  });
+
+  it("wipes between two images, but swaps at the midpoint when a document has no image, so no text is cut", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const stage = beat6.querySelector("[data-stage]");
+    expect(stage).toHaveAttribute("data-swap");
+    cleanupAll();
+    const c = fixtureChapter();
+    c.items[0].image = { src: "/a.png", width: 10, height: 10 };
+    if (c.present.instrument) c.present.instrument.image = { src: "/b.png", width: 10, height: 10 };
+    const both = await renderChapter(c);
+    expect(both.beat6.querySelector("[data-stage]")).not.toHaveAttribute("data-swap");
+  });
+
+  it("hides the divider's year label that would run past the frame's edge", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    const range = within(beat6).getByRole("slider");
+    const stage = beat6.querySelector("[data-stage]");
+    fireEvent.change(range, { target: { value: "1905" } });
+    expect(stage).toHaveAttribute("data-wipe-edge", "start");
+    fireEvent.change(range, { target: { value: "1960" } });
+    expect(stage).not.toHaveAttribute("data-wipe-edge");
+    fireEvent.change(range, { target: { value: "2015" } });
+    expect(stage).toHaveAttribute("data-wipe-edge", "end");
+  });
+
+  it("offers a link to the full rule from each era's panel, for the pinned stage that shortens it", async () => {
+    sessionStorage.setItem("opmb:motion", "still");
+    const { beat6 } = await renderChapter();
+    for (const [era, beat] of [["historical", 4], ["present", 7]] as const) {
+      const link = panel(beat6, era).querySelector("a[data-full-rule]");
+      expect(link).toHaveAttribute("href", `#beat-${beat}`);
+      expect(link).toHaveTextContent(/^Read the full rule/);
+    }
+    // The quotation itself is whole in the markup.
+    expect(panel(beat6, "historical").querySelector("blockquote")).toHaveTextContent("fixture quote");
+  });
+
   it("in still mode the year buttons set the value at once, without scrolling", async () => {
     sessionStorage.setItem("opmb:motion", "still");
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
@@ -153,7 +242,7 @@ describe("beat 6 comparison", () => {
     const { beat6 } = await renderChapter(c);
     const frames = [...beat6.querySelectorAll("[data-document] [data-empty-mount]")];
     expect(frames.map((f) => f.textContent)).toEqual(["fixture historical gap note", "No image"]);
-    expect(beat6.querySelector('a[href="#beat-5"], a[href="#beat-7"]')).toBeNull();
+    expect(within(beat6).queryByRole("link", { name: /see the outcome/i })).toBeNull();
     for (const era of ["historical", "present"]) {
       expect(panel(beat6, era)).toHaveTextContent("No person is placed in this chapter, so no outcome is given.");
     }

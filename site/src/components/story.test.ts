@@ -10,6 +10,7 @@ import {
   neighbours,
   progressBetween,
   sectionTag,
+  stepIndex,
 } from "./story";
 
 describe("activeIndex", () => {
@@ -62,6 +63,27 @@ describe("neighbours", () => {
 
   it("treats an unknown active section as the first", () => {
     expect(neighbours(beats, null)).toEqual({ previous: null, next: 2 });
+  });
+});
+
+describe("stepIndex", () => {
+  // The scroll-padding line at 64px; sections 2 and 3 are short, both below the line.
+  const tops = [-2000, -300, 64, 200, 400, 1800];
+
+  it("goes next to the first section below the line, even a short one the reading line has passed", () => {
+    expect(stepIndex(tops, 64, 1)).toBe(3);
+    expect(stepIndex([-500, 63.5, 300], 64, 1)).toBe(2);
+  });
+
+  it("goes back to the last section above the line, not the one sitting on it", () => {
+    expect(stepIndex(tops, 64, -1)).toBe(1);
+    expect(stepIndex([-500, -100, 64.5, 300], 64, -1)).toBe(1);
+  });
+
+  it("is -1 when there is nowhere to go", () => {
+    expect(stepIndex([64, 900], 64, -1)).toBe(-1);
+    expect(stepIndex([-900, -300, 64], 64, 1)).toBe(-1);
+    expect(stepIndex([], 64, 1)).toBe(-1);
   });
 });
 
@@ -147,7 +169,7 @@ describe("confidence", () => {
     expect(confidenceSteps("high")).toBe(4);
     expect(confidenceSteps("moderate")).toBe(3);
     expect(confidenceSteps("low")).toBe(2);
-    expect(confidenceSteps("undetermined")).toBe(1);
+    expect(confidenceSteps("undetermined")).toBe(0);
   });
 
   it("names each level in words", () => {

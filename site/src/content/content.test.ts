@@ -79,6 +79,68 @@ describe("chapters", () => {
     expect(levels).toEqual(["high", "moderate", "low", "moderate", "undetermined", "low"]);
   });
 
+  it("has the summaries and levels of the plan's table, word for word", () => {
+    const table = chapters.map((c) => [
+      c.slug,
+      c.outcome?.level ?? null,
+      c.summary.historical.decides,
+      c.summary.historical.evidence,
+      c.present.outcome?.level ?? null,
+      c.summary.present.decides,
+      c.summary.present.evidence,
+    ]);
+    expect(table).toEqual([
+      [
+        "louisiana",
+        "high",
+        "The census enumerator",
+        "Ancestry, whatever the share",
+        "moderate",
+        "The person, or whoever fills in the household’s form",
+        "Self-identification; the Census Bureau classifies what is written",
+      ],
+      [
+        "sao-paulo",
+        "low",
+        "A declarant, often the head of the family; a coder then matches the word against a list",
+        "A declared word; no ancestry, standing or papers asked",
+        "moderate",
+        "Whoever is interviewed: the person, another resident or a non-resident informant",
+        "A declaration among five read-out options",
+      ],
+      [
+        "johannesburg",
+        "undetermined",
+        "The Director of Census; on objection, a board",
+        "Appearance, general acceptance and, for one category, membership “in fact”",
+        "low",
+        "The employee, on a workplace form; the employer if the employee refuses or gives inaccurate information",
+        "Self-declaration; failing that, “reliable historical and existing data”",
+      ],
+      [
+        "tobique",
+        null,
+        "The Registrar, a federal officer; one reference to a judge",
+        "Recorded descent through men, band membership and marriage",
+        null,
+        "The Registrar, on application",
+        "Descent through either parent; credible evidence where an ancestor is unknown or unstated",
+      ],
+    ]);
+  });
+
+  it("marks the São Paulo originals as Portuguese, and no other chapter's", () => {
+    for (const c of chapters) {
+      const sources = [...c.items, ...(c.present.instrument ? [c.present.instrument] : [])]
+        .filter((i) => i.translation !== null)
+        .map((i) => i.originalLang);
+      const quotes = [c.basis, c.present.basis].filter((b) => b && b.quoteTranslation !== null).map((b) => b?.originalLang);
+      const expected = c.slug === "sao-paulo" ? "pt" : undefined;
+      for (const lang of [...sources, ...quotes]) expect(lang).toBe(expected);
+      if (c.slug === "sao-paulo") expect(sources.length + quotes.length).toBe(5);
+    }
+  });
+
   it("gives every chapter both era summaries as text", () => {
     for (const c of chapters) {
       for (const s of [c.summary.historical, c.summary.present]) {

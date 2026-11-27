@@ -14,6 +14,7 @@ export function BasisView({ basis, person }: { basis: Basis; person: PersonCard 
       <Bilingual
         original={basis.quote}
         translation={basis.quoteTranslation}
+        lang={basis.originalLang}
         render={(text, part) => (
           <blockquote
             className={`measure border-l-2 border-paper/40 pl-5 leading-[1.6] sm:pl-7 ${part === "original" ? "font-source text-lg sm:text-xl" : "font-yours text-lg"}`}

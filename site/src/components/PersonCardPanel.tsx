@@ -7,7 +7,8 @@ import { useActiveBeat } from "./StoryProgress";
 // Below the breakpoint: the fixed button that opens the person card, with the number of facts the
 // section in view uses, and the card as a bottom sheet (a native popover, so it opens without
 // scripts) with its own Close control. A link chosen inside the sheet closes it, so the section
-// it goes to is not covered. At the breakpoint globals.css shows the card in its column instead.
+// it goes to is not covered. At the breakpoint globals.css shows the card in its column instead;
+// a sheet left open as the width crosses it (a rotated tablet) dims nothing there (max-lg:backdrop).
 export function PersonCardPanel({ uses, children }: { uses: Pick<FactUses, "basis" | "present">; children: ReactNode }) {
   const { activeBeat, eraInView } = useActiveBeat();
   const count = factsUsedAt(uses, activeBeat, eraInView).length;
@@ -42,7 +43,7 @@ export function PersonCardPanel({ uses, children }: { uses: Pick<FactUses, "basi
         popover="auto"
         data-person-card
         onClick={onClick}
-        className="inset-x-0 top-auto bottom-0 m-0 max-h-[85svh] w-full max-w-none overflow-y-auto border-0 border-t border-rule bg-raised px-3 pb-4 text-paper backdrop:bg-surround/80"
+        className="inset-x-0 top-auto bottom-0 m-0 max-h-[85svh] w-full max-w-none overflow-y-auto border-0 border-t border-rule bg-raised px-3 pb-4 text-paper max-lg:backdrop:bg-surround/80"
       >
         <div className="sticky top-0 z-10 -mx-3 mb-1 flex justify-end bg-raised px-3 py-1 lg:hidden">
           <button

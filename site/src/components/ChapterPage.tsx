@@ -38,8 +38,10 @@ export function ChapterPage({
 
   return (
     // The bottom padding (7rem) keeps the last content clear of the fixed story bar, one row of
-    // 2rem, 3.25rem on touch (BeatTicks).
+    // 2rem, 3.25rem on touch (BeatTicks). Keyed by the chapter, so moving to another chapter
+    // starts its progress afresh and measures it again.
     <StoryProgressProvider
+      key={chapter.slug}
       slug={chapter.slug}
       beats={beats}
       className={`grid pb-28 ${card ? "lg:grid-cols-[18rem_1fr]" : ""}`}

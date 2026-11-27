@@ -7,9 +7,9 @@ import type { Item } from "@/content/types";
 import { fixtureItem } from "@/test/fixtures";
 import { CloseView } from "./CloseView";
 
-function withLargeImage(): Item {
+function withImage(): Item {
   const item = fixtureItem("item");
-  item.image = { src: "/scan-small.png", width: 10, height: 10, largeSrc: "/scan-large.png" };
+  item.image = { src: "/scan.png", width: 10, height: 10 };
   return item;
 }
 
@@ -29,7 +29,7 @@ async function openView(item: Item, highlights?: Highlight[]) {
 describe("CloseView", () => {
   it("moves focus inside when opened and back to its opener when closed", async () => {
     const user = userEvent.setup();
-    const { container } = render(<CloseView item={withLargeImage()} />);
+    const { container } = render(<CloseView item={withImage()} />);
     const dialog = dialogOf(container);
     const opener = screen.getByRole("button", { name: /open close view/i });
 
@@ -42,13 +42,12 @@ describe("CloseView", () => {
     expect(document.activeElement).toBe(opener);
   });
 
-  it("has a visible heading naming it, a close button and a plain link to the large image", async () => {
-    const dialog = await openView(withLargeImage());
+  it("has a visible heading naming it and a close button", async () => {
+    const dialog = await openView(withImage());
     const heading = within(dialog).getByRole("heading", { level: 2 });
     expect(heading).toHaveTextContent(/close view/i);
     expect(dialog).toHaveAttribute("aria-labelledby", heading.id);
     expect(within(dialog).getByRole("button", { name: /close/i })).toBeInTheDocument();
-    expect(within(dialog).getByRole("link", { name: /large image/i })).toHaveAttribute("href", "/scan-large.png");
   });
 
   it("names each opener after the item it opens", () => {
@@ -66,11 +65,6 @@ describe("CloseView", () => {
     expect(screen.getByRole("button", { name: /open close view.*first fixture title/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /open close view.*second fixture title/i })).toBeInTheDocument();
     expect(new Set(names).size).toBe(2);
-  });
-
-  it("has no large-image link when the item has no large image", async () => {
-    const dialog = await openView(fixtureItem("item"));
-    expect(within(dialog).queryByRole("link")).toBeNull();
   });
 
   it('shows "No image" in the mount of an item without an image or a gap note', async () => {
@@ -109,7 +103,7 @@ describe("CloseView", () => {
 
 describe("CloseView with highlights", () => {
   function scanWithHighlights(): { item: Item; highlights: Highlight[] } {
-    const item = withLargeImage();
+    const item = withImage();
     item.annotations = [
       { id: "item-annotation-1", text: slot("first annotation") },
       { id: "item-annotation-2", text: slot("second annotation") },
@@ -136,7 +130,8 @@ describe("CloseView with highlights", () => {
     expect(chosen).toHaveTextContent("Paragraph 1");
     const marked = [...dialog.querySelectorAll('[data-annotation][aria-current="true"]')];
     expect(marked.map((m) => m.getAttribute("data-annotation"))).toEqual(["item-annotation-2"]);
-    expect(within(dialog).getByText(/showing paragraph 1\. annotation 2 marked\./i)).toBeInTheDocument();
+    // Said a moment after opening, once the live region exists to announce it.
+    expect(await within(dialog).findByText(/showing paragraph 1\. annotation 2 marked\./i)).toBeInTheDocument();
 
     await user.click(within(dialog).getByRole("button", { name: /^close$/i }));
     expect(document.activeElement).toBe(opener);

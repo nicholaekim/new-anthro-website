@@ -38,40 +38,49 @@ export function MatrixViews({ panels }: { panels: Panel[] }) {
   const id = useId();
 
   useGSAP(
-    () => {
+    (context) => {
       const el = root.current;
       if (mode !== "full" || !ready || !el || played.current) return;
-      // The rows of the view shown, in the layout the width gives (table or cards).
-      const rows = [...el.querySelectorAll<HTMLElement>("[data-view]:not([hidden]) [data-matrix-row]")].filter(
-        (r) => r.getClientRects().length > 0,
+      // Set up again when the width crosses 768px, where the rows change layout (table or cards):
+      // the old set-up is reverted, leaving nothing inline, and the new one finds the rows shown.
+      // Copies the other set-ups' pattern: made outside useGSAP's context (ignore), reverted once.
+      const mm = gsap.matchMedia(el);
+      context.ignore(() =>
+        mm.add({ wide: "(min-width: 768px)", narrow: "(max-width: 767.98px)" }, () => {
+          if (played.current) return;
+          // The rows of the view shown, in the layout the width gives.
+          const rows = [...el.querySelectorAll<HTMLElement>("[data-view]:not([hidden]) [data-matrix-row]")].filter(
+            (r) => r.getClientRects().length > 0,
+          );
+          if (rows.length === 0 || !startsBelowView(rows[0].getBoundingClientRect().top, window.innerHeight)) {
+            played.current = true;
+            return;
+          }
+          rows.forEach((r) => r.setAttribute("data-entering", ""));
+          const done = () => {
+            played.current = true;
+            entrance.current = null;
+            rows.forEach(tidy);
+          };
+          entrance.current = gsap.from(rows, {
+            opacity: 0,
+            y: RISE,
+            duration: DURATION.enter,
+            stagger: STAGGER,
+            ease: HOUSE_EASE,
+            clearProps: "opacity,transform",
+            scrollTrigger: { trigger: rows[0], start: "top 90%", once: true },
+            onComplete: done,
+          });
+          const onFocusIn = () => entrance.current?.progress(1);
+          el.addEventListener("focusin", onFocusIn);
+          return () => {
+            el.removeEventListener("focusin", onFocusIn);
+            entrance.current = null;
+            rows.forEach(tidy);
+          };
+        }),
       );
-      if (rows.length === 0 || !startsBelowView(rows[0].getBoundingClientRect().top, window.innerHeight)) {
-        played.current = true;
-        return;
-      }
-      rows.forEach((r) => r.setAttribute("data-entering", ""));
-      const done = () => {
-        played.current = true;
-        entrance.current = null;
-        rows.forEach(tidy);
-      };
-      entrance.current = gsap.from(rows, {
-        opacity: 0,
-        y: RISE,
-        duration: DURATION.enter,
-        stagger: STAGGER,
-        ease: HOUSE_EASE,
-        clearProps: "opacity,transform",
-        scrollTrigger: { trigger: rows[0], start: "top 90%", once: true },
-        onComplete: done,
-      });
-      const onFocusIn = () => entrance.current?.progress(1);
-      el.addEventListener("focusin", onFocusIn);
-      return () => {
-        el.removeEventListener("focusin", onFocusIn);
-        entrance.current = null;
-        rows.forEach(tidy);
-      };
     },
     { scope: root, dependencies: [mode, ready], revertOnUpdate: true },
   );

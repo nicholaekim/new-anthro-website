@@ -1,4 +1,4 @@
-import type { Basis, ConfidenceLevel, Era } from "@/content/types";
+import { CONFIDENCE_LEVELS, type Basis, type ConfidenceLevel, type Era } from "@/content/types";
 
 // The chapter's sections, named once: the beat headings and the story bar both read this list.
 // Beat 1's heading is the chapter's own title, so its label is used by the story bar only.
@@ -41,6 +41,17 @@ export function progressBetween(value: number, start: number, end: number): numb
 export function neighbours(beats: readonly number[], active: number | null) {
   const i = Math.max(0, active === null ? 0 : beats.indexOf(active));
   return { previous: beats[i - 1] ?? null, next: beats[i + 1] ?? null };
+}
+
+// Where previous and next go, from where the page is rather than from the active section (whose
+// reading line is lower than the line scrollIntoView lands a section on, so a short section could
+// be skipped): next is the first section whose top is below line, the scroll-padding line;
+// previous the last whose top is above it. A pixel either side is the line itself. tops are in
+// document order; -1 when there is no such section.
+export function stepIndex(tops: readonly number[], line: number, direction: 1 | -1): number {
+  if (direction === 1) return tops.findIndex((top) => top > line + 1);
+  for (let i = tops.length - 1; i >= 0; i--) if (tops[i] < line - 1) return i;
+  return -1;
 }
 
 // The parts of a chapter the person card reads: which facts each era's rule uses.
@@ -96,7 +107,7 @@ export function factsUsedAt(
   return [];
 }
 
-export const CONFIDENCE_LEVELS: readonly ConfidenceLevel[] = ["high", "moderate", "low", "undetermined"];
+export { CONFIDENCE_LEVELS };
 
 export const CONFIDENCE_WORDS: Record<ConfidenceLevel, string> = {
   high: "High",
@@ -108,5 +119,7 @@ export const CONFIDENCE_WORDS: Record<ConfidenceLevel, string> = {
 // Where a chapter places no person (Tobique), in place of its outcome: beat 6 and the ending.
 export const NO_PERSON_PLACED = "No person is placed in this chapter, so no outcome is given.";
 
-// How many of the meter's four steps are filled: four for high, one for cannot be determined.
-export const confidenceSteps = (level: ConfidenceLevel) => CONFIDENCE_LEVELS.length - CONFIDENCE_LEVELS.indexOf(level);
+// How many of the meter's four steps are filled: four for high, three for moderate, two for low,
+// none for cannot be determined (all hollow, beside its word), so it never reads as a low level.
+const STEPS: Record<ConfidenceLevel, number> = { high: 4, moderate: 3, low: 2, undetermined: 0 };
+export const confidenceSteps = (level: ConfidenceLevel) => STEPS[level];

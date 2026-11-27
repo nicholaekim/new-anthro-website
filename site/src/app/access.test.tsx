@@ -73,7 +73,7 @@ function expectNoInlineStyles(root: Element) {
 function withImages(): Chapter {
   const c = fixtureChapter();
   c.photograph.image = { src: "/fixture-photo.jpg", width: 800, height: 600 };
-  c.items[0].image = { src: "/fixture-item.jpg", width: 800, height: 1000, largeSrc: "/fixture-item-large.jpg" };
+  c.items[0].image = { src: "/fixture-item.jpg", width: 800, height: 1000 };
   if (c.present.instrument) c.present.instrument.image = { src: "/fixture-instrument.jpg", width: 800, height: 1000 };
   return c;
 }

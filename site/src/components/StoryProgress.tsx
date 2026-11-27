@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, use, useEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createContext, use, useEffect, useRef, useState, type ReactNode } from "react";
 import type { Era } from "@/content/types";
 import { activeIndex, progressBetween } from "./story";
 
@@ -122,14 +122,6 @@ const noEra = () => {};
 // For beat 6's comparison: report the era in view, or null once it is no longer set up.
 export function useSetEraInView(): (era: Era | null) => void {
   return use(StoryContext)?.setEraInView ?? noEra;
-}
-
-const noProgress = { get: () => 0, subscribe: () => () => {} };
-
-// Progress through the chapter, 0 to 1; re-renders on every change.
-export function useChapterProgress(): number {
-  const store = use(StoryContext)?.progress ?? noProgress;
-  return useSyncExternalStore(store.subscribe, store.get, () => 0);
 }
 
 // Calls onChange with each new progress value without re-rendering: for a transform that

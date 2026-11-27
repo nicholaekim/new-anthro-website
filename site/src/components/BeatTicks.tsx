@@ -1,10 +1,12 @@
 "use client";
 
-import { useRef, type FocusEvent, type KeyboardEvent, type MouseEvent } from "react";
-import { neighbours, SECTION_LABELS, sectionTag, type Beat } from "./story";
+import { useRef, type MouseEvent } from "react";
+import { neighbours, SECTION_LABELS, sectionTag, stepIndex, type Beat } from "./story";
 import { useActiveBeat, useChapterProgressEffect } from "./StoryProgress";
+import { useDismiss } from "./useDismiss";
 
-// The story bar: one row at every width. Previous, the ticks (from 640px), the current section's
+// The story bar: one row at every width. Previous, the ticks (from 768px; narrower, on touch,
+// eight 44px ticks and the labels would not fit one row), the current section's
 // label, which opens the list of sections, and next; a thin line along the top edge shows the
 // progress through the chapter. Every control is a plain #beat-N link or a native disclosure
 // first, so without scripts the ticks and the list still jump to each section.
@@ -12,13 +14,23 @@ import { useActiveBeat, useChapterProgressEffect } from "./StoryProgress";
 // hairline is a shadow and the progress line sits inside it, so neither adds height. The pins,
 // the chapter's bottom padding and scroll-padding-bottom in globals.css allow for these heights.
 
-function goTo(event: MouseEvent<HTMLAnchorElement>, beat: number | null) {
+// A click that opens a new tab or window, or any button but the main one, is the browser's.
+const modified = (e: MouseEvent) => e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey;
+
+// beat: a section, or a step (previous or next) worked out from where the page is now.
+function goTo(event: MouseEvent<HTMLAnchorElement>, beat: number | "previous" | "next") {
   const root = event.currentTarget.closest("[data-chapter]");
-  if (!root) return;
+  if (!root || modified(event)) return;
   event.preventDefault();
+  const sections = [...root.querySelectorAll<HTMLElement>("section[data-beat]")];
+  let target: HTMLElement | undefined;
+  if (typeof beat === "string") {
+    const line = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+    target = sections[stepIndex(sections.map((s) => s.getBoundingClientRect().top), line, beat === "next" ? 1 : -1)];
+  } else {
+    target = sections.find((s) => s.dataset.beat === String(beat));
+  }
   // Previous at the first section and next at the last do nothing.
-  if (beat === null) return;
-  const target = root.querySelector<HTMLElement>(`section[data-beat="${beat}"]`);
   if (!target) return;
   target.scrollIntoView({ block: "start" });
   const heading = target.querySelector<HTMLElement>("h1, h2");
@@ -35,24 +47,17 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
   const { previous, next } = neighbours(beats, activeBeat);
   const known = activeBeat !== null;
   const line = useRef<HTMLDivElement>(null);
-  const list = useRef<HTMLDetailsElement>(null);
+  const { ref: list, onKeyDown, onBlur } = useDismiss();
 
   useChapterProgressEffect((progress) => {
     if (line.current) line.current.style.transform = `scaleX(${progress})`;
   });
 
-  // The list closes when one of its links is chosen, on Escape, and when focus leaves it.
+  // The list closes when one of its links is chosen, and as useDismiss says.
   function choose(event: MouseEvent<HTMLAnchorElement>, beat: number) {
-    if (list.current) list.current.open = false;
+    const details = event.currentTarget.closest("details");
+    if (details && !modified(event)) details.open = false;
     goTo(event, beat);
-  }
-  function onBlur(e: FocusEvent<HTMLDetailsElement>) {
-    if (!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.open = false;
-  }
-  function onKeyDown(e: KeyboardEvent<HTMLDetailsElement>) {
-    if (e.key !== "Escape" || !e.currentTarget.open) return;
-    e.currentTarget.open = false;
-    e.currentTarget.querySelector("summary")?.focus();
   }
 
   const step = "target quiet justify-center gap-1 px-2 no-underline hover:text-interface aria-disabled:cursor-default aria-disabled:text-muted aria-disabled:no-underline";
@@ -68,7 +73,7 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
         <a
           href={`#beat-${previous ?? beats[0]}`}
           aria-disabled={known && previous === null ? true : undefined}
-          onClick={(e) => goTo(e, previous)}
+          onClick={(e) => goTo(e, "previous")}
           className={step}
         >
           <span aria-hidden>←</span>
@@ -76,7 +81,7 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
           <span className="sr-only">Previous section</span>
         </a>
         <div className="flex min-w-0 items-center gap-3">
-          <ol className="hidden items-center sm:flex">
+          <ol className="hidden items-center md:flex">
             {beats.map((n) => (
               <li key={n}>
                 <a
@@ -98,10 +103,10 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
           </ol>
           <details ref={list} data-section-list className="relative" onKeyDown={onKeyDown} onBlur={onBlur}>
             <summary className="target quiet list-none gap-2 whitespace-nowrap px-2 no-underline hover:text-interface [&::-webkit-details-marker]:hidden">
-              <span className="sr-only">Current section: </span>
+              {known && <span className="sr-only">Sections, current: </span>}
               <span className="caps [--caps-track:0.08em]">{known ? tag(activeBeat) : "Sections"}</span>
               {/* On a phone the ticks are a compact strip here, decoration only; the list holds the links. */}
-              <span aria-hidden className="hidden items-center gap-1 min-[400px]:flex sm:hidden">
+              <span aria-hidden className="hidden items-center gap-1 min-[400px]:flex md:hidden">
                 {beats.map((n) => (
                   <span key={n} className={n === activeBeat ? "h-3 w-1.5 bg-paper" : "h-2 w-px bg-interface"} />
                 ))}
@@ -114,8 +119,9 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
                   <a
                     href={`#beat-${n}`}
                     onClick={(e) => choose(e, n)}
-                    aria-current={n === activeBeat ? "step" : undefined}
-                    className="target quiet w-full gap-2 px-2 text-sm no-underline hover:text-interface aria-[current=step]:font-semibold aria-[current=step]:text-interface"
+                    // The ticks carry the one current step; here it is the current place in the list.
+                    aria-current={n === activeBeat ? "location" : undefined}
+                    className="target quiet w-full gap-2 px-2 text-sm no-underline hover:text-interface aria-[current=location]:font-semibold aria-[current=location]:text-interface"
                   >
                     {/* The current section is marked by a block as well as by tone. */}
                     <span aria-hidden className={`block size-2 ${n === activeBeat ? "bg-interface" : "border border-current/45"}`} />
@@ -129,7 +135,7 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
         <a
           href={`#beat-${next ?? beats.at(-1)}`}
           aria-disabled={known && next === null ? true : undefined}
-          onClick={(e) => goTo(e, next)}
+          onClick={(e) => goTo(e, "next")}
           className={step}
         >
           <span aria-hidden className="max-sm:hidden">Next</span>

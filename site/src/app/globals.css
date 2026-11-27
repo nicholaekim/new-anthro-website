@@ -53,6 +53,14 @@
       scroll-padding-bottom: 5.25rem;
     }
   }
+  /* A touch screen 1024px and wider: the 3.75rem header needs more than 4rem above a target.
+     (Narrower, the rules after the person card's emphasis below allow for its button too.) The
+     person card's column ends above the 3.25rem story bar: see [data-person-card] below. */
+  @media (min-width: 1024px) and (pointer: coarse) {
+    html {
+      scroll-padding-top: 4.5rem;
+    }
+  }
 
   html {
     scrollbar-color: var(--color-scrollbar) var(--color-surround);
@@ -238,9 +246,14 @@ html[data-motion-pending] [data-reveal] {
 html[data-motion-pending] [data-opening-part] {
   opacity: 0;
 }
-/* Printed, anything a reveal had not yet brought in is shown. */
+/* Printed, anything a reveal or a sequence had not yet brought in is shown, the decoration too. */
 @media print {
   [data-opening-part],
+  [data-opening-light],
+  [data-opening-bar],
+  [data-chapter-figures],
+  [data-chapter-number],
+  [data-chapter-rule],
   [data-entering] {
     opacity: 1 !important;
     transform: none !important;
@@ -324,6 +337,12 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
     padding: 1rem;
     border: 0;
     background: transparent;
+  }
+}
+/* On touch the story bar is 3.25rem tall: the card's column ends 0.25rem above it. */
+@media (min-width: 1024px) and (pointer: coarse) {
+  [data-person-card] {
+    bottom: 3.5rem;
   }
 }
 
@@ -435,6 +454,20 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
 [data-stage]:not([data-wipe="between"]) > [data-divider] {
   visibility: hidden;
 }
+/* Swapped instead of wiped (a document without an image): no cut and no divider; only the
+   document of the era in view is shown, whole. */
+[data-enhanced] [data-stage][data-swap] [data-era="present"] > [data-document] {
+  clip-path: none;
+}
+[data-enhanced] [data-stage][data-swap] [data-in-view="false"] > [data-document],
+[data-stage][data-swap] > [data-divider] {
+  visibility: hidden;
+}
+/* Near either end, the label on the outer side of the divider would run past the frame. */
+[data-wipe-edge="start"] [data-divider-label="present"],
+[data-wipe-edge="end"] [data-divider-label="historical"] {
+  visibility: hidden;
+}
 [data-divider-label] {
   position: absolute;
   top: 0.5rem;
@@ -498,8 +531,11 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
 /* Pinned (full motion at the breakpoint; the script adds data-pinned before the pin is made):
    the wrapper is exactly the height of the view between the header (2.5rem, 3.75rem on touch)
    and the story bar (2rem, 3.25rem on touch). The stage takes what the heading, rule and control
-   leave; a tall document is scaled down to fit, never cropped, and a long panel scrolls inside
-   itself. Layout only: no starting state. */
+   leave; a tall document is scaled down to fit, never cropped. Nothing scrolls inside the pin:
+   the panel is shortened to fit instead, its quotation clamped to a few lines (the whole of it
+   stays in the markup, and is read in full) with a link to the section that quotes it in full,
+   which holds its citation too. Measured at 1280 by 800 for all four chapters, both eras.
+   Layout only: no starting state. */
 [data-change-of-date][data-pinned] {
   height: calc(100svh - 4.5rem);
   gap: 1rem;
@@ -532,16 +568,45 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
   object-fit: contain;
   outline: none;
 }
+[data-pinned] [data-stage] {
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+}
 [data-pinned] [data-info] {
   min-height: 0;
-  overflow-y: auto;
-  padding-right: 0.5rem;
+  gap: 0.75rem;
+}
+[data-pinned] [data-rule-quote] {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
+  overflow: hidden;
+}
+/* A translated rule shows both texts: the opening lines of each. */
+[data-pinned] [data-language-part] [data-rule-quote] {
+  -webkit-line-clamp: 2;
+}
+[data-full-rule],
+[data-pinned] [data-rule-citation] {
+  display: none;
+}
+[data-pinned] [data-full-rule] {
+  display: inline-flex;
+}
+
+/* While the close view (a modal dialog) is open the page behind it does not scroll. The gutter
+   is kept, so the page does not shift sideways when its scrollbar goes. */
+html {
+  scrollbar-gutter: stable;
+}
+html:has(dialog[open]) {
+  overflow: hidden;
 }
 
 /* The close view's highlights (ViewerStage). Each outline is a button placed over its region from
    the same view the page is drawn with; the line is drawn just outside the region so it never
    covers the passage, dashed, and solid and heavier when chosen (shape, not only tone). The
-   number sits above its top left corner. Hiding the outlines removes them altogether. */
+   number sits inside its top left corner, so it never covers a neighbouring passage above (two
+   Louisiana highlights abut). Hiding the outlines removes them altogether. */
 .viewer-outline [data-outline-line] {
   position: absolute;
   inset: -3px;
@@ -554,8 +619,8 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
 }
 .viewer-outline [data-outline-number] {
   position: absolute;
-  left: -4px;
-  bottom: calc(100% + 4px);
+  left: 0;
+  top: 0;
   min-width: 1.125rem;
   padding: 0 0.25rem;
   background: var(--color-interface-deep);

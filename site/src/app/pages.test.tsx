@@ -1,5 +1,7 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { hydrateRoot } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import EndingPage from "@/app/ending/page";
 import OpeningPage from "@/app/page";
@@ -109,6 +111,53 @@ describe("opening sequence", () => {
     expect(screen.queryByRole("button", { name: "Skip" })).toBeNull();
     await user.click(screen.getByRole("link", { name: "Restart" }));
     expect(screen.getByRole("button", { name: "Skip" })).toBeInTheDocument();
+  });
+
+  it("in full mode, when the sequence ends with focus on Skip, moves focus to the title instead of dropping it", async () => {
+    const { gsap } = await import("@/motion/gsap");
+    render(
+      <MotionProvider>
+        <OpeningPage />
+      </MotionProvider>,
+    );
+    const skip = screen.getByRole("button", { name: "Skip" });
+    act(() => skip.focus());
+    expect(document.activeElement).toBe(skip);
+    // Run every tween to its end, as time passing would.
+    act(() => {
+      gsap.globalTimeline.time(gsap.globalTimeline.time() + 10);
+    });
+    expect(screen.queryByRole("button", { name: "Skip" })).toBeNull();
+    expect(document.activeElement).toBe(screen.getByRole("heading", { level: 1 }));
+  });
+
+  it("in full mode, finishes at once when focus is already on the page before the sequence starts", async () => {
+    // Fresh modules, as a page load: what earlier tests stored in module memory (Restart's count)
+    // would otherwise make the client render differ from the server's and replace the page.
+    vi.resetModules();
+    const [{ MotionProvider: Provider }, { default: Opening }] = await Promise.all([import("@/motion/MotionProvider"), import("@/app/page")]);
+    const page = (
+      <Provider>
+        <Opening />
+      </Provider>
+    );
+    const host = document.createElement("div");
+    host.innerHTML = renderToString(page);
+    document.body.append(host);
+    try {
+      const begin = host.querySelector<HTMLAnchorElement>("[data-opening-part='begin'] a, a[data-opening-part='begin']");
+      if (!begin) throw new Error("no Begin link");
+      begin.focus();
+      vi.spyOn(console, "error").mockImplementation(() => {}); // hydration notes from the client-only values
+      await act(async () => {
+        hydrateRoot(host, page);
+      });
+      expect(within(host).queryByRole("button", { name: "Skip" })).toBeNull();
+      expect(document.activeElement).toBe(begin);
+      for (const el of host.querySelectorAll<HTMLElement>("[data-opening-part]")) expect(el.style.opacity).toBe("");
+    } finally {
+      host.remove();
+    }
   });
 
   it("in full mode, once seen, offers no Skip", () => {
