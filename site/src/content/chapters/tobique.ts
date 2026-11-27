@@ -38,7 +38,8 @@ export const tobique: Chapter = {
     provenance: provenance(),
     contentNote: null,
     annotations: [],
-    gapNote: null,
+    gapNote:
+      "No photograph is shown here. An image of this community would need its permission, which has not been sought.",
   },
   photographContext: slot("your context"),
   items: [

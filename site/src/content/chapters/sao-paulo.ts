@@ -1,14 +1,4 @@
-import { slot } from "../slot";
-import type { Chapter, Provenance } from "../types";
-
-const provenance = (): Provenance => ({
-  creator: slot("creator"),
-  title: slot("title"),
-  holder: slot("holding institution"),
-  reference: slot("reference number"),
-  rights: slot("rights statement"),
-  alterations: slot("any alteration you made"),
-});
+import type { Chapter } from "../types";
 
 const instructions1950 =
   "Instituto Brasileiro de Geografia e Estatística, Conselho Nacional de Estatística, Serviço Nacional de Recenseamento, Censo demográfico: Instruções ao recenseador, C. D. 1.30 (Recenseamento Geral de 1950)";
@@ -33,24 +23,38 @@ export const saoPaulo: Chapter = {
     id: "sao-paulo-photograph",
     kind: "photograph",
     status: "sourced",
-    image: null,
-    alt: slot("short alternative text"),
-    longDescription: slot("longer description"),
+    image: { src: "/images/sao-paulo/sao-paulo-photograph.jpg", width: 1456, height: 2000 },
+    alt: "Warm-toned black-and-white photograph from 1957 of the front of the Catedral Metropolitana de São Paulo, its two unfinished towers in scaffolding and board casing, seen across a paved square with people in the foreground.",
+    longDescription:
+      "A tall Gothic-style stone facade fills most of the upright frame, with pointed windows, statues in niches and a large rose window above the arched main doorway. Above it, a dome topped by a lantern and cross rises between two unfinished towers, the left wrapped in timber scaffolding and the right boxed in boards, with more scaffolding over the rose window. In the foreground the paved square holds a close group of five men at lower left: one in a uniform and peaked cap, one in a light jacket and hat with his back to the camera, one in a dark suit, and two in hats, one holding a broom beside a bin. Further back are more pedestrians, among them children in white, people seated at the left edge, a stone plinth in the middle of the square, a street lamp and taller apartment buildings at the edges. Two signboards at lower left name the works on the cathedral's towers. The left one reads \"OBRA TORRES DA CATEDRAL\" and \"COMPANHIA CONSTRUTORA NACIONAL S.A.\"; the right one, partly hidden by the men, reads \"OBRAS DAS TORRES DA CATE…\" above another firm's name. A small red ink mark on the print sits on the board casing of the right tower.",
     transcription: null,
-    provenance: provenance(),
+    provenance: {
+      creator:
+        "Photographer unknown (the Wikimedia Commons record, uploaded from the Arquivo Nacional's collection, gives \"Unknown\")",
+      title: "Catedral Metropolitana de São Paulo",
+      holder: "Arquivo Nacional (Brazilian National Archives), Rio de Janeiro; digital copy published on Wikimedia Commons through the Arquivo Nacional GLAM partnership",
+      reference:
+        "Accession number BR_RJANRIO_PH_0_FOT_03819_0004 (Fundo Correio da Manhã); https://commons.wikimedia.org/wiki/File:Catedral_Metropolitana_de_S%C3%A3o_Paulo,_Fundo_Correio_da_Manh%C3%A3.tif",
+      rights:
+        "Public domain, as stated on the Wikimedia Commons file page: \"This media is a faithful reproduction of public domain multimedia and it was the result of a GLAM partnership between the Arquivo Nacional and the Wikimedia Users Group in Brazil.\" Requested attribution: \"Domínio público / Acervo Arquivo Nacional\" (English: \"Public domain / Arquivo Nacional Collection\").",
+      alterations:
+        "Original 1937 by 2660 pixel TIFF converted to JPEG and reduced to 1456 by 2000 pixels; not cropped, retouched or otherwise altered.",
+    },
     contentNote: null,
     annotations: [],
     gapNote: null,
   },
-  photographContext: slot("your context"),
+  photographContext:
+    "This photograph shows the Catedral Metropolitana de São Paulo from the square in front of it, with scaffolding and board casing on its unfinished towers. The Wikimedia Commons record, uploaded from the Arquivo Nacional's collection, dates it to 1957, seven years after this chapter's year of 1950, and gives no exact day. It belongs to the Correio da Manhã fonds, kept by the Arquivo Nacional, Brazil's national archives, in Rio de Janeiro. The photographer is not named, and the record does not say why the picture was made. It is used here as a public-domain work, as the Wikimedia Commons licence statement for this partnership says, with the attribution that statement asks for.",
   items: [
     {
       id: "sao-paulo-item-1",
       kind: "document",
       status: "sourced",
-      image: null,
-      alt: slot("short alternative text"),
-      longDescription: slot("longer description"),
+      image: { src: "/images/sao-paulo/sao-paulo-item-1.jpg", width: 1600, height: 2552 },
+      alt: "Scanned page 28 of the 1950 Brazilian census instructions to enumerators, printed in Portuguese, carrying the instruction for question 8 on colour.",
+      longDescription:
+        "A single column of printed text on a greyish scanned page, with the page number 28 centred at the foot. The page opens with the end of the instruction for the preceding question on nationality, then runs through headings of the form \"QUESITO 8 — Côr.\" for questions 8 to 12, each followed by one or more paragraphs. The question 8 instruction on colour is the short section in the upper third of the page. The passage on responsibility for the declarations, also transcribed here, is on a different page (printed page 11) and is not shown.",
       transcription:
         "10.7 — RESPONSABILIDADE DAS DECLARAÇÕES\nA responsabilidade das declarações cabe:\na) no boletim de família, ao Chefe da família; no impedimento dêste, ao cônjuge, ao filho mais velho ou a outra pessoa residente no domicílio e em condições de responsabilizar-se pelas informações;\nb) no boletim individual, ao próprio recenseado; [...]\nQUESITO 8 — Côr.\nA côr Amarela sòmente se aplica a pessoas de raça amarela (japonêses, chineses, etc. e seus descendentes). [...]\nEm caso algum deverá ser usada, como resposta, a expressão \"morena\".\n\nEnglish translation: 10.7 — RESPONSIBILITY FOR THE DECLARATIONS\nResponsibility for the declarations lies:\na) on the family bulletin, with the head of the family; if the head is unable, with the spouse, the eldest child or another person living in the household and able to take responsibility for the information;\nb) on the individual bulletin, with the person enumerated; [...]\nQUESTION 8 — Colour.\nThe colour Yellow applies only to persons of the yellow race (Japanese, Chinese, etc. and their descendants). [...]\nIn no case is the expression \"morena\" to be used as an answer.",
       provenance: {
@@ -60,8 +64,10 @@ export const saoPaulo: Chapter = {
         holder: "IBGE Biblioteca (digital library of the Instituto Brasileiro de Geografia e Estatística)",
         reference:
           "Form number C. D. 1.30, printed on the cover; IBGE digital library file doc46.pdf. Passages from printed pages 11 and 28.",
-        rights: "Rights not stated by the holder; check before reuse.",
-        alterations: slot("any alteration you made"),
+        rights:
+          "No rights or reuse statement found in the PDF; IBGE's site-wide terms could not be checked. Check before reuse.",
+        alterations:
+          "Page 29 of the PDF (printed page 28) rendered to an image 1600 pixels wide; not otherwise altered.",
       },
       contentNote: null,
       annotations: [
@@ -74,16 +80,16 @@ export const saoPaulo: Chapter = {
           text: "The instruction for question 8 defines no colour except 'Amarela', which it limits to people of Japanese, Chinese or similar origin and their descendants; a further sentence, cut here, adds that the term does not cover people whose skin is yellowed by illness. Its remaining rule bars the answer 'morena'. It does not tell the enumerator to judge colour by sight.",
         },
       ],
-      gapNote:
-        "No image has been added yet; the document can be read in the IBGE Biblioteca digital library at https://biblioteca.ibge.gov.br/visualizacao/instrumentos_de_coleta/doc46.pdf.",
+      gapNote: null,
     },
     {
       id: "sao-paulo-item-2",
       kind: "document",
       status: "sourced",
-      image: null,
-      alt: slot("short alternative text"),
-      longDescription: slot("longer description"),
+      image: { src: "/images/sao-paulo/sao-paulo-item-2.jpg", width: 1600, height: 2443 },
+      alt: "Scanned page from the 1950 Brazilian census coders' code, printed in Portuguese, listing the numbered codes for question 8 on colour.",
+      longDescription:
+        "A printed page without a visible page number. At the top, the codes for question 7 on nationality are set in two columns; below them, the centred heading for question 8 introduces two columns of numbered colour codes, the passage transcribed here. Lower down come the headings for questions 9 and 10 and instructions for coding age in fields 9 and 10. Faint mirror-image text from the other side of the sheet, a list of numbered country names, shows through across the page.",
       transcription:
         "4. Estão incluídas neste Código, além das designações corretas e adequadas, muitas outras que poderão ocorrer, de acôrdo com o próprio entendimento do declarante. [...]\nQUESITO 8 — Côr.\n[left column] 1 — Branca\n2 — Preta — De côr\n3 — Amarela\n4 — Parda — Mulata\n9 — Ignorada\n[right column] 5 — Cafuso\n6 — Caboclo\n7 — Mestiço\n8 — Índio\n9 — Ignorada\n\nEnglish translation: 4. This Code includes, besides the correct and suitable designations, many others that may occur, according to the declarant's own understanding. [...]\nQUESTION 8 — Colour.\n[left column] 1 — White\n2 — Black — \"De côr\"\n3 — Yellow\n4 — Brown — \"Mulata\"\n9 — Unknown\n[right column] 5 — \"Cafuso\"\n6 — \"Caboclo\"\n7 — \"Mestiço\"\n8 — Indigenous (\"Índio\")\n9 — Unknown",
       provenance: {
@@ -92,8 +98,9 @@ export const saoPaulo: Chapter = {
         holder: "IBGE Biblioteca (digital library of the Instituto Brasileiro de Geografia e Estatística)",
         reference:
           "No form number printed on the cover; IBGE digital library file doc48.pdf. Passages from the cover (item 4) and PDF page 8.",
-        rights: "Rights not stated by the holder; check before reuse.",
-        alterations: slot("any alteration you made"),
+        rights:
+          "No rights or reuse statement found in the PDF; IBGE's site-wide terms could not be checked. Check before reuse.",
+        alterations: "Page 8 of the PDF rendered to an image 1600 pixels wide; not otherwise altered.",
       },
       contentNote: null,
       annotations: [
@@ -106,8 +113,7 @@ export const saoPaulo: Chapter = {
           text: "The right-hand column gives separate numbers to 'Cafuso', 'Caboclo', 'Mestiço' and 'Índio'. This page does not say how those codes were grouped in the published tables.",
         },
       ],
-      gapNote:
-        "No image has been added yet; the document can be read in the IBGE Biblioteca digital library at https://biblioteca.ibge.gov.br/visualizacao/instrumentos_de_coleta/doc48.pdf.",
+      gapNote: null,
     },
   ],
   basis: {
@@ -135,9 +141,10 @@ export const saoPaulo: Chapter = {
       id: "sao-paulo-present-instrument",
       kind: "document",
       status: "sourced",
-      image: null,
-      alt: slot("short alternative text"),
-      longDescription: slot("longer description"),
+      image: { src: "/images/sao-paulo/sao-paulo-present-instrument.jpg", width: 1600, height: 2263 },
+      alt: "Page 61 of IBGE's August 2018 PNAD Contínua interview manual, in Portuguese, with the section on colour or race (question 10) and its table of five options.",
+      longDescription:
+        "A typeset page with a running header naming the survey and the IBGE logo at top right, and the page number 61 in a box at bottom right. Three numbered section headings run down the page: age (10.9), colour or race (10.10) and the informant for this part (10.11). Under 10.10, two paragraphs (the first with \"pelo próprio entrevistado\" in bold) are followed by a two-column table with a black header row, option names on the left and descriptions on the right in alternating grey bands. Below the table, a warning triangle sits beside a rounded box with a further note on the option 'Amarela'.",
       transcription:
         "Cor ou raça (Quesito 10)\nA cor ou raça dos moradores deve ser determinada pelo próprio entrevistado, sem qualquer influência do entrevistador, mesmo que este discorde das informações declaradas. [...]\nLeia as opções de cor ou raça para o entrevistado e marque aquela que for declarada:\n1. Branca | Para a pessoa que se declarar branca.\n2. Preta | Para a pessoa que se declarar preta.\n3. Amarela | Para a pessoa que se declarar de cor amarela (de origem oriental: japonesa, chinesa, coreana etc.).\n4. Parda | Para a pessoa que se declarar parda.\n5. Indígena | Para a pessoa que se declarar indígena ou índia. [...]\n\nEnglish translation: Colour or race (Question 10)\nThe colour or race of the residents must be determined by the person interviewed, without any influence from the interviewer, even if the interviewer disagrees with the information declared. [...]\nRead the colour or race options to the person interviewed and mark the one declared:\n1. White | For the person who declares themself white.\n2. Black | For the person who declares themself black.\n3. Yellow | For the person who declares themself of yellow colour (of \"oriental\" origin: Japanese, Chinese, Korean etc.).\n4. Brown | For the person who declares themself brown.\n5. Indigenous | For the person who declares themself indigenous or \"índia\". [...]",
       provenance: {
@@ -148,7 +155,7 @@ export const saoPaulo: Chapter = {
         reference: "IBGE digital library file doc5609.pdf; passage on page 61. No other reference number stated.",
         rights:
           "The PDF carries the notice \"©Projeto gráfico e editoração: DPE/GPO/GEPES, IBGE, 2018.\" No other rights statement seen; check before reuse.",
-        alterations: slot("any alteration you made"),
+        alterations: "Page 61 of the PDF rendered to an image 1600 pixels wide; not otherwise altered.",
       },
       contentNote: null,
       annotations: [
@@ -161,8 +168,7 @@ export const saoPaulo: Chapter = {
           text: "This August 2018 edition is the latest edition from before 2020 found in IBGE's library. Whether it, or separate telephone instructions, governed interviews in 2020 has not been confirmed. In the transcription, a vertical bar marks the break between the option and description columns of the manual's table.",
         },
       ],
-      gapNote:
-        "No image has been added yet; the document can be read in the IBGE Biblioteca digital library at https://biblioteca.ibge.gov.br/visualizacao/instrumentos_de_coleta/doc5609.pdf.",
+      gapNote: null,
     },
     basis: {
       quote:

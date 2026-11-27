@@ -1,14 +1,4 @@
-import { slot } from "../slot";
-import type { Chapter, Provenance } from "../types";
-
-const provenance = (): Provenance => ({
-  creator: slot("creator"),
-  title: slot("title"),
-  holder: slot("holding institution"),
-  reference: slot("reference number"),
-  rights: slot("rights statement"),
-  alterations: slot("any alteration you made"),
-});
+import type { Chapter } from "../types";
 
 const ipumsCitation =
   "IPUMS USA, “1930 Census: Enumerator Instructions,” par. 151, https://usa.ipums.org/usa/voliii/inst1930.shtml (accessed 26 November 2026).";
@@ -29,35 +19,51 @@ export const louisiana: Chapter = {
     id: "louisiana-photograph",
     kind: "photograph",
     status: "sourced",
-    image: null,
-    alt: slot("short alternative text"),
-    longDescription: slot("longer description"),
+    image: { src: "/images/louisiana/louisiana-photograph.jpg", width: 2000, height: 1543 },
+    alt: "Black-and-white aerial photograph of Shreveport, Louisiana, looking west over the city from above the river, mounted on a card with typed captions.",
+    longDescription:
+      "An oblique aerial view taken from above a river, which fills the lower right corner and is crossed by a steel truss bridge. Rail yards, an overpass and low buildings run across the middle ground, with a cluster of taller downtown buildings to the right and rows of houses and trees stretching back to a lake and a hazy horizon. Visible text: white lettering along the bottom of the print reads “B-2679 Shreveport La. Looking W. (4-12-500) (6-1-30-10:30)”; a sign on a warehouse roof at the left middle ground ends “WAREHOUSE”; the card mount above the print carries the typed captions “Shreveport, La. - looking west” and “Rec’d from Maxwell Field, Ala. - 12/11/31”, has three punch holes along its top edge, and a handwritten mark appears at its lower right corner.",
     transcription: null,
-    provenance: provenance(),
+    provenance: {
+      creator:
+        "Not stated on the item record. The record sits in the series “Airscapes” of American and Foreign Areas, whose most recent creator the National Archives gives as War Department. Army Air Forces. (06/20/1941 - 09/26/1947).",
+      title: "Louisiana - Shreveport",
+      holder: "U.S. National Archives and Records Administration, National Archives at College Park - Still Pictures",
+      reference:
+        "National Archives Identifier 23940497; local identifier 18-AA-65-80 (Record Group 18, Records of the Army Air Forces; Box 65, Folder 535); https://catalog.archives.gov/id/23940497",
+      rights:
+        "The National Archives catalogue gives the use restriction status as “Unrestricted” (https://catalog.archives.gov/id/23940497).",
+      alterations:
+        "The National Archives’ digital file 18-AA-65-080.jpg (4385 by 3382 pixels, greyscale) resized to 2000 pixels on its long side and saved as JPEG; not cropped, colourised or retouched.",
+    },
     contentNote: null,
     annotations: [],
     gapNote: null,
   },
-  photographContext: slot("your context"),
+  photographContext:
+    "An aerial view of Shreveport, Louisiana, looking west across the city from above the river. The National Archives holds the print among the Army Air Forces “Airscapes” of American and Foreign Areas (Record Group 18) under the title “Louisiana - Shreveport.” The catalogue record gives no date for the item; the figures printed on the photograph, “6-1-30,” appear to give 1 June 1930, and a typed note on the mount records that the print was received from Maxwell Field, Alabama, on 11 December 1931. The photographer is not named. The National Archives lists the item’s use as “Unrestricted.”",
   items: [
     {
       id: "louisiana-item-1",
       kind: "document",
       status: "sourced",
-      image: null,
-      alt: slot("short alternative text"),
-      longDescription: slot("longer description"),
+      image: { src: "/images/louisiana/louisiana-item-1.jpg", width: 1600, height: 1223 },
+      alt: "Scan of a two-page opening, pages 26 and 27, of the printed 1930 Instructions to Enumerators, with numbered paragraphs on the population schedule.",
+      longDescription:
+        "The scan shows two facing printed pages side by side, with the binding down the middle. The left page, headed “Instructions to Enumerators” with the page number 26, opens under the centred heading “Personal Description” and runs from paragraph 149 to the start of paragraph 156; paragraphs 150 and 151 sit in the upper third and paragraph 155 near the bottom. The right page, headed “Population” with the page number 27, continues with paragraphs 157 to 162 under a second centred heading, “Education.” The paper edges and a dark strip from the scanner show around the pages.",
       transcription:
         "150. Column 12. Color or race.-Write “W” for white; “Neg” for Negro; “Mex” for Mexican; “In” for Indian; “Ch” for Chinese; “Jp” for Japanese; “Fil” for Filipino; “Hin” for Hindu; and “Kor” for Korean. For a person of any other race, write the race in full.\n151. Negroes.-A person of mixed white and Negro blood should be returned as a Negro, no matter how small the percentage of Negro blood. Both black and mulatto persons are to be returned as Negroes, without distinction. A person of mixed Indian and Negro blood should be returned a Negro, unless the Indian blood predominates and the status as an Indian is generally accepted in the community.\n[...]\n155. Other mixed races.-Any mixture of white and nonwhite should be reported according to the nonwhite parent. [...]",
       provenance: {
         creator:
-          "United States federal census authorities for the 1930 census; the issuing office is not named on the IPUMS transcription.",
+          "U.S. Department of Commerce, Bureau of the Census (Form 15-100, 1930)",
         title: "1930 Census: Enumerator Instructions, paragraphs 150, 151 and 155 (Column 12, “Color or race”)",
-        holder: "IPUMS USA (online transcription)",
-        reference: "Paragraphs 150, 151 and 155; https://usa.ipums.org/usa/voliii/inst1930.shtml",
+        holder: "U.S. Census Bureau (page image); IPUMS USA (online transcription)",
+        reference:
+          "Paragraphs 150, 151 and 155; https://usa.ipums.org/usa/voliii/inst1930.shtml. Page image: U.S. Department of Commerce, Bureau of the Census, Fifteenth Census of the United States, Instructions to Enumerators, Population and Agriculture (Form 15-100; Washington: Government Printing Office, 1930), pp. 26-27, scan published by the U.S. Census Bureau at https://www.census.gov/content/dam/Census/programs-surveys/decennial/technical-documentation/questionnaires/1930instructions.pdf (PDF page 19).",
         rights:
-          "The IPUMS USA website carries a general site copyright notice; no separate rights statement is given for the instruction text. Check before reuse.",
-        alterations: slot("any alteration you made"),
+          "The IPUMS USA website carries a general site copyright notice; no separate rights statement is given for the instruction text. The U.S. Census Bureau scan carries no rights statement. Check before reuse.",
+        alterations:
+          "Page 19 of the U.S. Census Bureau PDF (printed pages 26 and 27) rendered to an image 1600 pixels wide; not otherwise altered.",
       },
       contentNote: null,
       annotations: [
@@ -70,25 +76,28 @@ export const louisiana: Chapter = {
           text: "The next paragraph, on the category the instructions call “Indian,” allows an exception where a person “is regarded as a white person by those in the community where he lives.” Paragraph 151 offers no such exception for a person “of mixed white and Negro blood.”",
         },
       ],
-      gapNote:
-        "No image has been added yet; the full text of the instructions can be read at IPUMS USA, https://usa.ipums.org/usa/voliii/inst1930.shtml.",
+      gapNote: null,
     },
     {
       id: "louisiana-item-2",
       kind: "document",
       status: "sourced",
-      image: null,
-      alt: slot("short alternative text"),
-      longDescription: slot("longer description"),
+      image: { src: "/images/louisiana/louisiana-item-2.jpg", width: 1600, height: 2216 },
+      alt: "Scan of a printed page of volume 126 of the Louisiana Reports, from the 1910 opinion in State v. Treadaway, set in two columns.",
+      longDescription:
+        "A single printed page set in two columns of justified type, with the running head “State v. Treadaway.” centred at the top between the numbers 305 at the left and 306 at the right. The left column finishes one paragraph and begins a new one about two-thirds of the way down; the transcribed passage starts there and runs to the foot of the left column. It continues at the top of the right column, whose opening sentences complete it; the rest of that column lists earlier Louisiana statutes. The lower margin is blank apart from faint marks.",
       transcription:
         "There is a word in the English language which does express the meaning of a person of mixed negro and other blood [...]. That word is the word “colored.” The word “colored,” when used to designate the race of a person, is unmistakable, at least in the United States. It means a person of negro blood pure or mixed; and the term applies no matter what may be the proportions of the admixture, so long as the negro blood is traceable. [...] In our Constitution and laws, when it has become necessary to use a word comprehending within its meaning both negroes, properly so-called, and persons of mixed negro blood, the term “colored” has invariably been used.",
       provenance: {
         creator: "Supreme Court of Louisiana (majority opinion; Land and Nicholls, JJ., dissenting)",
         title: "State v. Treadaway et al., 126 La. 300, 52 So. 500 (La. 1910), decided 25 April 1910",
         holder: "Caselaw Access Project (digitised copy of the Louisiana Reports)",
-        reference: "126 La. 300; 52 So. 500; No. 18,149",
-        rights: "Rights not stated by the holder; check before reuse.",
-        alterations: slot("any alteration you made"),
+        reference:
+          "126 La. 300; 52 So. 500; No. 18,149. Page image: Louisiana Reports, vol. 126 (St. Paul, MN: West Publishing Company, 1911), page headed 305 and 306, from the Caselaw Access Project volume scan at https://static.case.law/la/126.pdf (PDF page 179).",
+        rights:
+          "No rights statement appears with the volume files on static.case.law. Harvard Law School Library Innovation Lab states that the original limitations on Caselaw Access Project data have expired and that the data “can now be fully released without restriction on access or use” (https://lil.law.harvard.edu/blog/2024/03/26/transitions-for-the-caselaw-access-project). Check before reuse.",
+        alterations:
+          "Page 179 of the Caselaw Access Project PDF of volume 126 rendered to an image 1600 pixels wide; not otherwise altered.",
       },
       contentNote: null,
       annotations: [
@@ -101,8 +110,7 @@ export const louisiana: Chapter = {
           text: "The case was a prosecution under Act No. 87 of 1908, which used the words “negro or black race”; the court affirmed an acquittal, setting those words apart from “colored,” which it read as reaching any traceable African ancestry.",
         },
       ],
-      gapNote:
-        "No image has been added yet; the opinion can be read in the Caselaw Access Project’s digitised copy at https://static.case.law/la/126/html/0299-01.html.",
+      gapNote: null,
     },
   ],
   basis: {
@@ -128,18 +136,20 @@ export const louisiana: Chapter = {
       id: "louisiana-present-instrument",
       kind: "document",
       status: "sourced",
-      image: null,
-      alt: slot("short alternative text"),
-      longDescription: slot("longer description"),
+      image: { src: "/images/louisiana/louisiana-present-instrument.jpg", width: 1600, height: 1956 },
+      alt: "Page 2 of the 2020 Census informational questionnaire, with questions 5 to 9 about Person 1 on a pale blue form overprinted with the words “Informational Copy.”",
+      longDescription:
+        "A form page with a light blue background, divided into two columns and headed “Person 1” at the top left, with a barcode at the top centre. The left column holds Questions 5 to 8 (name, sex, age and date of birth, and Hispanic origin), with a note in bold above Question 8. The right column holds Question 9, the race question transcribed here, with its checkboxes and write-in boxes running down most of the column, and a bold instruction about Person 2 at the foot. The words “Informational Copy” are printed in large outlined letters diagonally across both columns, and the page number 2 is centred at the bottom.",
       transcription:
         "9. What is Person 1’s race?\nMark [X] one or more boxes AND print origins.\nWhite – Print, for example, German, Irish, English, Italian, Lebanese, Egyptian, etc.\nBlack or African Am. – Print, for example, African American, Jamaican, Haitian, Nigerian, Ethiopian, Somali, etc.\nAmerican Indian or Alaska Native – Print name of enrolled or principal tribe(s), for example, Navajo Nation, Blackfeet Tribe, Mayan, Aztec, Native Village of Barrow Inupiat Traditional Government, Nome Eskimo Community, etc.\n[...]\nSome other race – Print race or origin.",
       provenance: {
         creator: "U.S. Census Bureau, U.S. Department of Commerce",
         title: "2020 Census informational questionnaire, Question 9 (race)",
         holder: "U.S. Census Bureau",
-        reference: "Form DI-Q1 (05-31-2019); OMB No. 0607-1006",
+        reference:
+          "Form DI-Q1 (05-31-2019); OMB No. 0607-1006; https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/questionnaires-and-instructions/questionnaires/2020-informational-questionnaire-english_DI-Q1.pdf (PDF page 2)",
         rights: "Rights not stated by the holder; check before reuse.",
-        alterations: slot("any alteration you made"),
+        alterations: "Page 2 of the PDF rendered to an image 1600 pixels wide; not otherwise altered.",
       },
       contentNote: null,
       annotations: [
@@ -148,8 +158,7 @@ export const louisiana: Chapter = {
           text: "The cut omits the boxes and write-in lines for Asian and Pacific Islander groups. A note above Question 8 asks for answers to both the Hispanic-origin and race questions and states that “For this census, Hispanic origins are not races.”",
         },
       ],
-      gapNote:
-        "No image has been added yet; the questionnaire can be read as a PDF from the U.S. Census Bureau at https://www2.census.gov/programs-surveys/decennial/2020/technical-documentation/questionnaires-and-instructions/questionnaires/2020-informational-questionnaire-english_DI-Q1.pdf.",
+      gapNote: null,
     },
     basis: {
       quote:
