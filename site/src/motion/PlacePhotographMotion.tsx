@@ -48,6 +48,9 @@ export function PlacePhotographMotion({ children }: { children: ReactNode }) {
           const onFocusIn = (event: FocusEvent) => {
             const focused = event.target;
             if (!(focused instanceof Element)) return;
+            // The close view is a dialog in the top layer: its controls are placed by the view,
+            // not by the pin, so focus inside it must not move the page behind it.
+            if (focused.closest("dialog")) return;
             cancelAnimationFrame(frame);
             frame = requestAnimationFrame(() => {
               const st = tl.scrollTrigger;
