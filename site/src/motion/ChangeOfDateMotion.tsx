@@ -206,12 +206,13 @@ export function ChangeOfDateMotion({
             </p>
           )}
         </div>
-        {/* The rule under the heading. */}
-        <div aria-hidden data-date-line className="h-px bg-(--hair)" />
+        {/* The rule under the heading; drawn as the section enters, like the others (SectionReveals). */}
+        <div aria-hidden data-date-line data-rule />
         {enhanced && (
           <EraSwitch from={from} to={to} year={year} eraInView={eraInView} onYear={onYear} onEra={onEra} />
         )}
-        <div data-stage className="flex flex-col gap-14">
+        {/* data-enter: the stage rises in as the section enters, in full motion (SectionReveals). */}
+        <div data-stage data-enter className="flex flex-col gap-14">
           {ERAS.map((era) => {
             const hidden = enhanced && era !== eraInView;
             return (

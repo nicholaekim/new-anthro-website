@@ -35,6 +35,7 @@ export function NavMenu({ links }: { links: readonly NavLink[] }) {
             <li key={l.href}>
               <CoverLink
                 href={l.href}
+                card={l.card}
                 aria-current={l.href === pathname ? "page" : undefined}
                 className="target quiet w-full px-2 py-1 text-sm hover:text-interface aria-[current=page]:font-semibold aria-[current=page]:text-interface"
               >

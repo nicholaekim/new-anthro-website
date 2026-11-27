@@ -114,10 +114,13 @@ describe("chapter pages", () => {
     // Beat 6's empty frames hold their gap note or "No image" as text, so they are not decoration.
     const decorative = [
       ...container.querySelectorAll(
-        "[data-layer], [data-date-line], [data-date-indicator], [data-divider], [data-mark], [data-tick] > span:not(.sr-only)",
+        "[data-place-figures], [data-depth], [data-chapter-figures], [data-chapter-number], [data-rule], [data-date-line], [data-date-indicator], [data-divider], [data-mark], [data-tick] > span:not(.sr-only)",
       ),
     ];
-    expect(container.querySelectorAll("[data-layer]")).toHaveLength(3);
+    // Beat 2's side column: the year and the place set large, as type only.
+    expect(container.querySelectorAll("[data-place-figures] [data-depth]")).toHaveLength(2);
+    expect(container.querySelector("[data-place-figures] img")).toBeNull();
+    expect(container.querySelector("[data-chapter-figures]")).toHaveTextContent(String(c.historicalYear));
     expect(container.querySelector("[data-date-line]")).not.toBeNull();
     expect(container.querySelector("[data-mark]")).not.toBeNull();
     for (const el of decorative) expect(el.closest('[aria-hidden="true"]')).not.toBeNull();

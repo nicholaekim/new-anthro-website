@@ -18,14 +18,17 @@ export function BeatHeading({
   before?: ReactNode;
   after?: ReactNode;
 }) {
+  // data-beat-opening: its parts (number, heading, rule) arrive in turn as the section enters, in
+  // full motion (SectionReveals); mt-2 and the gap put the rule 1rem below the heading.
   return (
-    <div className={rule ? "opening" : "flex flex-col gap-2"}>
+    <div data-beat-opening className={rule ? "opening" : "flex flex-col gap-2"}>
       <p aria-hidden className="caps soft">{sectionNumber(beat)}</p>
       <h2 id={`beat-${beat}-heading`} className={`font-title type-heading ${className}`}>
         {before}
         {SECTION_LABELS[beat]}
         {after}
       </h2>
+      {rule && <span aria-hidden data-rule className="mt-2" />}
     </div>
   );
 }

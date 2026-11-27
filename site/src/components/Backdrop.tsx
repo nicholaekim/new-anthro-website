@@ -12,7 +12,9 @@ export function Backdrop({ person, chapter }: { person: PersonCard | null; chapt
   return (
     <>
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 hidden bg-surround lg:block">
+        {/* data-backdrop-light: drifts a little while beat 2 is pinned (PlacePhotographMotion). */}
         <div
+          data-backdrop-light
           className={`absolute inset-y-0 right-0 bg-[radial-gradient(ellipse_at_50%_40%,color-mix(in_srgb,var(--color-paper)_7%,transparent),transparent_60%)] ${person ? "left-72" : "left-0"}`}
         />
       </div>

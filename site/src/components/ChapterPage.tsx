@@ -1,4 +1,6 @@
 import type { Chapter, PersonCard } from "@/content/types";
+import type { TitleCard } from "@/motion/cover";
+import { SectionReveals } from "@/motion/SectionReveals";
 import { Backdrop } from "./Backdrop";
 import { BeatTicks } from "./BeatTicks";
 import { PlaceDateTag } from "./PlaceDateTag";
@@ -21,7 +23,7 @@ export function ChapterPage({
 }: {
   chapter: Chapter;
   person: PersonCard;
-  next: { href: string; label: string };
+  next: { href: string; label: string; card?: TitleCard };
   // Which chapter this is, for the tag beside the place and date ("Chapter 1 of 4").
   position?: { number: number; count: number };
 }) {
@@ -43,8 +45,8 @@ export function ChapterPage({
       className={`grid pb-28 ${card ? "lg:grid-cols-[18rem_1fr]" : ""}`}
     >
       <StartAtTop />
-      <main className={card ? "lg:col-start-2" : undefined}>
-        <ChapterCard chapter={chapter} />
+      <SectionReveals className={card ? "lg:col-start-2" : undefined}>
+        <ChapterCard chapter={chapter} number={position?.number} />
         <PlacePhotograph chapter={chapter} />
         <ItemsBeat items={chapter.items} />
         {chapter.basis && <BasisBeat basis={chapter.basis} person={card} />}
@@ -52,7 +54,7 @@ export function ChapterPage({
         {historical && present && <ChangeOfDate chapter={chapter} historical={historical} present={present} />}
         <PresentDay chapter={chapter} person={card} />
         <CloseBeat next={next} />
-      </main>
+      </SectionReveals>
       <Backdrop person={card} chapter={chapter} />
       <PlaceDateTag
         place={chapter.place}

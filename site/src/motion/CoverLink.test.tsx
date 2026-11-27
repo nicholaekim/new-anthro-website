@@ -3,7 +3,7 @@ import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CoverLink } from "./CoverLink";
 import { CoverProvider } from "./CoverProvider";
-import { COVER_FAILSAFE_MS } from "./cover";
+import { COVER_FAILSAFE_MS, type TitleCard } from "./cover";
 import { gsap } from "./gsap";
 import { MotionProvider } from "./MotionProvider";
 
@@ -43,11 +43,11 @@ afterEach(() => {
   nav.linkNavigated.mockReset();
 });
 
-function renderLink(href = "/ending") {
+function renderLink(href = "/ending", card?: TitleCard) {
   return render(
     <MotionProvider>
       <CoverProvider>
-        <CoverLink href={href}>Go</CoverLink>
+        <CoverLink href={href} card={card}>Go</CoverLink>
       </CoverProvider>
     </MotionProvider>,
   );
@@ -76,6 +76,23 @@ describe("CoverLink", () => {
       for (const tween of gsap.getTweensOf(el)) tween.progress(1);
     });
     expect(nav.push).toHaveBeenCalledWith("/ending");
+  });
+
+  it("shows the destination's title card on the cover, hidden from assistive technology", () => {
+    renderLink("/chapters/two", { kicker: "Chapter 2 of 4", title: "Somewhere", year: 1950 });
+    fireEvent.click(screen.getByRole("link", { name: "Go" }));
+    const card = document.querySelector("[data-cover-card]");
+    expect(card).toHaveTextContent("Chapter 2 of 4");
+    expect(card).toHaveTextContent("Somewhere");
+    expect(card).toHaveTextContent("1950");
+    expect(card?.closest('[aria-hidden="true"]')).toBe(cover());
+  });
+
+  it("shows no title card for a link that has none", () => {
+    renderLink();
+    fireEvent.click(screen.getByRole("link", { name: "Go" }));
+    expect(cover()).not.toBeNull();
+    expect(document.querySelector("[data-cover-card]")).toBeNull();
   });
 
   it("in full mode leaves a link to the page already shown alone", () => {

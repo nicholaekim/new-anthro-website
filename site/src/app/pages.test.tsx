@@ -68,6 +68,21 @@ describe("opening sequence", () => {
     }
   });
 
+  it("in still mode leaves the framing, card, note and Begin as they are, and never hides them from assistive technology", () => {
+    preferReducedMotion();
+    const { container } = render(
+      <MotionProvider>
+        <OpeningPage />
+      </MotionProvider>,
+    );
+    const parts = [...container.querySelectorAll("[data-opening-part]")];
+    expect(parts.map((p) => p.getAttribute("data-opening-part"))).toEqual(["framing", "card", "note", "begin"]);
+    for (const el of parts) {
+      expect(el).not.toHaveAttribute("style");
+      expect(el.closest("[aria-hidden], [inert]")).toBeNull();
+    }
+  });
+
   it("in full mode, not yet seen, offers Skip, which records the opening as seen and keeps the card and title", async () => {
     const user = userEvent.setup();
     render(

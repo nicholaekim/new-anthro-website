@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { chapterTitleCard } from "@/components/navLinks";
 import { PersonCardView } from "@/components/PersonCardView";
 import { SlotText } from "@/components/SlotText";
 import { chapters, person } from "@/content";
@@ -11,7 +12,8 @@ import { pageTitle } from "./title";
 export const metadata: Metadata = { title: pageTitle("Opening") };
 
 // The light and the border around the person card are decoration, present in the still page. They
-// are marked data-reveal so the pending mark covers them until the opening sequence is set up.
+// are marked data-reveal so the pending mark covers them until the opening sequence is set up. The
+// parts the sequence brings in (data-opening-part) are only see-through until then (globals.css).
 export default function OpeningPage() {
   const first = chapters[0];
   return (
@@ -22,7 +24,7 @@ export default function OpeningPage() {
         <Reveal className="font-title type-display max-w-[14em]">
           <SlotText value={opening.title} />
         </Reveal>
-        <section aria-labelledby="framing-heading" className="flex flex-col gap-4">
+        <section data-opening-part="framing" aria-labelledby="framing-heading" className="flex flex-col gap-4">
           <h2 id="framing-heading" className="font-title type-heading border-b border-rule pb-3">Introduction</h2>
           <p className="type-lead"><SlotText value={opening.framing} /></p>
         </section>
@@ -39,14 +41,18 @@ export default function OpeningPage() {
             <span data-opening-bar="y" className="absolute inset-y-0 left-0 w-px bg-paper" />
             <span data-opening-bar="y" className="absolute inset-y-0 right-0 w-px bg-paper" />
           </div>
-          <PersonCardView person={person} />
+          <div data-opening-part="card">
+            <PersonCardView person={person} />
+          </div>
         </div>
-        <section aria-labelledby="site-note-heading" className="flex flex-col gap-3">
+        <section data-opening-part="note" aria-labelledby="site-note-heading" className="flex flex-col gap-3">
           <h2 id="site-note-heading" className="font-title text-xl">Note on language and content</h2>
           <p className="measure soft text-base leading-relaxed"><SlotText value={opening.siteNote} /></p>
         </section>
         <CoverLink
+          data-opening-part="begin"
           href={`/chapters/${first.slug}`}
+          card={chapterTitleCard(first, 1, chapters.length)}
           className="target self-start border border-paper/70 px-6 py-3 font-interface text-sm tracking-[0.04em] text-paper hover:border-paper hover:bg-paper hover:text-ink"
         >
           Begin: {first.place}, {first.historicalYear}

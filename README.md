@@ -106,7 +106,7 @@ The site's own words (beat headings, button and link labels, and labels such as 
 - `site/src/components/Mount.tsx`: "No image";
 - `site/src/components/PersonCardView.tsx` and `PersonCardPanel.tsx`: "Person card", "Reason:", "See the rule", "In this chapter", "Outcome confidence", "Close", and for screen readers "outcome, confidence:" and "facts used in this section";
 - `site/src/components/PlaceDateTag.tsx`: "Chapter 1 of 4" and the others;
-- `site/src/components/EraSwitch.tsx` (the two years as buttons, named "Show 1930" and "Show 2020" and so on for screen readers, and the range, named "Date, from 1930 to 2020"); `site/src/motion/era.ts` (the range's spoken value, such as "1962, 1930 in view"); `site/src/motion/ChangeOfDateMotion.tsx` (what screen readers hear when the era changes, "Now showing 2020."); `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Current section:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending"), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
+- `site/src/components/EraSwitch.tsx` (the two years as buttons, named "Show 1930" and "Show 2020" and so on for screen readers, and the range, named "Date, from 1930 to 2020"); `site/src/motion/era.ts` (the range's spoken value, such as "1962, 1930 in view"); `site/src/motion/ChangeOfDateMotion.tsx` (what screen readers hear when the era changes, "Now showing 2020."); `BeatTicks.tsx` ("Previous", "Next", "Sections", and for screen readers "Sections in this chapter", "Previous section", "Next section", "Current section:"), `NavMenu.tsx` ("Menu"), `navLinks.ts` ("Opening", "Ending", and the cover's "Chapter 1 of 4"), `beats/ChapterCard.tsx` ("Chapter 01" on the title page), `RestartButton.tsx` ("Restart"), `MotionSwitch.tsx` ("Motion"), `StatusLabel.tsx` (see below);
 - `site/src/motion/OpeningMotion.tsx`: "Skip";
 - `site/src/app/layout.tsx`: "Skip to content";
 - `site/src/app/page.tsx`: "Introduction", "Note on language and content", "Begin:";
@@ -127,7 +127,7 @@ The four type voices are loaded in `site/src/app/layout.tsx` through `next/font/
 ## Motion
 
 - Full motion runs only when the window is at least 1024 pixels wide. The same width is the layout breakpoint (Tailwind's `lg`). It is set in pixels in three places that must agree: `MOTION_QUERY` in `site/src/motion/gsap.ts`, `--breakpoint-lg` and the media queries in `site/src/app/globals.css`.
-- At that width, only beats 2 and 6 pin. Beat 2 pins for about one screen of scrolling and moves the decorative layers. Beat 6 pins for about one and a half screens; see "Beat 6, the change of date" below.
+- At that width, only beats 2 and 6 pin. Beat 2 pins for about one screen of scrolling; meanwhile the place and the year, set large and upright in the column beside the photograph, drift upward at two different rates and the pool of light behind the page drifts a little. The photograph and its sheet stay still, whole and uncropped; the column is decoration, hidden from screen readers, and is the same whether or not the chapter has a photograph (Tobique shows its empty frame). Beat 6 pins for about one and a half screens; see "Beat 6, the change of date" below.
 - Below 1024 pixels nothing pins.
 - The Motion button in the header turns full motion on or off. When it is pressed, motion is on. It overrides the system's reduced-motion setting for the rest of the visit. With motion off, the site is the still version: nothing pins and nothing moves over time, but beat 6's controls still work, instantly.
 - By default the site follows the system setting: reduced motion means the still version.
@@ -148,18 +148,25 @@ In full motion at 1024 pixels and wider, the section pins and scrolling moves th
 
 ### Motion extras
 
-Three time-based extras run whenever motion is on, at any window width (only the pinning needs 1024 pixels). With motion off, or with the system's reduced-motion setting and no override, none of them runs and nothing is ever hidden.
+These time-based extras run whenever motion is on, at any window width (only the pinning and beat 2's drift need 1024 pixels). With motion off, or with the system's reduced-motion setting and no override, none of them runs, nothing is ever hidden and no element carries a leftover style. Nothing in them loops, and each plays once.
 
 - **Title reveals.** Each page's main heading (the opening title, the chapter heading with its place and date, the ending heading) rises into place line by line. Once the page has loaded, screen readers read the whole heading, during the reveal too. Once the lines are in place the heading is ordinary text again. Set in `site/src/motion/Reveal.tsx`.
-- **Animated opening.** On the opening page a light comes up behind the person card and a thin border grows around it, then the title rises. It plays once per visit; a "Skip" button jumps to the end. Restart clears the record, so the opening plays again. The light and border are also part of the still page. Set in `site/src/motion/OpeningMotion.tsx`; the light and border are in `site/src/app/page.tsx`.
-- **Cover between pages.** Choosing the menu links, the next-chapter link, the opening's link to chapter 1 or Restart fades a plain dark panel over the page, changes page under it, and fades it away. Links within a page, a link to the page already shown, Back, Forward, reload and opening a link in a new tab are plain cuts. If the new page does not arrive within 4 seconds, the panel fades away anyway. Set in `site/src/motion/CoverProvider.tsx` and `CoverLink.tsx`.
+- **Animated opening.** On the opening page, once per visit, the light comes up, the title rises line by line, the introduction follows, the person card is set down and a thin border draws around it, then the note and the Begin link arrive (about three seconds). A "Skip" button finishes it at once, and moving keyboard focus onto any part of the page finishes it too. Every part is readable by screen readers and reachable by keyboard throughout: only its opacity and position change. Restart clears the record, so the opening plays again. The still page is the finished composition. Set in `site/src/motion/OpeningMotion.tsx` and `useSequence.ts`; the parts are marked `data-opening-part` in `site/src/app/page.tsx`.
+- **Chapter title page.** Each chapter opens on a title page: the chapter number ("Chapter 01") and the historical year in very large, faint figures behind the title. They come up first, then the title rises. Both are decoration, hidden from screen readers (the heading and the header's "Chapter 1 of 4" say the same). The content note is never animated and can be read from the first moment. Set in `site/src/components/beats/ChapterCard.tsx` and `site/src/motion/ChapterEntrance.tsx`.
+- **Section reveals.** As each later section scrolls into view, its number, heading and rule arrive in turn, then each block of its content rises a little and fades in, once; scrolling back does not replay them. Whatever is already on screen when the page loads is left alone, keyboard focus moving into a block that has not arrived yet completes it at once, and reaching the end of the page completes anything left. Set in `site/src/motion/SectionReveals.tsx` (the chapter's `<main>`).
+- **Cover between pages.** Choosing the menu links, the next-chapter link, the opening's Begin link or Restart fades a dark panel over the page showing where you are going: the chapter number, place and year, or "Ending" or "Opening". It holds for a moment, the page changes under it, and it fades away as the new page's title rises; the new page's heading receives keyboard focus as before. The panel is hidden from screen readers. Links within a page, a link to the page already shown, Back, Forward, reload and opening a link in a new tab are plain cuts. If the new page does not arrive within 4 seconds, the panel fades away anyway. Set in `site/src/motion/CoverProvider.tsx` and `CoverLink.tsx`; the title cards are built in `site/src/components/navLinks.ts`.
+- **Hover and focus.** Links, buttons and document sheets change colour, border or shadow on hover and focus over 0.15 seconds with motion on, and at once with motion off.
 
-One exception to "no hidden starting state in CSS": while the page loads, a short script in `site/src/app/layout.tsx` marks the page (`data-motion-pending`) when motion will be on, and `site/src/app/globals.css` hides the elements marked for a reveal (`data-reveal`) while that mark is there, so a heading never shows finished and then jumps. The mark is removed as soon as the reveals are set up, and after 2.5 seconds at the latest. Without scripts it is never set.
+The eases and durations are defined once, in `site/src/motion/gsap.ts` (`HOUSE_EASE`, `DURATION`, `STAGGER`, `RISE`); the hover transitions read the same ease and duration from `--ease-house` and `--duration-quick` in `site/src/app/globals.css`, and a test keeps the two equal.
+
+One exception to "no hidden starting state in CSS": while the page loads, a short script in `site/src/app/layout.tsx` marks the page (`data-motion-pending`) when motion will be on, and `site/src/app/globals.css` hides the elements marked for a reveal (`data-reveal`: page titles and decorations) and makes the opening's parts see-through (never hidden from screen readers) while that mark is there, so nothing shows finished and then jumps. The mark is removed as soon as the reveals are set up, and after 2.5 seconds at the latest. Without scripts it is never set.
 
 To turn one extra off for good, leaving the others:
 
 - title reveals: in `site/src/motion/Reveal.tsx`, change `if (mode !== "full" || !el) return;` to `return;`;
 - animated opening: in `site/src/app/page.tsx`, remove the `<OpeningMotion>` wrapper (keep what is inside it), and remove the light and border if you do not want them in the still page either;
+- chapter title page: in `site/src/components/beats/ChapterCard.tsx`, replace `<ChapterEntrance>` with a fragment;
+- section reveals: in `site/src/motion/SectionReveals.tsx`, change `if (mode !== "full" || !root) return;` to `return;`;
 - cover: in `site/src/app/layout.tsx`, remove the `<CoverProvider>` wrapper (keep what is inside it). The links then work as plain links.
 
 ## Assets, credits and AI use
@@ -215,7 +222,7 @@ Small issues found in review and left for later:
 - Behaviour:
   - The menu marks the current page by an exact path match. This would break if trailing slashes were turned on in the Next.js config.
   - Restart clears what the site has stored, but the Motion button keeps its setting until the page is reloaded.
-  - While the cover between pages is up (about one second), keyboard focus stays on the page beneath it.
+  - While the cover between pages is up (about one and a half seconds), keyboard focus stays on the page beneath it.
   - The place-and-date tag measures the page on every scroll.
   - Scroll positions are measured again whenever any disclosure or the person-card panel opens or closes.
   - Pins are placed under the header by finding it as `body > header`. Moving the header breaks this.

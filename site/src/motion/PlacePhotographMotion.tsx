@@ -8,13 +8,16 @@ import { scrollTargetForFocus } from "./pinFocus";
 // Space left between a control brought into view and the beat bar, in pixels.
 const FOCUS_MARGIN = 16;
 
-// Beat 2's pin wrapper. In full motion at the breakpoint it pins for one viewport height and
-// moves the decorative layers ([data-layer]) by different amounts. Nothing else moves.
-const LAYER_TRAVEL: [layer: string, yPercent: number][] = [
-  ["1", -15],
-  ["2", -35],
-  ["3", -60],
+// Beat 2's pin wrapper. In full motion at the breakpoint it pins for one viewport height and,
+// scrubbed, moves the side column's two lines of type ([data-depth], PlacePhotograph) up by
+// different amounts, the nearer one further, and lets the backdrop's pool of light
+// ([data-backdrop-light], Backdrop) drift a little. The photograph and its sheet stay still.
+const DEPTH_TRAVEL: [depth: string, y: number][] = [
+  ["far", -56],
+  ["near", -150],
 ];
+// The light's drift, in percent of its own size.
+const LIGHT_DRIFT = { xPercent: 3, yPercent: -5 };
 
 export function PlacePhotographMotion({ children }: { children: ReactNode }) {
   const { mode } = useMotionMode();
@@ -35,9 +38,12 @@ export function PlacePhotographMotion({ children }: { children: ReactNode }) {
           const tl = gsap.timeline({
             scrollTrigger: { trigger: el, pin: true, start: pinStart, end: "+=100%", scrub: 0.5 },
           });
-          for (const [layer, yPercent] of LAYER_TRAVEL) {
-            tl.fromTo(`[data-layer="${layer}"]`, { yPercent: 0 }, { yPercent, ease: "none", duration: 1 }, 0);
+          for (const [depth, y] of DEPTH_TRAVEL) {
+            tl.fromTo(`[data-depth="${depth}"]`, { y: 0 }, { y, ease: "none", duration: 1 }, 0);
           }
+          // Outside the wrapper, so passed as an element; the revert puts it back too.
+          const light = document.querySelector("[data-backdrop-light]");
+          if (light) tl.fromTo(light, { xPercent: 0, yPercent: 0 }, { ...LIGHT_DRIFT, ease: "none", duration: 1 }, 0);
           // The pinned wrapper is taller than the view: a control focused below the visible slot
           // is brought into view by scrolling to where it shows once the pin has ended.
           // Checked a frame later, after the browser's own scroll to the focused element, which can

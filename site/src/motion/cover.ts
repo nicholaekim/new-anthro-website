@@ -5,6 +5,14 @@ import type { MotionMode } from "./motionMode";
 export type CoverState = "idle" | "closing" | "covered" | "opening";
 export type CoverEvent = "navigate" | "closed" | "arrived" | "opened" | "failsafe";
 
+// The destination, shown on the cover while it is closed: "Chapter 2 of 4", the place, the year;
+// or only a title ("Ending", "Opening"). Built from the link's own data (navLinks.ts).
+export interface TitleCard {
+  kicker: string | null;
+  title: string;
+  year: number | null;
+}
+
 // If the new page has not arrived this long after the cover started closing, it opens anyway.
 export const COVER_FAILSAFE_MS = 4000;
 

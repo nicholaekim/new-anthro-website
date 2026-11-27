@@ -2,7 +2,7 @@
 
 import { createContext, use, useLayoutEffect, useRef, type ReactNode } from "react";
 import { useCover } from "./CoverProvider";
-import { gsap, HOUSE_EASE, SplitText, useGSAP } from "./gsap";
+import { DURATION, gsap, HOUSE_EASE, SplitText, STAGGER, useGSAP } from "./gsap";
 import { useMotionMode } from "./MotionProvider";
 
 // What a sequence around a Reveal asks of it: hold its tween paused, let it play, or finish it at
@@ -72,8 +72,8 @@ export function Reveal({ children, className, id }: { children: ReactNode; class
               // paused still renders the start state at once (a from tween renders immediately).
               const t = gsap.from(self.lines, {
                 yPercent: 100,
-                duration: 0.9,
-                stagger: 0.08,
+                duration: DURATION.title,
+                stagger: STAGGER,
                 ease: HOUSE_EASE,
                 paused: true,
                 onComplete: restore,

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { pageTitle } from "@/app/title";
 import { ChapterPage } from "@/components/ChapterPage";
+import { chapterTitleCard, ENDING_CARD } from "@/components/navLinks";
 import { chapters, getChapter, person } from "@/content";
 
 export function generateStaticParams() {
@@ -19,11 +20,16 @@ export default async function Page({ params }: PageProps<"/chapters/[slug]">) {
   const chapter = getChapter(slug);
   if (!chapter) notFound();
 
-  const following = chapters[chapters.indexOf(chapter) + 1];
+  const index = chapters.indexOf(chapter);
+  const following = chapters[index + 1];
   const next = following
-    ? { href: `/chapters/${following.slug}`, label: `${following.place}, ${following.historicalYear}` }
-    : { href: "/ending", label: "Ending" };
+    ? {
+        href: `/chapters/${following.slug}`,
+        label: `${following.place}, ${following.historicalYear}`,
+        card: chapterTitleCard(following, index + 2, chapters.length),
+      }
+    : { href: "/ending", label: "Ending", card: ENDING_CARD };
 
-  const position = { number: chapters.indexOf(chapter) + 1, count: chapters.length };
+  const position = { number: index + 1, count: chapters.length };
   return <ChapterPage chapter={chapter} person={person} next={next} position={position} />;
 }

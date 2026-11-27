@@ -191,13 +191,18 @@
   }
 }
 
-/* The opening of a section: number, heading, then a thin rule. */
+/* The opening of a section: number, heading, then a thin rule ([data-rule], its own element so a
+   section reveal can draw it). 1rem above the rule and its 1px, as when it was a border. */
 @utility opening {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px solid var(--hair);
+}
+[data-rule] {
+  display: block;
+  height: 1px;
+  background: var(--hair);
+  transform-origin: left;
 }
 
 /* A quiet text button: underlined, solid on hover, outlined while pressed. Changes are instant.
@@ -226,6 +231,48 @@
    set up, and the script itself after 2500 ms. Without scripts it is never set. */
 html[data-motion-pending] [data-reveal] {
   visibility: hidden;
+}
+/* The opening page's text and controls that its sequence brings in. While the mark is there they
+   are see-through only, never hidden: a screen reader reads them and the keyboard reaches them
+   from the first frame. */
+html[data-motion-pending] [data-opening-part] {
+  opacity: 0;
+}
+/* Printed, anything a reveal had not yet brought in is shown. */
+@media print {
+  [data-opening-part],
+  [data-entering] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Motion tokens shared with src/motion/gsap.ts (HOUSE_CURVE, DURATION.quick): a test keeps them equal. */
+:root {
+  --ease-house: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-quick: 150ms;
+}
+
+/* Hover and focus feedback eases, briefly, in full motion only (data-motion on html is set before
+   first paint); in still mode every change is instant. Only colour, border and shadow ease: the
+   motion layer animates opacity and transform on some links, and a transition would fight it. */
+html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
+  transition-property: color, background-color, border-color, box-shadow;
+  transition-duration: var(--duration-quick);
+  transition-timing-function: var(--ease-house);
+}
+/* A document sheet lifts a little, by its shadow alone, under the pointer or with focus inside. */
+@media (hover: hover) {
+  [data-item]:hover {
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.4),
+      0 28px 52px -22px rgb(0 0 0 / 0.85);
+  }
+}
+[data-item]:has(:focus-visible) {
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 28px 52px -22px rgb(0 0 0 / 0.85);
 }
 
 /* Below the breakpoint the person card's fixed button and the place-and-date tag sit under the
@@ -277,6 +324,20 @@ html[data-motion-pending] [data-reveal] {
     padding: 1rem;
     border: 0;
     background: transparent;
+  }
+}
+
+/* Beat 1, the title page, fills the view below the header (2.5rem, 3.75rem on touch), and its
+   content note ends 2rem above the story bar (2rem, 3.25rem on touch), so the note is whole in
+   the first frame. Unlayered, so it overrides the beat utility's padding. */
+[data-beat="1"] {
+  min-height: calc(100svh - 2.5rem);
+  padding-bottom: 4rem;
+}
+@media (pointer: coarse) {
+  [data-beat="1"] {
+    min-height: calc(100svh - 3.75rem);
+    padding-bottom: 5.25rem;
   }
 }
 

@@ -4,8 +4,12 @@ import { BeatHeading } from "../BeatHeading";
 import { ItemView } from "../ItemView";
 import { SlotText } from "../SlotText";
 
-// The decorative layers are placeholders for the student's own foreground shapes. They sit in
-// their own column at the breakpoint, so they never cover the photograph or any text.
+// The side column, at the breakpoint only, holds the place and the year set large and upright:
+// typography, not imagery, so it reads the same whether or not the chapter has a photograph
+// (Tobique shows an empty frame with its note). It is decoration, hidden from assistive
+// technology: the heading, the header and the title page already say both. In full motion the
+// two lines drift at different rates while the photograph's sheet stays still (PlacePhotographMotion).
+// The photograph itself is never moved, cropped or covered.
 export function PlacePhotograph({ chapter }: { chapter: Chapter }) {
   return (
     <section data-beat="2" id="beat-2" aria-labelledby="beat-2-heading" className="beat">
@@ -16,10 +20,16 @@ export function PlacePhotograph({ chapter }: { chapter: Chapter }) {
           <ItemView item={chapter.photograph} />
           <p className="measure"><SlotText value={chapter.photographContext} /></p>
         </div>
-        <div aria-hidden className="relative hidden overflow-hidden lg:block">
-          <div data-layer="1" className="absolute inset-x-6 top-[15%] h-1/4 bg-sheet/10" />
-          <div data-layer="2" className="absolute inset-x-2 top-[45%] h-1/3 bg-paper/10" />
-          <div data-layer="3" className="absolute inset-x-10 top-[70%] h-1/2 bg-interface/30" />
+        <div aria-hidden data-place-figures className="pointer-events-none relative hidden select-none overflow-hidden lg:block">
+          <p
+            data-depth="far"
+            className="absolute right-0 top-[6%] font-title text-[7.5rem] font-light leading-none tracking-[-0.04em] text-paper/[0.07] tabular-nums [writing-mode:vertical-rl]"
+          >
+            {chapter.historicalYear}
+          </p>
+          <p data-depth="near" className="caps soft absolute left-1 top-[28%] [--caps-track:0.4em] [writing-mode:vertical-rl]">
+            {chapter.place}
+          </p>
         </div>
       </PlacePhotographMotion>
     </section>
