@@ -103,8 +103,10 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
           </ol>
           <details ref={list} data-section-list className="relative" onKeyDown={onKeyDown} onBlur={onBlur}>
             <summary className="target quiet list-none gap-2 whitespace-nowrap px-2 no-underline hover:text-interface [&::-webkit-details-marker]:hidden">
-              {known && <span className="sr-only">Sections, current: </span>}
-              <span className="caps [--caps-track:0.08em]">{known ? tag(activeBeat) : "Sections"}</span>
+              {/* Read in plain case; shown in capitals, at a fixed least width (the longest label,
+                  "06 Change of date"), so the ticks beside it do not shift as it changes. */}
+              <span className="sr-only">{known ? `Sections, current: ${tag(activeBeat)}` : "Sections"}</span>
+              <span aria-hidden className="caps min-w-[8.75rem] [--caps-track:0.08em]">{known ? tag(activeBeat) : "Sections"}</span>
               {/* On a phone the ticks are a compact strip here, decoration only; the list holds the links. */}
               <span aria-hidden className="hidden items-center gap-1 min-[400px]:flex md:hidden">
                 {beats.map((n) => (

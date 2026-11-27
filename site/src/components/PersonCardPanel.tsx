@@ -28,13 +28,13 @@ export function PersonCardPanel({ uses, children }: { uses: Pick<FactUses, "basi
       <button
         type="button"
         popoverTarget="person-card-panel"
+        aria-label={count > 0 ? `Person card, ${count === 1 ? "1 fact" : `${count} facts`} used in this section` : undefined}
         className="target quiet fixed left-2 top-11 z-20 gap-1.5 bg-raised px-2 text-xs text-paper hover:text-interface pointer-coarse:top-16 lg:hidden"
       >
         Person card
         {count > 0 && (
           <>
             <span aria-hidden className="border border-current/60 px-1 tabular-nums">{count}</span>
-            <span className="sr-only">{`, ${count === 1 ? "1 fact" : `${count} facts`} used in this section`}</span>
           </>
         )}
       </button>

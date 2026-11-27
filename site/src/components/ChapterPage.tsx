@@ -44,7 +44,7 @@ export function ChapterPage({
       key={chapter.slug}
       slug={chapter.slug}
       beats={beats}
-      className={`grid pb-28 ${card ? "lg:grid-cols-[18rem_1fr]" : ""}`}
+      className={`grid pb-28 ${card ? "lg:grid-cols-[21rem_1fr]" : ""}`}
     >
       <StartAtTop />
       <SectionReveals className={card ? "lg:col-start-2" : undefined}>

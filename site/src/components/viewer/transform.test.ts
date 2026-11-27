@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  panIntoView,
   clampView,
   fitSize,
   fitWidthView,
@@ -135,6 +136,29 @@ describe("viewForRegion", () => {
   it("does not zoom past the largest scale for a tiny region", () => {
     const tiny: Region = { x: 0.5, y: 0.5, w: 0.001, h: 0.001 };
     expect(viewForRegion(tiny, content, viewport).scale).toBe(MAX_SCALE);
+  });
+});
+
+describe("panIntoView", () => {
+  // A 1000 by 1000 page at scale 4 in a 400 by 300 view: it is drawn 4000 by 4000.
+  const content = { width: 1000, height: 1000 };
+  const viewport = { width: 400, height: 300 };
+  const view = { scale: 4, x: -1000, y: -1000 };
+
+  it("leaves the view alone when the rectangle is already inside it", () => {
+    expect(panIntoView(view, { x: 50, y: 50, width: 100, height: 100 }, content, viewport)).toEqual(view);
+  });
+
+  it("moves the view by the least amount that brings the rectangle inside, with a margin", () => {
+    expect(panIntoView(view, { x: 600, y: -400, width: 100, height: 50 }, content, viewport)).toEqual({ scale: 4, x: -1000 - 316, y: -1000 + 416 });
+  });
+
+  it("shows the top left of a rectangle larger than the view", () => {
+    expect(panIntoView(view, { x: -500, y: 900, width: 2000, height: 2000 }, content, viewport)).toEqual({ scale: 4, x: -1000 + 516, y: -1000 - 884 });
+  });
+
+  it("stays within the page", () => {
+    expect(panIntoView({ scale: 4, x: 0, y: 0 }, { x: -50, y: -50, width: 20, height: 20 }, content, viewport)).toEqual({ scale: 4, x: 0, y: 0 });
   });
 });
 

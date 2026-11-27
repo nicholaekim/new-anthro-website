@@ -154,6 +154,8 @@ describe("beat 6 comparison", () => {
     const beat6 = container.querySelector<HTMLElement>('section[data-beat="6"]') as HTMLElement;
     fireEvent.change(within(beat6).getByRole("slider"), { target: { value: "2010" } });
     await userEvent.click(screen.getByRole("button", { name: "Motion" }));
+    // The switch puts the reader back in place two frames later; let that happen here.
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     expect(within(beat6).getByRole("slider")).toHaveValue("2010");
     expect(beat6.querySelector("[data-date-indicator]")).toHaveTextContent("2010");
     expect(panel(beat6, "present")).not.toHaveAttribute("aria-hidden");

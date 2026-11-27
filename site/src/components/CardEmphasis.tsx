@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import type { Era } from "@/content/types";
 import { gsap, HOUSE_EASE, useGSAP } from "@/motion/gsap";
 import { useMotionMode } from "@/motion/MotionProvider";
@@ -33,6 +33,19 @@ export function CardEmphasis({ children }: { children: ReactNode }) {
     },
     { scope: ref, dependencies: [emphasis, mode], revertOnUpdate: true },
   );
+
+  // If the card is taller than its column (a short window), bring the first emphasised fact into
+  // view inside the card's own scroller, never the page: smooth in full motion, at once in still.
+  useEffect(() => {
+    const el = ref.current;
+    const scroller = el?.closest<HTMLElement>("[data-person-card]");
+    const fact = emphasis ? el?.querySelector<HTMLElement>(`[data-uses-${emphasis}]`) : null;
+    if (!scroller || !fact || scroller.clientHeight === 0 || scroller.scrollHeight <= scroller.clientHeight) return;
+    const box = scroller.getBoundingClientRect();
+    const r = fact.getBoundingClientRect();
+    if (r.top >= box.top && r.bottom <= box.bottom) return;
+    scroller.scrollTo({ top: scroller.scrollTop + r.top - box.top - 8, behavior: mode === "full" ? "smooth" : "auto" });
+  }, [emphasis, mode]);
 
   return (
     <div ref={ref} data-emphasis={emphasis ?? undefined}>

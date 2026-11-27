@@ -120,3 +120,17 @@ export function resizeView(view: View, content: Size, viewport: Size, nextConten
     nextViewport,
   );
 }
+
+// The least pan that brings rect (where something is drawn in the viewport, as regionRect gives
+// it) inside the viewport with margin to spare; a rect larger than that shows its top left. Used
+// when keyboard focus reaches an outline out of view.
+export function panIntoView(view: View, rect: Rect, content: Size, viewport: Size, margin = 16): View {
+  const axis = (start: number, size: number, room: number) => {
+    if (size > room - 2 * margin || start < margin) return margin - start;
+    if (start + size > room - margin) return room - margin - (start + size);
+    return 0;
+  };
+  const dx = axis(rect.x, rect.width, viewport.width);
+  const dy = axis(rect.y, rect.height, viewport.height);
+  return dx === 0 && dy === 0 ? view : panBy(view, dx, dy, content, viewport);
+}

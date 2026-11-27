@@ -24,6 +24,13 @@ const CROSSING_SECONDS = 1.4;
 // 3rem, under a sixth of the narrowest frame).
 const LABEL_EDGE = 0.16;
 
+// Within this of either end, the value is the end.
+const SNAP = 0.001;
+
+// How far ahead of the view the documents start loading: both are fetched before the wipe can
+// uncover the one behind (a lazy image is not fetched while clipped or hidden).
+const PRELOAD_MARGIN = "150% 0px";
+
 // Beat 6. Without its script (and on the server) the two era panels follow one another and none
 // of the controls below exists. Once the script runs, at every width and in both modes, it is one
 // stage: the two documents in one frame, the information panel of the era in view, a date
@@ -72,10 +79,13 @@ export function ChangeOfDateMotion({
   const [message, setMessage] = useState("");
   const setStoryEra = useSetEraInView();
 
-  function paint(p: number) {
+  function paint(raw: number) {
     // On the stage, not the wrapper: the pin writes and restores the wrapper's own inline style.
     const el = stage.current;
     if (!el) return;
+    // A scrub or a tween can stop a hair short of an end; that would leave the divider at the
+    // frame's edge.
+    const p = raw < SNAP ? 0 : raw > 1 - SNAP ? 1 : raw;
     progress.current = p;
     // At the start nothing is written inline: the page at rest carries no style attribute.
     if (p > 0) el.style.setProperty("--wipe", String(p));
@@ -183,6 +193,26 @@ export function ChangeOfDateMotion({
     },
     { scope: wrapper, dependencies: [eraInView, mode], revertOnUpdate: true },
   );
+
+  // Both documents load once the stage nears the view. They stay lazy in the markup: without
+  // scripts they follow one another and load as they are reached; eager, Next would preload both
+  // with the page, and Chrome reports the preloads as unused.
+  useEffect(() => {
+    const el = stage.current;
+    if (!enhanced || !el) return;
+    const load = () => el.querySelectorAll<HTMLImageElement>("[data-document] img").forEach((img) => (img.loading = "eager"));
+    if (typeof IntersectionObserver === "undefined") return load();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        load();
+        observer.disconnect();
+      },
+      { rootMargin: PRELOAD_MARGIN },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [enhanced]);
 
   // The era in view is passed to the person card while enhanced.
   useEffect(() => {

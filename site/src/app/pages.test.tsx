@@ -183,8 +183,10 @@ describe("opening page", () => {
 });
 
 describe("opening page card", () => {
-  it("shows the facts only: no era marks, no rule links, no confidence", () => {
+  it("shows the facts only, each reason in view: no era marks, no rule links, no confidence", () => {
     const { container } = render(<OpeningPage />);
+    expect(container.querySelector("[data-fact] details")).toBeNull();
+    expect(container.querySelector("[data-fact]")).toHaveTextContent("Reason:");
     expect(container.querySelectorAll("[data-fact]")).toHaveLength(4);
     expect(container.querySelector("[data-era-mark], [data-meter], [data-emphasis], a[href^=\"#beat-\"]")).toBeNull();
   });

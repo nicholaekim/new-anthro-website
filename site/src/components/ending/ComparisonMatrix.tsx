@@ -98,7 +98,7 @@ function CellView({ chapter: c, card, era, view }: { chapter: Chapter; card: Tit
             <span>{CONFIDENCE_WORDS[cell.level]}</span>
           </p>
           <div className="w-full">
-            <Disclosure summary={<>Read the outcome<span className="sr-only">{`, ${c.place}, ${year}`}</span></>}>
+            <Disclosure summary="Read the outcome" label={`Read the outcome, ${c.place}, ${year}`}>
               <div className="flex flex-col gap-2">
                 <p className="font-yours text-base leading-normal"><SlotText value={cell.text} /></p>
                 <p><span className="soft">Confidence:</span> <SlotText value={cell.confidence} /></p>
@@ -109,9 +109,8 @@ function CellView({ chapter: c, card, era, view }: { chapter: Chapter; card: Tit
         </>
       )}
       {cell.kind === "none" && <p className="soft">{NO_PERSON_PLACED}</p>}
-      <CoverLink href={cellHref(c.slug, cell.beat)} card={card} className="target quiet text-xs hover:text-interface-deep">
+      <CoverLink href={cellHref(c.slug, cell.beat)} card={card} aria-label={`${sectionTag(cell.beat)}, ${c.place}, ${year}`} className="target quiet text-xs hover:text-interface-deep">
         {sectionTag(cell.beat)}
-        <span className="sr-only">{`, ${c.place}, ${year}`}</span>
       </CoverLink>
     </div>
   );

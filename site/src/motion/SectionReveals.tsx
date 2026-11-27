@@ -9,6 +9,8 @@ import { useMotionMode } from "./MotionProvider";
 const ENTERING = "data-entering";
 // When an entrance starts: the element's top passing this line of the view.
 const START = "top 90%";
+// A trigger whose top is already above this share of the view when it enters came by a jump.
+const JUMPED = 0.5;
 
 type Entrance = { trigger: HTMLElement; targets: HTMLElement[]; opening: boolean; image: boolean };
 
@@ -100,16 +102,18 @@ export function SectionReveals({ className, children }: { className?: string; ch
           pending.delete(anim);
           e.targets.forEach(tidy);
         };
-        // A jump straight past the trigger (the story bar from section 1 to 7) is finished at
-        // once rather than played out of sight, so nothing above the reader is left see-through,
-        // whatever ScrollTrigger does with the jump. Checked on enter: with once, ScrollTrigger
-        // kills the trigger before it would call onLeave for a jump, so onLeave never runs then.
+        // Arrived at by a jump (the story bar from section 1 to 7, or straight into beat 6's pin)
+        // rather than scrolled into: the trigger has gone past or well into the view in one step.
+        // That entrance is finished at once, rather than played out of sight or over a blank
+        // stage. Checked on enter: with once, ScrollTrigger kills the trigger before it would call
+        // onLeave for a jump straight past, so onLeave never runs then.
         const scrollTrigger = {
           trigger: e.trigger,
           start: START,
           once: true,
           onEnter: (self: ScrollTrigger) => {
-            if (self.progress >= 1) self.animation?.progress(1);
+            const jumped = self.progress >= 1 || e.trigger.getBoundingClientRect().top < window.innerHeight * JUMPED;
+            if (jumped) self.animation?.progress(1);
           },
         };
         const anim: gsap.core.Animation = e.opening

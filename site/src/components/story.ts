@@ -54,6 +54,27 @@ export function stepIndex(tops: readonly number[], line: number, direction: 1 | 
   return -1;
 }
 
+// Where the reader is, to come back to after the page changes height (Motion switched on or off
+// adds or removes the pins' spacing): the section at line (the scroll-padding line) and how far
+// into it the line is, as a share of its height. tops are from the view's top, in document order.
+export interface Place {
+  index: number;
+  fraction: number;
+}
+
+export function placeAt(tops: readonly number[], heights: readonly number[], line: number): Place {
+  const index = Math.max(0, activeIndex(tops, line));
+  const height = heights[index] ?? 0;
+  const fraction = height > 0 ? Math.min(1, Math.max(0, (line - tops[index]) / height)) : 0;
+  return { index, fraction: Math.round(fraction * 1e6) / 1e6 };
+}
+
+// The scroll position that puts the line at the same place again. tops are from the document's top.
+export function scrollForPlace(place: Place, tops: readonly number[], heights: readonly number[], line: number): number {
+  const top = tops[place.index] ?? 0;
+  return Math.max(0, top + place.fraction * (heights[place.index] ?? 0) - line);
+}
+
 // The parts of a chapter the person card reads: which facts each era's rule uses.
 export interface FactUses {
   historicalYear: number;

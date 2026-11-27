@@ -170,6 +170,9 @@
     0 1px 2px rgb(0 0 0 / 0.35),
     0 22px 44px -22px rgb(0 0 0 / 0.75);
 
+  /* A scroll area on paper (the close view and its side panel) gets a scrollbar to match. */
+  scrollbar-color: color-mix(in srgb, var(--color-ink) 35%, transparent) transparent;
+
   & :focus-visible {
     outline-color: var(--color-interface-deep);
   }
@@ -321,27 +324,43 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
   font-weight: 600;
 }
 
+/* In a chapter, a fact's reason opens from a small toggle (PersonCardView). In the card's
+   column, with a fine pointer, the toggle sits at the right of the fact's label row, so a closed
+   reason takes no room and the card fits a laptop's screen; opened, the reason follows the
+   fact's other lines. On touch its 44px target would cover the value, so it keeps its own row. */
+@media (min-width: 1024px) and (pointer: fine) {
+  [data-reason] > summary {
+    position: absolute;
+    top: 0.125rem;
+    right: 0;
+  }
+}
+
 /* At the breakpoint the person card is part of the backdrop: shown, fixed in its reserved
    column. This overrides the browser's popover styles; below it the card is a popover. */
 @media (min-width: 1024px) {
   [data-person-card] {
     display: block;
     position: fixed;
-    inset: 4rem auto 3rem 0;
-    width: 18rem;
+    /* Between the header (2.5rem) and the story bar (2rem), with 0.5rem to spare at each end. */
+    inset: 3rem auto 2.5rem 0;
+    width: 21rem;
     /* The browser's popover style sets height: fit-content, which would let a long card run
        past the bottom of the view with nothing to scroll. auto lets inset set the height. */
     height: auto;
     max-height: none;
     margin: 0;
-    padding: 1rem;
+    padding: 0.5rem 0.75rem;
     border: 0;
     background: transparent;
+    /* A scrollbar that comes and goes would rewrap the card's text: keep its room. */
+    scrollbar-gutter: stable;
   }
 }
-/* On touch the story bar is 3.25rem tall: the card's column ends 0.25rem above it. */
+/* On touch the header is 3.75rem and the story bar 3.25rem tall: the card's column clears both. */
 @media (min-width: 1024px) and (pointer: coarse) {
   [data-person-card] {
+    top: 4rem;
     bottom: 3.5rem;
   }
 }
@@ -568,12 +587,36 @@ html[data-motion="full"] :is(a, button, summary, input, [data-item]) {
   object-fit: contain;
   outline: none;
 }
+/* The document takes the wide column and nearly all of its height: the heading row, the date
+   and the gaps are tighter, and the sheet and mat have thin margins, so the scan is as large as
+   the view allows (at 1280 by 800 a portrait page is drawn about 360 to 410px wide and 577px
+   tall: the height is what limits it). The panel takes the narrow column, tighter too. */
+[data-change-of-date][data-pinned] {
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+}
+[data-pinned] [data-date-indicator] {
+  font-size: 2.75rem;
+}
 [data-pinned] [data-stage] {
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 1.5rem;
+}
+[data-pinned] [data-document] {
+  padding: 0.5rem;
+}
+[data-pinned] [data-document] > [data-mount]:not([data-empty-mount]) {
+  padding: 0.25rem;
 }
 [data-pinned] [data-info] {
   min-height: 0;
-  gap: 0.75rem;
+  gap: 0.5rem;
+}
+[data-pinned] [data-info] > * {
+  padding-top: 0.5rem;
+}
+[data-pinned] [data-info] > :first-child {
+  padding-top: 0;
 }
 [data-pinned] [data-rule-quote] {
   display: -webkit-box;
@@ -604,13 +647,14 @@ html:has(dialog[open]) {
 
 /* The close view's highlights (ViewerStage). Each outline is a button placed over its region from
    the same view the page is drawn with; the line is drawn just outside the region so it never
-   covers the passage, dashed, and solid and heavier when chosen (shape, not only tone). The
-   number sits inside its top left corner, so it never covers a neighbouring passage above (two
-   Louisiana highlights abut). Hiding the outlines removes them altogether. */
+   covers the passage: a thin line, so the neighbouring lines stay readable at the whole page,
+   and three times heavier when chosen (shape, not only tone). The number sits just outside the
+   region's left edge, in the margin, so it covers neither the document's own paragraph numbers
+   nor a neighbouring passage. Hiding the outlines removes them altogether. */
 .viewer-outline [data-outline-line] {
   position: absolute;
   inset: -3px;
-  border: 2px dashed var(--color-interface-deep);
+  border: 1px solid var(--color-interface-deep);
   pointer-events: none;
 }
 .viewer-outline[aria-current="true"] [data-outline-line] {
@@ -619,8 +663,8 @@ html:has(dialog[open]) {
 }
 .viewer-outline [data-outline-number] {
   position: absolute;
-  left: 0;
-  top: 0;
+  right: calc(100% + 6px);
+  top: -4px;
   min-width: 1.125rem;
   padding: 0 0.25rem;
   background: var(--color-interface-deep);

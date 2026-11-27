@@ -35,10 +35,14 @@ export function ChapterCard({ chapter, number }: { chapter: Chapter; number?: nu
               <span data-chapter-rule className="block h-px w-16 origin-left bg-(--hair)" />
             </p>
           )}
-          <Reveal id="beat-1-heading" className="font-title type-display">
-            {chapter.place}, {chapter.country}
-            {/* The year is set on its own line; this keeps the heading's text "place, country, year". */}
-            <span className="sr-only">,</span>{" "}
+          {/* The year is set on its own line; the name says "place, country, year" in one line
+              (a hidden comma before it was read with a space before it). */}
+          <Reveal
+            id="beat-1-heading"
+            label={`${chapter.place}, ${chapter.country}, ${chapter.historicalYear}`}
+            className="font-title type-display"
+          >
+            {chapter.place}, {chapter.country}{" "}
             <span className="mt-4 block text-[0.5em] leading-tight tracking-normal text-muted">{chapter.historicalYear}</span>
           </Reveal>
         </div>

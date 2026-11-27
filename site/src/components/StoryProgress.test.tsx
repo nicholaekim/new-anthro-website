@@ -57,6 +57,13 @@ function renderChapter(c: Chapter = chapterUsing()) {
 
 const bar = () => screen.getByRole("navigation", { name: "Sections in this chapter" });
 
+// What a screen reader is given: the text without the parts hidden from it.
+function spoken(el: Element | null): string {
+  const copy = el?.cloneNode(true) as Element | undefined;
+  copy?.querySelectorAll("[aria-hidden]").forEach((e) => e.remove());
+  return copy?.textContent ?? "";
+}
+
 describe("story navigation", () => {
   it("marks the active section on the chapter, in the ticks and in the label", async () => {
     const { container } = renderChapter();
@@ -68,7 +75,7 @@ describe("story navigation", () => {
     expect(current[0]).toHaveAttribute("data-tick", "4");
     expect(bar().querySelector('[data-section-list] [aria-current="location"]')).toHaveAttribute("href", "#beat-4");
     expect(within(bar()).getByText("04 Basis", { selector: "summary *" })).toBeInTheDocument();
-    expect(bar().querySelector("summary")).toHaveTextContent(/^Sections, current: 04 Basis/);
+    expect(spoken(bar().querySelector("summary"))).toBe("Sections, current: 04 Basis");
     await scrollTo(7);
     expect(container.querySelector("[data-chapter]")).toHaveAttribute("data-active-beat", "7");
   });
@@ -110,7 +117,7 @@ describe("story navigation", () => {
     host.innerHTML = renderToString(
       <ChapterPage chapter={chapterUsing()} person={fixturePerson()} next={{ href: "/ending", label: "Ending" }} />,
     );
-    expect(host.querySelector("[data-section-list] summary")).toHaveTextContent(/^Sections▴$/);
+    expect(spoken(host.querySelector("[data-section-list] summary"))).toBe("Sections");
   });
 
   it("goes next to the section below the top line, even a short one the reading line has passed", async () => {
@@ -193,6 +200,17 @@ describe("person card in a chapter", () => {
     expect(emphasis()).toBeNull();
     // Still mode: nothing is left inline.
     expect(card().querySelector("[style]")).toBeNull();
+  });
+
+  it("keeps each reason behind a closed disclosure, and puts the chapter's footer straight after the fiction statement", () => {
+    renderChapter();
+    const reason = fact("fact-1").querySelector("details");
+    expect(reason).not.toBeNull();
+    expect(reason).not.toHaveAttribute("open");
+    expect(reason?.querySelector("summary")).toHaveTextContent("Reason");
+    expect(reason).toHaveTextContent("fixture fact 1 reason");
+    const footer = within(card()).getByRole("region", { name: "In this chapter", hidden: true });
+    expect(footer.compareDocumentPosition(fact("fact-1")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
   it("gives each outcome's confidence in words, linked to its section", () => {

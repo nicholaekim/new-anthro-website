@@ -83,12 +83,16 @@ export function DocumentViewer({
 
   // Opened at a highlight from the page: its annotations are brought into view as if chosen here.
   const initialAnnotation = initial?.annotationIds[0];
+  // This runs before CloseView's own effect opens the dialog (a child's effects run first), when
+  // the panel has no height yet: the scroll waits a frame, until the dialog is open and laid out.
   useEffect(() => {
-    if (initialAnnotation) scrollPanelTo(initialAnnotation);
+    const frame = initialAnnotation ? requestAnimationFrame(() => scrollPanelTo(initialAnnotation)) : 0;
     // Said a moment after the dialog opens, once the live region is there to announce it.
-    if (!initial) return;
-    const timer = setTimeout(() => setMessage(choiceMessage(initial, item)), 100);
-    return () => clearTimeout(timer);
+    const timer = initial ? setTimeout(() => setMessage(choiceMessage(initial, item)), 100) : 0;
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
     // Once, on opening.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -150,7 +154,9 @@ export function DocumentViewer({
         <div
           ref={panelRef}
           data-viewer-panel
-          className="flex flex-col gap-6 lg:w-[min(28rem,42%)] lg:shrink-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2"
+          // Wider for a translated item, so its original and translation sit side by side (Bilingual
+          // puts them side by side from 32rem); on phones they stack.
+          className={`flex flex-col gap-6 lg:shrink-0 lg:overflow-y-auto lg:overscroll-contain lg:pr-2 ${item.translation ? "lg:w-[min(36rem,50%)]" : "lg:w-[min(28rem,42%)]"}`}
         >
           {item.transcription !== null && (
             <div>

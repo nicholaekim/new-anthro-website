@@ -145,6 +145,29 @@ describe("the viewer's page", () => {
   });
 });
 
+describe("keyboard focus on an outline", () => {
+  it("brings an outline out of view into view by moving the page, and keeps the viewport itself unscrolled", async () => {
+    const { area, page } = await openViewer();
+    for (let i = 0; i < 9; i++) fireEvent.keyDown(area, { key: "+" });
+    for (let i = 0; i < 9; i++) fireEvent.keyDown(area, { key: "ArrowLeft" });
+    for (let i = 0; i < 9; i++) fireEvent.keyDown(area, { key: "ArrowUp" });
+    const outline = within(area).getByRole("button", { name: "Paragraph 2" });
+    const placed = () => {
+      const m = /translate\(([-\d.]+)px, ([-\d.]+)px\)/.exec(outline.style.transform);
+      return { x: Number(m?.[1]), y: Number(m?.[2]), w: parseFloat(outline.style.width), h: parseFloat(outline.style.height) };
+    };
+    expect(placed().y).toBeGreaterThan(300); // below the view
+    const before = page();
+    area.scrollTop = 120; // what the browser does to show a focused element in an overflow-hidden box
+    act(() => outline.focus());
+    expect(page()).not.toBe(before);
+    const r = placed();
+    expect(r.y).toBeGreaterThanOrEqual(0);
+    expect(r.y + Math.min(r.h, 300)).toBeLessThanOrEqual(300);
+    expect(area.scrollTop).toBe(0);
+  });
+});
+
 describe("scrolling past the page", () => {
   it("lets the wheel scroll the dialog while the page is whole and the dialog scrolls; zooms once zoomed in", async () => {
     const { area, page } = await openViewer();

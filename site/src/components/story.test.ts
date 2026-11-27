@@ -10,6 +10,8 @@ import {
   neighbours,
   progressBetween,
   sectionTag,
+  placeAt,
+  scrollForPlace,
   stepIndex,
 } from "./story";
 
@@ -84,6 +86,31 @@ describe("stepIndex", () => {
     expect(stepIndex([64, 900], 64, -1)).toBe(-1);
     expect(stepIndex([-900, -300, 64], 64, 1)).toBe(-1);
     expect(stepIndex([], 64, 1)).toBe(-1);
+  });
+});
+
+describe("placeAt and scrollForPlace", () => {
+  // Three sections, 1000, 400 and 2000px tall, starting at the document's top; line 64.
+  const heights = [1000, 400, 2000];
+
+  it("is the section at the line and how far into it the line is, as a share of its height", () => {
+    // Scrolled 1164px: the line (64px from the view's top) is 1228px down, 228px into section 2.
+    expect(placeAt([-1164, -164, 236], heights, 64)).toEqual({ index: 1, fraction: 0.57 });
+    expect(placeAt([0, 1000, 1400], heights, 64)).toEqual({ index: 0, fraction: 0.064 });
+  });
+
+  it("finds the same place again after the sections change height", () => {
+    const place = { index: 2, fraction: 0.25 };
+    // Section 1 lost 300px (a pin's spacing removed); section 3 is now 1600px tall.
+    expect(scrollForPlace(place, [0, 700, 1100], [700, 400, 1600], 64)).toBe(1100 + 400 - 64);
+  });
+
+  it("never scrolls above the top", () => {
+    expect(scrollForPlace({ index: 0, fraction: 0 }, [0, 1000], [1000, 500], 64)).toBe(0);
+  });
+
+  it("before any section, keeps to the first at its start", () => {
+    expect(placeAt([300, 1300], [1000, 500], 64)).toEqual({ index: 0, fraction: 0 });
   });
 });
 

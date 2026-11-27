@@ -79,10 +79,8 @@ function EraPanel({
             {year}
           </p>
         )}
-        {/* eager: a lazy image is not fetched while clipped or hidden (checked in Chrome: an image
-            in the 2020 document, cut back to nothing at the start of the wipe, was never
-            requested), so it would appear late, once the wipe had begun to uncover it. */}
-        <Mount image={item.image} alt={item.alt} gapNote={item.gapNote} eager />
+        {/* Lazy here; ChangeOfDateMotion loads both as the stage nears the view. */}
+        <Mount image={item.image} alt={item.alt} gapNote={item.gapNote} />
       </div>
       <div data-info className="flex flex-col gap-4 font-interface text-sm">
         <div>
@@ -134,8 +132,8 @@ function EraPanel({
               <ConfidenceMeter level={outcome.level} />
               <span>{CONFIDENCE_WORDS[outcome.level]}</span>
             </p>
-            <a href={`#beat-${outcomeBeat}`} className="target quiet mt-1 hover:text-interface">
-              See the outcome<span className="sr-only">{` (${year})`}</span>
+            <a href={`#beat-${outcomeBeat}`} aria-label={`See the outcome (${year})`} className="target quiet mt-1 hover:text-interface">
+              See the outcome
             </a>
           </div>
         ) : (

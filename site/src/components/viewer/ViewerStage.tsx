@@ -11,6 +11,7 @@ import {
   MIN_SCALE,
   fitWidthView,
   panBy,
+  panIntoView,
   regionRect,
   resizeView,
   viewForRegion,
@@ -355,6 +356,20 @@ export function ViewerStage({
                 data-highlight={h.id}
                 aria-label={h.label}
                 aria-current={selected ? "true" : undefined}
+                // Tabbing to an outline out of view: the browser would scroll the overflow-hidden
+                // viewport to show it, out of step with the drawn page. Undo that and move the
+                // page instead, at once, so the outline and its focus ring are in view.
+                onFocus={() => {
+                  const vp = viewportRef.current;
+                  if (vp) {
+                    vp.scrollTop = 0;
+                    vp.scrollLeft = 0;
+                  }
+                  const l = layoutRef.current;
+                  if (!l) return;
+                  const next = panIntoView(l.view, regionRect(h.region, l.view, l.content), l.content, l.viewport);
+                  if (next !== l.view) update(() => next);
+                }}
                 onClick={(e) => {
                   // detail 0: chosen from the keyboard, whatever the pointer did before.
                   if (e.detail === 0 || !dragging.current) onChoose(h.id);

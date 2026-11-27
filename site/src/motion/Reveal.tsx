@@ -28,7 +28,8 @@ function applyCue(tween: gsap.core.Tween, cue: RevealCue) {
 // detached). Once back, nothing is clipped by the masks and nothing re-splits later.
 // The set-up runs outside useGSAP's context (ignore), so the tween is reverted once, by the
 // split's own revert, never a second time by the context (see ChangeOfDateMotion).
-export function Reveal({ children, className, id }: { children: ReactNode; className?: string; id?: string }) {
+// label: the heading's accessible name, where its visible text is set out over lines.
+export function Reveal({ children, className, id, label }: { children: ReactNode; className?: string; id?: string; label?: string }) {
   const { mode } = useMotionMode();
   const { state: coverState } = useCover();
   const sequenceCue = use(RevealCueContext);
@@ -94,7 +95,7 @@ export function Reveal({ children, className, id }: { children: ReactNode; class
   );
 
   return (
-    <h1 ref={heading} id={id} data-reveal className={className}>
+    <h1 ref={heading} id={id} aria-label={label} data-reveal className={className}>
       {children}
     </h1>
   );
