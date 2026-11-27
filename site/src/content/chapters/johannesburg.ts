@@ -188,7 +188,7 @@ export const johannesburg: Chapter = {
       annotations: [
         {
           id: "johannesburg-present-instrument-annotation-1",
-          text: "The form defines none of its four categories, and the Employment Equity Act says only that \"black people\" is a \"generic term which means Africans, Coloureds and Indians\" (Employment Equity Act, No. 55 of 1998, section 1, as enacted; listed in the bibliography). There is no box for \"mixed\" and no instruction for a person who belongs to more than one category.",
+          text: "The form defines none of its four categories, and the Employment Equity Act says only that \"black people\" is a \"generic term which means Africans, Coloureds and Indians\" (Employment Equity Act, No. 55 of 1998, section 1; the Employment Equity Amendment Act, No. 47 of 2013, replaced the definition of 'designated groups', whose wording the form repeats, and left this one as enacted; both listed in the bibliography). There is no box for \"mixed\" and no instruction for a person who belongs to more than one category.",
         },
       ],
       gapNote: null,

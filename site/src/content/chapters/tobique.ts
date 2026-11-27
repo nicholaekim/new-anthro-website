@@ -126,7 +126,7 @@ export const tobique: Chapter = {
         },
         {
           id: "tobique-item-2-annotation-3",
-          text: "In Lovelace v. Canada (views adopted 30 July 1981), the UN Human Rights Committee considered Sandra Lovelace, who had lost her status under paragraph 12(1)(b) after marrying in 1970, and found that denying her \"the legal right to reside on the Tobique Reserve\" breached article 27 of the International Covenant on Civil and Political Rights (Communication No. R.6/24, U.N. Doc. A/36/40 at 166, paragraph 19; read in the University of Minnesota Human Rights Library copy listed in the bibliography).",
+          text: "In Lovelace v. Canada (views adopted 30 July 1981), the UN Human Rights Committee considered Sandra Lovelace, who had lost her status under paragraph 12(1)(b) after marrying in 1970, and found that denying her \"the legal right to reside on the Tobique Reserve\" breached article 27 of the International Covenant on Civil and Political Rights (Communication No. R.6/24, Official Records of the General Assembly, Thirty-sixth Session, Supplement No. 40 (A/36/40), annex XVIII, paragraph 19, p. 174; United Nations copy listed in the bibliography).",
         },
       ],
       gapNote:

@@ -34,7 +34,7 @@ export const saoPaulo: Chapter = {
     kind: "photograph",
     status: "sourced",
     image: { src: "/images/sao-paulo/sao-paulo-photograph.jpg", width: 1456, height: 2000 },
-    alt: "Warm-toned black-and-white photograph from 1957 of the front of the Catedral Metropolitana de São Paulo, its two unfinished towers in scaffolding and board casing, seen across a paved square with people in the foreground.",
+    alt: "Warm-toned black-and-white photograph from 1958 of the front of the Catedral Metropolitana de São Paulo, its two unfinished towers in scaffolding and board casing, seen across a paved square with people in the foreground.",
     longDescription:
       "A tall Gothic-style stone facade fills most of the upright frame, with pointed windows, statues in niches and a large rose window above the arched main doorway. Above it, a dome topped by a lantern and cross rises between two unfinished towers, the left wrapped in timber scaffolding and the right boxed in boards, with more scaffolding over the rose window. In the foreground the paved square holds a close group of five men at lower left: one in a uniform and peaked cap, one in a light jacket and hat with his back to the camera, one in a dark suit, and two in hats, one holding a broom beside a bin. Further back are more pedestrians, among them children in white, people seated at the left edge, a stone plinth in the middle of the square, a street lamp and taller apartment buildings at the edges. Two signboards at lower left name the works on the cathedral's towers. The left one reads \"OBRA TORRES DA CATEDRAL\" and \"COMPANHIA CONSTRUTORA NACIONAL S.A.\"; the right one, partly hidden by the men, reads \"OBRAS DAS TORRES DA CATE…\" above another firm's name. A small red ink mark on the print sits on the board casing of the right tower.",
     transcription: null,
@@ -45,7 +45,7 @@ export const saoPaulo: Chapter = {
       title: "Catedral Metropolitana de São Paulo",
       holder: "Arquivo Nacional (Brazilian National Archives), Rio de Janeiro; digital copy published on Wikimedia Commons through the Arquivo Nacional GLAM partnership",
       reference:
-        "Accession number BR_RJANRIO_PH_0_FOT_03819_0004 (Fundo Correio da Manhã); https://commons.wikimedia.org/wiki/File:Catedral_Metropolitana_de_S%C3%A3o_Paulo,_Fundo_Correio_da_Manh%C3%A3.tif",
+        "Accession number BR_RJANRIO_PH_0_FOT_03819_0004 (Fundo Correio da Manhã); https://commons.wikimedia.org/wiki/File:Catedral_Metropolitana_de_S%C3%A3o_Paulo,_Fundo_Correio_da_Manh%C3%A3.tif; also published by the Arquivo Nacional at https://www.flickr.com/photos/arquivonacionalbrasil/29962135408/, where the reference is written BR_RJANRIO_PH_0_FOT_03819_004 and the date August 1958",
       rights:
         "Public domain, as stated on the Wikimedia Commons file page: \"This media is a faithful reproduction of public domain multimedia and it was the result of a GLAM partnership between the Arquivo Nacional and the Wikimedia Users Group in Brazil.\" Requested attribution: \"Domínio público / Acervo Arquivo Nacional\" (English: \"Public domain / Arquivo Nacional Collection\").",
       alterations:
@@ -56,7 +56,7 @@ export const saoPaulo: Chapter = {
     gapNote: null,
   },
   photographContext:
-    "This photograph shows the Catedral Metropolitana de São Paulo from the square in front of it, with scaffolding and board casing on its unfinished towers. The Wikimedia Commons record, uploaded from the Arquivo Nacional's collection, dates it to 1957, seven years after this chapter's year of 1950, and gives no exact day. It belongs to the Correio da Manhã fonds, kept by the Arquivo Nacional, Brazil's national archives, in Rio de Janeiro. The photographer is not named, and the record does not say why the picture was made. It is used here as a public-domain work, as the Wikimedia Commons licence statement for this partnership says, with the attribution that statement asks for.",
+    "This photograph shows the Catedral Metropolitana de São Paulo from the square in front of it, with scaffolding and board casing on its unfinished towers. The Arquivo Nacional's own Flickr page describes it as works on the cathedral's towers in August 1958, eight years after this chapter's year of 1950; the Wikimedia Commons record, uploaded through the archive's partnership, gives 1957. It belongs to the Correio da Manhã fonds, kept by the Arquivo Nacional, Brazil's national archives, in Rio de Janeiro. Neither record names the photographer or says why the picture was made. It is used here as a public-domain work, as the Wikimedia Commons licence statement for this partnership says, with the attribution that statement asks for.",
   items: [
     {
       id: "sao-paulo-item-1",
@@ -181,11 +181,11 @@ export const saoPaulo: Chapter = {
       annotations: [
         {
           id: "sao-paulo-present-instrument-annotation-1",
-          text: "The census planned for 2020 was not taken that year: IBGE's 2020 management report (Relatório de Gestão 2020, listed in the bibliography) records that in mid-March its board decided to postpone the Demographic Census to 2021. The continuous household survey (PNAD Contínua) went on, by telephone. That it asked this question in 2020 by this procedure is assumed from the manual, not shown by the report.",
+          text: "The census planned for 2020 was not taken that year: IBGE's 2020 management report (Relatório de Gestão 2020, listed in the bibliography) records that in mid-March its board decided to postpone the Demographic Census to 2021. The continuous household survey (PNAD Contínua) went on, by telephone. IBGE's core questionnaire, headed as current from the first quarter of 2018, asks 'Cor ou raça' with these five options at every interview. IBGE's technical note 04/2022 says the 2020 figures on residents' general characteristics came from fifth-visit interviews and that collection was entirely by telephone from March 2020; its note on the April 2020 collection adds that there was no time to adjust the questionnaire.",
         },
         {
           id: "sao-paulo-present-instrument-annotation-2",
-          text: "This August 2018 edition is the latest edition from before 2020 found in IBGE's library. Whether it, or separate telephone instructions, governed interviews in 2020 has not been confirmed. In the transcription, a vertical bar marks the break between the option and description columns of the manual's table.",
+          text: "This August 2018 edition is the latest edition from before 2020 found in IBGE's library. No edition dated between August 2018 and June 2022, and no separate instructions for telephone interviews, were found there, so which instructions interviewers used in 2020 is not confirmed. In the transcription, a vertical bar marks the break between the option and description columns of the manual's table.",
         },
       ],
       gapNote: null,
