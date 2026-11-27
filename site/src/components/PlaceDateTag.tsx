@@ -32,7 +32,9 @@ export function PlaceDateTag({ place, historicalYear, presentYear }: { place: st
       ref={ref}
       data-place-date-tag
       data-tag-era={present ? "present" : "historical"}
-      className="caps pointer-events-none fixed right-2 top-11 z-30 max-w-[50vw] border border-rule bg-raised px-2 py-1 text-right text-paper pointer-coarse:top-16 lg:right-4 lg:top-2 lg:border-0 lg:border-l lg:bg-transparent lg:pl-3 lg:pr-0"
+      // Tighter tracking than other labels and no wrapping: the longest tag stays on one line at 320
+      // wide, so it never grows past the top scroll padding.
+      className="caps pointer-events-none fixed right-2 top-11 z-30 max-w-[calc(100vw-1rem)] whitespace-nowrap border [--caps-track:0.06em] border-rule bg-raised px-2 py-1 text-right text-paper pointer-coarse:top-16 lg:right-4 lg:top-2 lg:border-0 lg:border-l lg:bg-transparent lg:pl-3 lg:pr-0"
     >
       {place}, {present ? presentYear : historicalYear}
     </p>

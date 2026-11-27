@@ -16,7 +16,9 @@ export default function OpeningPage() {
   const first = chapters[0];
   return (
     <OpeningMotion>
+      {/* px-6 at least: the light behind the person card reaches 1.5rem past it (-inset-6). */}
       <main className="mx-auto flex max-w-3xl flex-col gap-14 px-6 py-16 sm:px-8 lg:py-24">
+        {/* max-w-[14em]: breaks the title into two balanced lines instead of one long one. */}
         <Reveal className="font-title type-display max-w-[14em]">
           <SlotText value={opening.title} />
         </Reveal>

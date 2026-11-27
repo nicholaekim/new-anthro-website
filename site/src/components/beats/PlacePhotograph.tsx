@@ -8,9 +8,10 @@ import { SlotText } from "../SlotText";
 // their own column at the breakpoint, so they never cover the photograph or any text.
 export function PlacePhotograph({ chapter }: { chapter: Chapter }) {
   return (
-    <section data-beat="2" id="beat-2" aria-labelledby="beat-2-heading" className="beat bg-surround">
+    <section data-beat="2" id="beat-2" aria-labelledby="beat-2-heading" className="beat">
       <PlacePhotographMotion>
-        <div className="flex flex-col gap-6">
+        {/* pt-4 keeps the section number off the header's hairline while pinned (see globals.css). */}
+        <div className="flex flex-col gap-6 pt-4">
           <BeatHeading beat={2}>Place</BeatHeading>
           <ItemView item={chapter.photograph} />
           <p className="measure"><SlotText value={chapter.photographContext} /></p>

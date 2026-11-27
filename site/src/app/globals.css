@@ -12,7 +12,9 @@
   --color-ink: #1f1d1a; /* text inside a document view */
   --color-ink-soft: #57514a; /* secondary text on paper and sheet: labels, citations */
   --color-muted: #aaa396; /* secondary text on the dark surround */
-  --color-rule: color-mix(in srgb, #efe9dc 18%, transparent); /* hairlines on the dark surround */
+  --color-rule: color-mix(in srgb, var(--color-paper) 18%, transparent); /* hairlines on the dark surround */
+  --color-edge: color-mix(in srgb, var(--color-ink) 15%, transparent); /* hairlines and edges on paper */
+  --color-scrollbar: #4a443a; /* the scrollbar's thumb on the dark surround */
   --color-reserved: #c2410c; /* only the outcome mark in beat 5 */
   --color-interface: #b8a47a; /* navigation, ticks, focus ring: old brass; never the reserved colour */
   --color-interface-deep: #6b5a32; /* the same neutral, deep enough for a focus ring on paper */
@@ -50,7 +52,7 @@
   }
 
   html {
-    scrollbar-color: #4a443a var(--color-surround);
+    scrollbar-color: var(--color-scrollbar) var(--color-surround);
     scrollbar-width: thin;
   }
 
@@ -134,11 +136,11 @@
 
 /* A small uppercase label: field names, status, the section number. */
 @utility caps {
-  font-family: var(--font-interface), system-ui, sans-serif;
-  font-size: 0.6875rem;
+  @apply font-interface;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 1rem;
-  letter-spacing: 0.14em;
+  letter-spacing: var(--caps-track, 0.14em); /* a long label can set --caps-track tighter */
   text-transform: uppercase;
 }
 /* Secondary text in the colour that suits its surface: muted on the dark, ink-soft on paper. */
@@ -150,9 +152,9 @@
    (bg-paper for sourced items, bg-sheet for the site's own) is set beside it. */
 @utility leaf {
   --soft: var(--color-ink-soft);
-  --hair: color-mix(in srgb, var(--color-ink) 16%, transparent);
+  --hair: var(--color-edge);
   color: var(--color-ink);
-  border: 1px solid color-mix(in srgb, var(--color-ink) 12%, transparent);
+  border: 1px solid var(--color-edge);
   box-shadow:
     0 1px 2px rgb(0 0 0 / 0.35),
     0 22px 44px -22px rgb(0 0 0 / 0.75);
@@ -165,7 +167,7 @@
 /* The mat an image sits in, with a thin keyline. */
 @utility mat {
   background: var(--color-paper-deep);
-  border: 1px solid color-mix(in srgb, var(--color-ink) 14%, transparent);
+  border: 1px solid var(--color-edge);
   padding: 0.75rem;
 
   @media (min-width: 640px) {
@@ -196,9 +198,10 @@
 }
 
 /* A quiet text button: underlined, solid on hover, outlined while pressed. Changes are instant.
-   Its size is set beside it (text-sm, text-xs). */
+   Its size is set beside it (text-sm, text-xs). The pressed outline is the surface's secondary
+   colour, not the text's, so it keeps 3:1 when hover turns the text brass. */
 @utility quiet {
-  font-family: var(--font-interface), system-ui, sans-serif;
+  @apply font-interface;
   letter-spacing: 0.02em;
   border: 1px solid transparent;
   text-decoration-line: underline;
@@ -210,7 +213,7 @@
     text-decoration-color: currentColor;
   }
   &[aria-pressed="true"] {
-    border-color: color-mix(in srgb, currentColor 45%, transparent);
+    border-color: var(--soft);
     text-decoration-line: none;
   }
 }
@@ -229,9 +232,12 @@ html[data-motion-pending] [data-reveal] {
     scroll-padding-top: 4.5rem;
   }
 }
+/* On a narrow touch screen the beat bar's 44px targets wrap it to up to three rows (8.75rem
+   measured at 375 and 320 wide); keep the bottom padding clear of it too. */
 @media (max-width: 1023.98px) and (pointer: coarse) {
   html {
     scroll-padding-top: 7rem;
+    scroll-padding-bottom: 9.5rem;
   }
 }
 
@@ -256,24 +262,31 @@ html[data-motion-pending] [data-reveal] {
 
 /* Beat 2: the place photograph is shown whole. An upright photograph is scaled down to fit the
    view under the header instead of running past the bottom of it. The close view is not capped.
-   While pinned, the image starts about 12.2rem below the pin wrapper's top (section number,
-   heading, rule, the sheet's padding and status label, the mat), and the view also holds the
-   header (2.5rem) and the beat bar (2rem): 17.5rem leaves a little air. On touch both bars are
-   1.25rem taller.
+   While pinned, the image starts about 13.2rem below the pin wrapper's top (1rem of padding,
+   section number, heading, rule, the sheet's padding and status label, the mat), and the view
+   also holds the header (2.5rem) and the beat bar (2rem): 18.5rem leaves a little air. On touch
+   both bars are 1.25rem taller.
    The image keeps its full width and is contained inside its box rather than given width: auto:
    an image with width: auto has no size until it has loaded, so the pin, measured before a first
    load, was too short and the context below the photograph ran over beat 3. */
 [data-beat="2"] [data-mount]:not(dialog [data-mount]) img {
   width: 100%;
-  max-height: calc(100svh - 17.5rem);
+  max-height: calc(100svh - 18.5rem);
   object-fit: contain;
   /* Contained, the box can be wider than the picture: the mat's own edge is the keyline here. */
   outline: none;
 }
 @media (pointer: coarse) {
   [data-beat="2"] [data-mount]:not(dialog [data-mount]) img {
-    max-height: calc(100svh - 20rem);
+    max-height: calc(100svh - 21rem);
   }
+}
+
+/* While a pin holds beat 2 or beat 6 under the header, 1rem keeps the section number off the
+   header's hairline. Beat 2 sets it on its own column (PlacePhotograph). Inside beat 6's fixed
+   height it is taken from the media row. */
+[data-change-of-date] {
+  padding-top: 1rem;
 }
 
 /* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the
@@ -310,6 +323,14 @@ html[data-motion-pending] [data-reveal] {
   height: auto;
   max-height: 100%;
   margin-inline: auto;
+}
+/* Still, or below the breakpoint, the eras follow one another (media, caption, media, caption):
+   each caption sits close under its own image, with room before the next. */
+[data-stage]:not([data-overlap]) > [data-caption] {
+  margin-top: -0.5rem;
+}
+[data-stage]:not([data-overlap]) > [data-caption]:not(:last-child) {
+  margin-bottom: 1.5rem;
 }
 [data-stage][data-overlap] > [data-caption="historical"] {
   grid-row: 2;

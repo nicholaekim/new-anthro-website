@@ -28,6 +28,7 @@ export function NavMenu({ links }: { links: readonly NavLink[] }) {
   return (
     <details data-nav-menu className="relative" onKeyDown={onKeyDown} onBlur={onBlur} onClick={onClick}>
       <summary className="target quiet px-2 hover:text-interface">Menu</summary>
+      {/* The shadow is the sheets' low shadow, deeper, so the panel reads as lifted above the page. */}
       <nav aria-label="Site" className="absolute left-0 top-full z-30 mt-2 min-w-64 border border-rule bg-raised p-2 shadow-[0_18px_40px_-16px_rgb(0_0_0/0.8)]">
         <ol className="flex flex-col">
           {links.map((l) => (

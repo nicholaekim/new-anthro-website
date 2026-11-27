@@ -9,7 +9,7 @@ export function ChapterCard({ chapter }: { chapter: Chapter }) {
       data-beat="1"
       id="beat-1"
       aria-labelledby="beat-1-heading"
-      className="beat flex min-h-svh flex-col justify-end gap-10 bg-surround text-paper"
+      className="beat flex min-h-svh flex-col justify-end gap-10 text-paper"
     >
       <Reveal id="beat-1-heading" className="font-title type-display">
         {chapter.place}, {chapter.country}

@@ -29,7 +29,9 @@ function moveTo(event: MouseEvent<HTMLAnchorElement>, pick: Pick) {
 
 export function BeatTicks({ beats }: { beats: readonly number[] }) {
   const link = "target quiet justify-center px-2 text-xs hover:text-interface";
-  // The hairline is a shadow, so the bar keeps its 2rem (3.25rem on touch) height.
+  // The hairline is a shadow, so it adds no height. The bar is 2rem tall, 3.25rem on touch while
+  // it fits one row; on a narrow touch screen its 44px targets wrap it to up to three rows (8.75rem),
+  // which the chapter's bottom padding and scroll-padding-bottom allow for.
   return (
     <nav
       data-beat-ticks
@@ -43,7 +45,7 @@ export function BeatTicks({ beats }: { beats: readonly number[] }) {
         {beats.map((n) => (
           <li key={n}>
             <a href={`#beat-${n}`} onClick={(e) => moveTo(e, beat(n))} data-tick={n} className="group target justify-center">
-              <span aria-hidden className="block h-3 w-px bg-interface group-hover:h-4 group-hover:w-0.5 group-hover:bg-paper" />
+              <span aria-hidden className="block h-3 w-0.5 bg-interface group-hover:h-4 group-hover:bg-paper" />
               <span className="sr-only">Beat {n}</span>
             </a>
           </li>

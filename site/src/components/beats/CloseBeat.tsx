@@ -7,7 +7,7 @@ export function CloseBeat({ next }: { next: { href: string; label: string } }) {
       data-beat="8"
       id="beat-8"
       aria-labelledby="beat-8-heading"
-      className="beat flex min-h-[50svh] flex-col justify-center gap-8 bg-surround text-paper"
+      className="beat flex min-h-[50svh] flex-col justify-center gap-8 text-paper"
     >
       <BeatHeading beat={8}>Next</BeatHeading>
       <CoverLink

@@ -43,7 +43,8 @@ export function ChangeOfDate({
               {item.image ? (
                 <Mount image={item.image} alt={item.alt} />
               ) : (
-                <div className="soft flex min-h-40 items-center justify-center border border-dashed border-current/45 font-title text-6xl">
+                // flex-1: in the pin (a column) the empty frame fills the media area.
+                <div className="soft flex min-h-40 flex-1 items-center justify-center border border-dashed border-current/45 font-title text-6xl">
                   {year}
                 </div>
               )}

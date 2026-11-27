@@ -45,7 +45,7 @@ function OutcomeRecord({ year, outcome }: { year: number; outcome: Outcome }) {
 // Records are shown in sequence, one per chapter. Tobique has no outcome, so only place and years.
 export default function EndingPage() {
   return (
-    <main className="mx-auto flex max-w-3xl flex-col gap-16 px-5 py-16 sm:px-8 lg:py-24">
+    <main className="mx-auto flex max-w-3xl flex-col gap-16 px-6 py-16 sm:px-8 lg:py-24">
       <Reveal className="font-title type-display">Ending</Reveal>
       <Note id="comparability" heading="Comparing the four cases" value={ending.comparability} />
       <Part id="records" heading="Records">
