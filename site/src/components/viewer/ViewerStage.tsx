@@ -359,12 +359,15 @@ export function ViewerStage({
                 // Tabbing to an outline out of view: the browser would scroll the overflow-hidden
                 // viewport to show it, out of step with the drawn page. Undo that and move the
                 // page instead, at once, so the outline and its focus ring are in view.
-                onFocus={() => {
+                onFocus={(e) => {
                   const vp = viewportRef.current;
                   if (vp) {
                     vp.scrollTop = 0;
                     vp.scrollLeft = 0;
                   }
+                  // Only for keyboard focus: a press with the mouse or a finger also focuses the
+                  // button, and moving the page then would pull it from under the pointer.
+                  if (!e.currentTarget.matches(":focus-visible")) return;
                   const l = layoutRef.current;
                   if (!l) return;
                   const next = panIntoView(l.view, regionRect(h.region, l.view, l.content), l.content, l.viewport);

@@ -1,6 +1,6 @@
 # One Person, Many Boxes
 
-The site is a Next.js app in `site/`. The research text is an AI-written draft from cited sources, for you to check and revise. Eleven images were added on 26 November 2026: eight pages of the quoted documents and three credited historical photographs. The Tobique chapter has no images, and its image fields are still placeholders. This file explains how to run the site, change its content, and what was left out on purpose.
+The site is a Next.js app in `site/`. The research text is an AI-written draft from cited sources, for you to check and revise. Eleven images were added on 26 November 2026: eight pages of the quoted documents and three credited historical photographs. The Tobique chapter has no images, and its image fields are still placeholders. On 27 November 2026 the site was rebuilt as an interactive exhibition: a story bar that shows where you are, a person card that follows the section in view, a "then and now" comparison in section 6, a document viewer with zoom and highlighted passages, a composed opening and chapter title pages, and a comparison matrix on the ending page. This file explains how to run the site, change its content, and what was left out on purpose.
 
 ## Run, test and build
 
@@ -15,6 +15,15 @@ npm run lint     # code checks
 npm run build    # the production build; all six pages are prerendered
 npm start        # serves the production build, after npm run build
 ```
+
+## Put it online
+
+The site is a standard Next.js app, so any host that runs Next.js will serve it. The app is in the `site/` folder, not the repository root: wherever a host asks for a "root directory" or "base directory", give it `site`.
+
+- **Vercel** (the simplest): import the GitHub repository, set Root Directory to `site`, and deploy. Build command `npm run build`, no environment variables.
+- **Your own server:** in `site/`, run `npm install`, `npm run build`, then `npm start` (it listens on port 3000; add `-- -p 8080` for another port).
+
+Before you publish, read "Assets, credits and AI use" below: some image holders' reuse terms are unconfirmed, and one photograph must keep its licence line.
 
 ## Where the content lives
 
@@ -174,7 +183,7 @@ To turn one extra off for good, leaving the others:
 
 The site holds no generated images, sound or video. Its eleven images are in `site/public/images/`: whole pages of the cited documents, rendered from the holders' files, and one historical photograph each for Louisiana (U.S. National Archives), São Paulo (Arquivo Nacional, public domain) and Johannesburg (Touring Club Italiano, CC BY-SA 4.0, so it must keep its credit and licence line). They were chosen, downloaded and described by AI at your request, and resized only. Each item's `provenance` and the ending page's `imageCredits` record the holder, reference and rights as the holder states them; several holders state no rights, and the items say so. Confirm with your instructor that these are acceptable to use, and replace or remove any that are not. The Tobique chapter has no images on purpose (see `design-plan.md`, "The Tobique chapter"). Every frame without an image is an empty placeholder. Keep it that way.
 
-The text is AI-generated. The code, this README, the interface labels (see "Interface labels" above) and, since 26 November 2026, the research content in `site/src/content/` were produced by AI at your request: the fictional person's four facts, the quotations and citations, the explanations, the outcomes, the reflections, the method note and the bibliography. Each quotation was copied from a source fetched that day and re-checked by a second pass, but you are responsible for it: open each cited source, confirm the wording and the reference details, and rewrite the reflections in your own words. The ending page's AI-use disclosure says the same thing to visitors; keep it accurate as you revise. Disclose all of this as your course requires; the "Read this first" section of `design-plan.md` gives the disclosure guidance.
+The text is AI-generated. The code, this README, the interface labels (see "Interface labels" above) and, since 26 November 2026, the research content in `site/src/content/` were produced by AI at your request: the fictional person's four facts, the quotations and citations, the explanations, the outcomes, the reflections, the method note and the bibliography. On 27 November 2026 AI also built the interactive features, measured where each quoted passage sits on its scanned page (the highlight rectangles in `site/src/content/regions.ts`, each checked by cropping the real image), wrote the short "who decides" and "on what evidence" summaries from the existing text, and corrected four points against sources re-read that day (the São Paulo photograph's date, the citation for the Lovelace decision, the 2020 Brazilian survey, and a South African definition). Each quotation was copied from a source fetched on those days and re-checked by a second pass, but you are responsible for it: open each cited source, confirm the wording and the reference details, and rewrite the reflections in your own words. The ending page's AI-use disclosure says the same thing to visitors; keep it accurate as you revise. Disclose all of this as your course requires; the "Read this first" section of `design-plan.md` gives the disclosure guidance.
 
 Log every asset you make or alter in a credits ledger from the day you add it: creator, title, holder, reference number, rights statement or licence, where it is used, alterations permitted and alterations made. The ledger is your own record. The site shows what you write in each item's `provenance` and in the ending page's `imageCredits`.
 

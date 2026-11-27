@@ -33,7 +33,11 @@ export function PersonCardView({ person, chapter = null }: { person: PersonCard;
               // so a closed reason takes no room of its own.
               <dd className="text-xs">
                 <details data-reason>
-                  <summary className="soft underline decoration-transparent underline-offset-4 hover:decoration-current">
+                  <summary
+                    // Four facts, four toggles: each says which fact it belongs to.
+                    aria-label={typeof fact.label === "string" ? `Reason: ${fact.label}` : undefined}
+                    className="soft underline decoration-transparent underline-offset-4 hover:decoration-current"
+                  >
                     Reason
                   </summary>
                   <p className="soft mt-1 leading-relaxed"><SlotText value={fact.reason} /></p>
