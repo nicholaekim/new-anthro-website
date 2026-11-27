@@ -47,6 +47,8 @@
     background: var(--color-surround);
     color: var(--color-paper);
     font-family: var(--font-yours), Georgia, serif;
+    /* A web address in a citation has no spaces; let it break so it cannot widen the page. */
+    overflow-wrap: anywhere;
   }
 
   summary {
@@ -107,12 +109,23 @@ html[data-motion-pending] [data-reveal] {
     position: fixed;
     inset: 4rem auto 3rem 0;
     width: 18rem;
+    /* The browser's popover style sets height: fit-content, which would let a long card run
+       past the bottom of the view with nothing to scroll. auto lets inset set the height. */
+    height: auto;
     max-height: none;
     margin: 0;
     padding: 1rem;
     border: 0;
     background: transparent;
   }
+}
+
+/* Beat 2: the place photograph is shown whole. An upright photograph is scaled down to fit the
+   view under the header instead of running past the bottom of it. The close view is not capped. */
+[data-beat="2"] [data-mount]:not(dialog [data-mount]) img {
+  width: auto;
+  max-height: calc(100svh - 12rem);
+  margin-inline: auto;
 }
 
 /* Beat 6 in full motion at the breakpoint: the motion set-up adds data-overlap, which puts the

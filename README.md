@@ -1,6 +1,6 @@
 # One Person, Many Boxes
 
-The site is a Next.js app in `site/`. Every piece of research text is still a placeholder. This file explains how to run the site, fill it in, and what was left out on purpose.
+The site is a Next.js app in `site/`. The research text is an AI-written draft from cited sources, for you to check and revise. Eleven images were added on 26 November 2026: eight pages of the quoted documents and three credited historical photographs. The Tobique chapter has no images, and its image fields are still placeholders. This file explains how to run the site, change its content, and what was left out on purpose.
 
 ## Run, test and build
 
@@ -42,7 +42,7 @@ explanation: "…",
 
 Only one test file reads your content files: `site/src/content/content.test.ts`. Every other test runs against a made-up set of placeholder chapters in `site/src/test/fixtures.ts`, so filling slots, adding images or removing a beat from a chapter does not change them. The tests in `content.test.ts` that change as you work:
 
-- "holds only slots in every research field": fails as soon as any slot holds a string. That is expected. Delete it once you start filling slots.
+- "leaves a placeholder only where the text depends on an image not yet added": fails if a slot remains anywhere except the image-dependent fields (the place photograph and its context, each item's `alt`, `longDescription` and `alterations`, and `imageCredits`). Fill those as you add images; the test keeps passing.
 - "validates every chapter": fails if a chapter refers to something that is not there, or breaks a rule below (a document image without a transcription, person-card facts listed on a page without the card). Fix the content, not the test.
 - "has the four chapters in order", "has the fixed places, countries and dates" and "gives Tobique no outcome": change them only if you change those decisions.
 - "shows the person card in every chapter but Tobique": change it if you change `showPersonCard` in a chapter file.
@@ -135,9 +135,9 @@ To turn one extra off for good, leaving the others:
 
 ## Assets, credits and AI use
 
-The site holds no generated images, sound or video, and no generated research content: every research field is still a slot for your own work, and every frame without an image is an empty placeholder. Keep it that way.
+The site holds no generated images, sound or video. Its eleven images are in `site/public/images/`: whole pages of the cited documents, rendered from the holders' files, and one historical photograph each for Louisiana (U.S. National Archives), São Paulo (Arquivo Nacional, public domain) and Johannesburg (Touring Club Italiano, CC BY-SA 4.0, so it must keep its credit and licence line). They were chosen, downloaded and described by AI at your request, and resized only. Each item's `provenance` and the ending page's `imageCredits` record the holder, reference and rights as the holder states them; several holders state no rights, and the items say so. Confirm with your instructor that these are acceptable to use, and replace or remove any that are not. The Tobique chapter has no images on purpose (see `design-plan.md`, "The Tobique chapter"). Every frame without an image is an empty placeholder. Keep it that way.
 
-It is not free of AI-generated text, though. The code, this README and the interface labels (see "Interface labels" above) were produced by AI at your request. The labels are working labels for you to review, and you may reword them. Disclose this as your course requires; the "Read this first" section of `design-plan.md` gives the disclosure guidance.
+The text is AI-generated. The code, this README, the interface labels (see "Interface labels" above) and, since 26 November 2026, the research content in `site/src/content/` were produced by AI at your request: the fictional person's four facts, the quotations and citations, the explanations, the outcomes, the reflections, the method note and the bibliography. Each quotation was copied from a source fetched that day and re-checked by a second pass, but you are responsible for it: open each cited source, confirm the wording and the reference details, and rewrite the reflections in your own words. The ending page's AI-use disclosure says the same thing to visitors; keep it accurate as you revise. Disclose all of this as your course requires; the "Read this first" section of `design-plan.md` gives the disclosure guidance.
 
 Log every asset you make or alter in a credits ledger from the day you add it: creator, title, holder, reference number, rights statement or licence, where it is used, alterations permitted and alterations made. The ledger is your own record. The site shows what you write in each item's `provenance` and in the ending page's `imageCredits`.
 
