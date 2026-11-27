@@ -47,6 +47,8 @@
     background: var(--color-surround);
     color: var(--color-paper);
     font-family: var(--font-yours), Georgia, serif;
+    /* A web address in a citation has no spaces; let it break so it cannot widen the page. */
+    overflow-wrap: anywhere;
   }
 
   summary {
@@ -107,6 +109,9 @@ html[data-motion-pending] [data-reveal] {
     position: fixed;
     inset: 4rem auto 3rem 0;
     width: 18rem;
+    /* The browser's popover style sets height: fit-content, which would let a long card run
+       past the bottom of the view with nothing to scroll. auto lets inset set the height. */
+    height: auto;
     max-height: none;
     margin: 0;
     padding: 1rem;

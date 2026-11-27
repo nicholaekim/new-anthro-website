@@ -3,38 +3,25 @@ import { chapters, getChapter, person } from "@/content";
 import { ending, opening } from "@/content/pages";
 import { isSlot, type Text } from "@/content/slot";
 import { validateChapter } from "@/content/validate";
-import { countSlots, fixtureChapter } from "@/test/fixtures";
+import { fixtureChapter } from "@/test/fixtures";
 
-// String fields that are real values rather than research slots.
-const EXEMPT_KEYS = new Set([
-  "id",
-  "slug",
-  "place",
-  "country",
-  "kind",
-  "status",
-  "historicalItemId",
-  "presentItemId",
-  "cardFactsUsed",
-  "src",
-  "largeSrc",
-]);
+// Text that describes or credits an image stays a placeholder until that image is added:
+// the place photograph and its context, each item's alternative text, longer description
+// and alteration note, and the image credits.
+const IMAGE_DEPENDENT =
+  /\.photograph\.|\.photographContext$|\.alt$|\.longDescription$|\.alterations$|\.imageCredits$/;
 
-function nonSlotStrings(value: unknown, path: string, out: string[]): void {
-  if (typeof value === "string") {
-    out.push(path);
-    return;
-  }
+function slotPaths(value: unknown, path: string, out: string[]): void {
   if (Array.isArray(value)) {
-    value.forEach((v, i) => nonSlotStrings(v, `${path}[${i}]`, out));
+    value.forEach((v, i) => slotPaths(v, `${path}[${i}]`, out));
     return;
   }
   if (value !== null && typeof value === "object") {
-    if (isSlot(value as Text)) return;
-    for (const [key, v] of Object.entries(value)) {
-      if (EXEMPT_KEYS.has(key)) continue;
-      nonSlotStrings(v, `${path}.${key}`, out);
+    if (isSlot(value as Text)) {
+      out.push(path);
+      return;
     }
+    for (const [key, v] of Object.entries(value)) slotPaths(v, `${path}.${key}`, out);
   }
 }
 
@@ -70,17 +57,10 @@ describe("chapters", () => {
     expect(tobique?.present.outcome).toBeNull();
   });
 
-  it("holds only slots in every research field", () => {
+  it("leaves a placeholder only where the text depends on an image not yet added", () => {
     const found: string[] = [];
-    nonSlotStrings(chapters, "chapters", found);
-    nonSlotStrings(person, "person", found);
-    nonSlotStrings(opening, "opening", found);
-    nonSlotStrings(ending, "ending", found);
-    expect(found).toEqual([]);
-    expect(countSlots(chapters)).toBeGreaterThan(0);
-    expect(countSlots(person)).toBeGreaterThan(0);
-    expect(countSlots(opening)).toBeGreaterThan(0);
-    expect(countSlots(ending)).toBeGreaterThan(0);
+    slotPaths({ chapters, person, opening, ending }, "content", found);
+    expect(found.filter((path) => !IMAGE_DEPENDENT.test(path))).toEqual([]);
   });
 
   it("shows the person card in every chapter but Tobique", () => {
