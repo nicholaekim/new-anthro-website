@@ -5,6 +5,7 @@ import { isSlot, slot, type Text } from "@/content/slot";
 import { highlights } from "@/content/regions";
 import { validateChapter } from "@/content/validate";
 import { fixtureChapter } from "@/test/fixtures";
+import { linkSegments, parseReferences } from "@/components/ending/references";
 
 // Text that describes or credits an image stays a placeholder until that image is added:
 // the place photograph and its context, each item's alternative text, longer description
@@ -196,5 +197,35 @@ describe("validateChapter", () => {
     if (!c.present.basis) throw new Error("fixture needs a present-day basis");
     c.present.basis.cardFactsUsed = ["no-such-fact"];
     expect(validateChapter(c)).not.toEqual([]);
+  });
+});
+
+// The ending reads these two notes into groups and entries (src/components/ending/references.ts).
+describe("ending reference notes", () => {
+  const lines = (t: string) => t.split("\n").map((l) => l.trim()).filter((l) => l !== "");
+
+  it("group the bibliography under the four places, losing no line", () => {
+    if (isSlot(ending.bibliography)) return;
+    const groups = parseReferences(ending.bibliography);
+    expect(groups.map((g) => g.heading)).toEqual(["Louisiana", "São Paulo", "Johannesburg", "Tobique"]);
+    expect(groups.flatMap((g) => [g.heading, ...g.entries])).toEqual(lines(ending.bibliography));
+  });
+
+  it("group the image credits under their two headings and a closing line, losing no line", () => {
+    if (isSlot(ending.imageCredits)) return;
+    const groups = parseReferences(ending.imageCredits);
+    expect(groups.map((g) => g.heading)).toEqual(["Place photographs", "Document pages", null]);
+    expect(groups.flatMap((g) => (g.heading ? [g.heading, ...g.entries] : g.entries))).toEqual(lines(ending.imageCredits));
+  });
+
+  it("link only whole web addresses, never with a trailing full stop or an unopened bracket", () => {
+    for (const note of [ending.bibliography, ending.imageCredits]) {
+      if (isSlot(note)) continue;
+      for (const entry of parseReferences(note).flatMap((g) => g.entries)) {
+        const segments = linkSegments(entry);
+        expect(segments.map((s) => s.text).join("")).toBe(entry);
+        for (const s of segments.filter((x) => x.href)) expect(s.href).toMatch(/^https:\/\/\S+[^.,;:)]$/);
+      }
+    }
   });
 });

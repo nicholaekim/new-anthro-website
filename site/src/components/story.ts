@@ -105,5 +105,8 @@ export const CONFIDENCE_WORDS: Record<ConfidenceLevel, string> = {
   undetermined: "Cannot be determined",
 };
 
+// Where a chapter places no person (Tobique), in place of its outcome: beat 6 and the ending.
+export const NO_PERSON_PLACED = "No person is placed in this chapter, so no outcome is given.";
+
 // How many of the meter's four steps are filled: four for high, one for cannot be determined.
 export const confidenceSteps = (level: ConfidenceLevel) => CONFIDENCE_LEVELS.length - CONFIDENCE_LEVELS.indexOf(level);

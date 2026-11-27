@@ -161,28 +161,30 @@ describe("ending page", () => {
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
-  it("shows each chapter's record with both years, and outcomes only where they exist", () => {
+  it("compares every chapter in the matrix, in order, with a confidence meter only where an outcome exists", () => {
     const { container } = render(<EndingPage />);
-    const records = [...container.querySelectorAll("[data-record]")];
-    expect(records.map((r) => r.getAttribute("data-record"))).toEqual(chapters.map((c) => c.slug));
+    const outcomeRows = [...container.querySelectorAll("[data-view='outcome'] table [data-matrix-row]")];
+    expect(outcomeRows.map((r) => r.getAttribute("data-matrix-row"))).toEqual(chapters.map((c) => c.slug));
     chapters.forEach((c, i) => {
-      expect(records[i]).toHaveTextContent(String(c.historicalYear));
-      expect(records[i]).toHaveTextContent(String(c.presentYear));
-      const hasOutcome = c.outcome !== null || c.present.outcome !== null;
-      expect(records[i].querySelector("[data-outcome]") !== null).toBe(hasOutcome);
+      expect(outcomeRows[i]).toHaveTextContent(String(c.historicalYear));
+      expect(outcomeRows[i]).toHaveTextContent(String(c.presentYear));
+      const meters = (c.outcome ? 1 : 0) + (c.present.outcome ? 1 : 0);
+      expect(outcomeRows[i].querySelectorAll("[data-meter]")).toHaveLength(meters);
     });
-    expect(records.some((r) => r.querySelector("[data-outcome]") === null)).toBe(true);
+    expect(outcomeRows.some((r) => r.querySelector("[data-meter]") === null)).toBe(true);
     expect(container.querySelector("[data-mark]")).toBeNull();
   });
 
-  it("keeps the line breaks of a filled note, as a transcription does", () => {
+  // The bibliography used to be one paragraph with its line breaks kept; it is now read into
+  // groups and one list item per line (src/components/ending/references.ts).
+  it("lists a filled bibliography one entry per line, grouped under its headings, instead of one paragraph", () => {
     const original = ending.bibliography;
-    ending.bibliography = "first line\nsecond line";
+    ending.bibliography = "Louisiana\nfirst line\nsecond line";
     try {
       const { container } = render(<EndingPage />);
-      const note = container.querySelector("#bibliography-heading + p");
-      expect(note?.textContent).toBe("first line\nsecond line");
-      expect(note).toHaveClass("whitespace-pre-line");
+      const section = container.querySelector("#bibliography-heading")?.closest("section");
+      expect(section?.querySelector("summary")?.textContent).toBe("Louisiana");
+      expect([...(section?.querySelectorAll("li") ?? [])].map((li) => li.textContent)).toEqual(["first line", "second line"]);
     } finally {
       ending.bibliography = original;
     }

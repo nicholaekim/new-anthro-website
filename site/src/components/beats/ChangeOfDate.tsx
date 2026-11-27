@@ -6,7 +6,7 @@ import { ConfidenceMeter } from "../ConfidenceMeter";
 import { Disclosure } from "../Disclosure";
 import { Mount } from "../Mount";
 import { SlotText } from "../SlotText";
-import { CONFIDENCE_WORDS } from "../story";
+import { CONFIDENCE_WORDS, NO_PERSON_PLACED } from "../story";
 
 // Beat 6: the two dates side by side in time. Each era is a complete panel: its year, its
 // document ([data-document]) and what the rule says ([data-info]): the instrument's title, who
@@ -122,7 +122,7 @@ function EraPanel({
           </div>
         ) : (
           !placesPerson && (
-            <p className="soft border-t border-(--hair) pt-3">No person is placed in this chapter, so no outcome is given.</p>
+            <p className="soft border-t border-(--hair) pt-3">{NO_PERSON_PLACED}</p>
           )
         )}
       </div>
